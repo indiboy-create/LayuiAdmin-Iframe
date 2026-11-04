@@ -1,0 +1,26 @@
+@import url("../../layui/css/layui.css");
+@import url("module/menu.css");
+@import url("module/page.css");
+@import url("module/tabPage.css");
+
+*::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: #E6E6E6;
+    border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+    background: #E6E6E6;
+}
+
+*::-webkit-scrollbar-corner {
+    background: #f6f6f6;
+}

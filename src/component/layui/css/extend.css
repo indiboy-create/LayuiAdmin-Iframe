@@ -1,0 +1,60 @@
+.iframe-container {
+  margin: 0px;
+  width: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+  background-color: whitesmoke;
+}
+
+.title-colorpicker {
+  height: 26px;
+  width: 38px;
+}
+
+.layui-bg-white {
+  background: #ffffff;
+}
+
+.layui-txt-bold {
+  font-weight: bold !important;
+}
+
+.padding-left {
+  padding-left: 15px !important;
+}
+
+.padding-right {
+  padding-right: 15px !important;
+}
+
+.layui-txt-red {
+  color: #ff5722 !important;
+}
+
+.layui-txt-orange {
+  color: #ffb800 !important;
+}
+
+.layui-txt-green {
+  color: #16baaa !important;
+}
+
+.layui-txt-cyan {
+  color: #2f4056 !important;
+}
+
+.layui-txt-blue {
+  color: #1e9fff !important;
+}
+
+.layui-txt-purple {
+  color: #a233c6 !important;
+}
+
+.layui-txt-black {
+  color: #2f363c !important;
+}
+
+.layui-txt-gray {
+  color: #5f5f5f !important;
+}
