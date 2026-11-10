@@ -2,6 +2,8 @@
 
 基于 [Layui](https://layui.dev/) 的经典后台管理系统前端模板，技术栈为原生 HTML + CSS + JavaScript，采用 Layui 的 AMD（`layui.define`）模块体系。
 
+**在线预览**：<https://indiboy-create.github.io/LayuiAdmin-Iframe/>
+
 ## 技术栈
 
 - **Layui**：UI 组件与模块加载
@@ -75,7 +77,7 @@ npm run preview
 
 推送 `v*` 标签（如 `v1.0.0`）会同时触发两条工作流：
 
-- **Deploy GitHub Pages**（`.github/workflows/deploy.yml`）：执行 lint、构建、产物校验后，将 `dist/` 部署到 GitHub Pages。首次部署需在仓库 `Settings → Pages → Source` 中选择 **GitHub Actions**。
+- **Deploy GitHub Pages**（`.github/workflows/deploy.yml`）：执行 lint、构建、产物校验后，将 `dist/` 部署到 GitHub Pages，访问地址为 <https://indiboy-create.github.io/LayuiAdmin-Iframe/>。首次部署需在仓库 `Settings → Pages → Source` 中选择 **GitHub Actions**。
 - **Release Package**（`.github/workflows/release.yml`）：校验标签与 `package.json` 版本一致后，构建 zip 并发布到 GitHub Packages，同时自动创建 Release 并附加 zip。工作流文件变更只会在其合并到默认分支后生效。
 
 向默认分支提交 Pull Request 时，`.github/workflows/verify.yml` 会执行同样的 lint、构建与产物校验。
