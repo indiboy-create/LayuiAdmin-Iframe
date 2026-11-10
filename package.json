@@ -1,6 +1,6 @@
 {
 	"name": "@indiboy-create/pear-admin-layui-mini",
-	"version": "4.0.3",
+	"version": "1.0.0",
 	"type": "module",
 	"description": "Pear Admin Layui Mini - 基于 Layui 的后台管理系统前端模板",
 	"repository": {
