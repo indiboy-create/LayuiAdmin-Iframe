@@ -17,6 +17,7 @@
 		"dev": "vite",
 		"build": "node scripts/build.mjs",
 		"preview": "vite preview",
+		"check": "node scripts/check.mjs",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
 		"format": "prettier --write \"src/**/*\"",

@@ -58,6 +58,7 @@ npm run preview
 | `npm run dev` | 启动 Vite 开发服务器 |
 | `npm run build` | 构建产物到 `dist/` |
 | `npm run preview` | 本地预览 `dist/` |
+| `npm run check` | 校验构建产物（入口文件与 HTML 资源引用） |
 | `npm run lint` | ESLint 检查 |
 | `npm run lint:fix` | ESLint 检查并自动修复 |
 | `npm run format` | Prettier 格式化 `src/**/*` |
@@ -69,6 +70,15 @@ npm run preview
 1. 清空并整体拷贝 `src/` 到 `dist/`
 2. 使用 Terser 压缩 `.js`、CleanCSS 压缩 `.css`
 3. 第三方目录 `component/layui/` 原样拷贝、不压缩（通过 `SKIP_PREFIXES` 配置跳过）
+
+## 自动部署与发布
+
+推送 `v*` 标签（如 `v1.0.0`）会同时触发两条工作流：
+
+- **Deploy GitHub Pages**（`.github/workflows/deploy.yml`）：执行 lint、构建、产物校验后，将 `dist/` 部署到 GitHub Pages。首次部署需在仓库 `Settings → Pages → Source` 中选择 **GitHub Actions**。
+- **Release Package**（`.github/workflows/release.yml`）：校验标签与 `package.json` 版本一致后，构建 zip 并发布到 GitHub Packages，同时自动创建 Release 并附加 zip。工作流文件变更只会在其合并到默认分支后生效。
+
+向默认分支提交 Pull Request 时，`.github/workflows/verify.yml` 会执行同样的 lint、构建与产物校验。
 
 ## 提交规范
 
