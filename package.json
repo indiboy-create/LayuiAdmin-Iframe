@@ -1,9 +1,18 @@
 {
-	"name": "pear-admin-layui-mini",
+	"name": "@indiboy-create/pear-admin-layui-mini",
 	"version": "4.0.3",
-	"private": true,
 	"type": "module",
 	"description": "Pear Admin Layui Mini - 基于 Layui 的后台管理系统前端模板",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/indiboy-create/LayuiAdmin-Iframe.git"
+	},
+	"publishConfig": {
+		"registry": "https://npm.pkg.github.com/"
+	},
+	"files": [
+		"dist"
+	],
 	"scripts": {
 		"dev": "vite",
 		"build": "node scripts/build.mjs",
