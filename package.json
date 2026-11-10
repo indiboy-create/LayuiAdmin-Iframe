@@ -1,8 +1,8 @@
 {
-	"name": "@indiboy-create/pear-admin-layui-mini",
+	"name": "@indiboy-create/layuiadmin-iframe",
 	"version": "1.0.0",
 	"type": "module",
-	"description": "Pear Admin Layui Mini - 基于 Layui 的后台管理系统前端模板",
+	"description": "LayuiAdmin-Iframe - 基于 Layui 的后台管理系统前端模板",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/indiboy-create/LayuiAdmin-Iframe.git"

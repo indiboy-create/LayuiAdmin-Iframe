@@ -1,4 +1,4 @@
-# Pear Admin Layui Mini
+# LayuiAdmin-Iframe
 
 基于 [Layui](https://layui.dev/) 的经典后台管理系统前端模板，技术栈为原生 HTML + CSS + JavaScript，采用 Layui 的 AMD（`layui.define`）模块体系。
 
@@ -13,7 +13,7 @@
 ## 目录结构
 
 ```
-Pear-Admin-Layui-Mini
+LayuiAdmin-Iframe
 ├── src/                    # 源码目录
 │   ├── index.html          # 后台主页入口
 │   ├── login.html          # 登录页
