@@ -1,4 +1,5 @@
 {
+	"debug": true,
 	"logo": {
 		"title": "Mini Admin",
 		"image": "admin/images/logo.png"
@@ -8,13 +9,11 @@
 		"method": "GET",
 		"accordion": true,
 		"collapse": false,
-		"control": false,
-		"controlWidth": 500,
+
 		"select": "10",
 		"async": true
 	},
 	"tab": {
-		"enable": true,
 		"keepState": true,
 		"session": true,
 		"preload": false,
@@ -27,11 +26,137 @@
 		}
 	},
 	"theme": {
-		"defaultColor": "2",
-		"defaultMenu": "dark-theme",
-		"defaultHeader": "light-theme",
+		"defaultScheme": "default",
+		"defaultColor": "6",
 		"allowCustom": true,
-		"banner": false
+		"schemes": [
+			{
+				"id": "default",
+				"label": "default",
+				"side": "#20222A",
+				"header": "",
+				"logo": ""
+			},
+			{
+				"id": "dark-blue",
+				"label": "dark-blue",
+				"side": "#03152A",
+				"header": "",
+				"logo": ""
+			},
+			{
+				"id": "coffee",
+				"label": "coffee",
+				"side": "#2E241B",
+				"header": "",
+				"logo": ""
+			},
+			{
+				"id": "purple-red",
+				"label": "purple-red",
+				"side": "#50314F",
+				"header": "",
+				"logo": ""
+			},
+			{
+				"id": "ocean",
+				"label": "ocean",
+				"side": "#344058",
+				"header": "",
+				"logo": "#1E9FFF"
+			},
+			{
+				"id": "green",
+				"label": "green",
+				"side": "#3A3D49",
+				"header": "",
+				"logo": "#2F9688"
+			},
+			{
+				"id": "red",
+				"label": "red",
+				"side": "#20222A",
+				"header": "",
+				"logo": "#F78400"
+			},
+			{
+				"id": "fashion-red",
+				"label": "fashion-red",
+				"side": "#28333E",
+				"header": "",
+				"logo": "#AA3130"
+			},
+			{
+				"id": "classic-black",
+				"label": "classic-black",
+				"side": "#24262F",
+				"header": "",
+				"logo": "#3A3D49"
+			},
+			{
+				"id": "green-header",
+				"label": "green-header",
+				"side": "",
+				"header": "#2F9688",
+				"logo": "#226A62"
+			},
+			{
+				"id": "ocean-header",
+				"label": "ocean-header",
+				"side": "#344058",
+				"header": "#1E9FFF",
+				"logo": "#0085E8"
+			},
+			{
+				"id": "classic-black-header",
+				"label": "classic-black-header",
+				"side": "",
+				"header": "#393D49",
+				"logo": ""
+			},
+			{
+				"id": "purple-red-header",
+				"label": "purple-red-header",
+				"side": "#50314F",
+				"header": "#50314F",
+				"logo": "#50314F"
+			},
+			{
+				"id": "fashion-red-header",
+				"label": "fashion-red-header",
+				"side": "#28333E",
+				"header": "#AA3130",
+				"logo": "#28333E"
+			},
+			{
+				"id": "green-header-2",
+				"label": "green-header",
+				"side": "#28333E",
+				"header": "#16baaa",
+				"logo": "#16baaa"
+			},
+			{
+				"id": "Classic-style1",
+				"label": "Classic-style1",
+				"side": "#393D49",
+				"header": "#23262E",
+				"logo": "#393D49"
+			},
+			{
+				"id": "Classic-style2",
+				"label": "Classic-style2",
+				"side": "#001529",
+				"header": "#1890FF",
+				"logo": "#001529"
+			},
+			{
+				"id": "Classic-style3",
+				"label": "Classic-style3",
+				"side": "#25282A",
+				"header": "#35BDB2",
+				"logo": "#25282A"
+			}
+		]
 	},
 	"colors": [
 		{
@@ -58,11 +183,35 @@
 			"id": "5",
 			"color": "#3963bc",
 			"second": "#ecf5ff"
+		},
+		{
+			"id": "6",
+			"color": "#16baaa",
+			"second": "#e8f7f5"
+		},
+		{
+			"id": "7",
+			"color": "#722ed1",
+			"second": "#f3ecfb"
+		},
+		{
+			"id": "8",
+			"color": "#eb2f96",
+			"second": "#fdeaf4"
+		},
+		{
+			"id": "9",
+			"color": "#faad14",
+			"second": "#fff8e6"
+		},
+		{
+			"id": "10",
+			"color": "#20222a",
+			"second": "#eeeef0"
 		}
 	],
 	"other": {
 		"keepLoad": "1200",
-		"autoHead": false,
-		"footer": false
+		"autoHead": false
 	}
 }

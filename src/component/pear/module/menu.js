@@ -19,8 +19,7 @@ layui.define(['table', 'jquery', 'element'], function (exports) {
 			method: opt.method ? opt.method : "GET",
 			defaultOpen: opt.defaultOpen,
 			defaultSelect: opt.defaultSelect,
-			control: opt.control,
-			controlWidth: opt.controlWidth ? opt.controlWidth : "auto",
+
 			defaultMenu: opt.defaultMenu || 0,
 			accordion: opt.accordion,
 			height: opt.height || "100%",
@@ -33,9 +32,7 @@ layui.define(['table', 'jquery', 'element'], function (exports) {
 		var tempDone = option.done;
 
 		option.done = function () {
-			if (option.control) {
-				rationalizeHeaderControlWidthAuto(option);
-			}
+
 			tempDone();
 		}
 
@@ -57,33 +54,7 @@ layui.define(['table', 'jquery', 'element'], function (exports) {
 
 		$("#" + opt.elem).height(option.height)
 
-		setTimeout(function () {
-			$("#" + opt.control + " .control").on("mousewheel DOMMouseScroll", function (event) {
-
-				var delta = (event.originalEvent.wheelDelta && (event.originalEvent.wheelDelta > 0 ? 1 : -1)) || // chrome & ie
-					(event.originalEvent.detail && (event.originalEvent.detail > 0 ? -1 : 1)); // firefox
-
-				if (delta > 0) {
-					for (var num = 1; num < 20; num++) {
-						setTimeout(function () {
-							if ($("#" + opt.control + " .control ul").css('left').replace("px", "") < 0) {
-								$("#" + opt.control + " .control ul").css("left", "+=2px");
-							}
-						}, 10)
-					}
-				} else if (delta < 0) {
-					if (((Number)($("#" + opt.control + " .control ul").css("left").replace("px", "")) + ($("#" + opt.control + " .control ul").width() - $("#" + opt.control + " .control").width())) > 0) {
-						for (var num = 1; num < 20; num++) {
-							setTimeout(function () {
-								$("#" + opt.control + " .control ul").css("left", "-=2px");
-							}, 10)
-						}
-					}
-				}
-			});
-		}, 1000)
-
-		return new menu(option);
+return new menu(option);
 	}
 
 	menu.prototype.click = function (clickEvent) {
@@ -148,21 +119,6 @@ layui.define(['table', 'jquery', 'element'], function (exports) {
 	}
 
 	menu.prototype.selectItem = function (pearId) {
-		if (this.option.control != false) {
-			$("#" + this.option.elem + " a[menu-id='" + pearId + "']").parents(".layui-side-scroll ").find("ul").css({
-				display: "none"
-			});
-			$("#" + this.option.elem + " a[menu-id='" + pearId + "']").parents(".layui-side-scroll ").find(".layui-this").removeClass(
-				"layui-this");
-			$("#" + this.option.elem + " a[menu-id='" + pearId + "']").parents("ul").css({
-				display: "block"
-			});
-			var controlId = $("#" + this.option.elem + " a[menu-id='" + pearId + "']").parents("ul").attr("pear-id");
-			if (controlId != undefined) {
-				$("#" + this.option.control).find(".layui-this").removeClass("layui-this");
-				$("#" + this.option.control).find("[pear-id='" + controlId + "']").addClass("layui-this");
-			}
-		}
 
 		$("#" + this.option.elem + " a[menu-id='" + pearId + "']").parents(".pear-nav-tree").find(".layui-this").removeClass(
 			"layui-this");
@@ -225,11 +181,7 @@ layui.define(['table', 'jquery', 'element'], function (exports) {
 			var that = this;
 			$("#" + this.option.elem)
 				.promise()
-				.done(function () {
-					if (that.option.control) {
-						rationalizeHeaderControlWidth(that.option);
-					}
-				})
+				.done(function () { })
 		} else {
 			activeMenus = $("#" + this.option.elem).find(".layui-nav-itemed>a");
 			$("#" + this.option.elem).find(".layui-nav-itemed").removeClass("layui-nav-itemed");
@@ -242,9 +194,7 @@ layui.define(['table', 'jquery', 'element'], function (exports) {
 				.promise()
 				.done(function () {
 					isHoverMenu(true, config);
-					if (that.option.control) {
-						rationalizeHeaderControlWidth(that.option);
-					}
+
 				})
 		}
 	}
@@ -272,11 +222,7 @@ layui.define(['table', 'jquery', 'element'], function (exports) {
 			option.parseData(option.data);
 		}
 		if (option.data.length > 0) {
-			if (option.control != false) {
-				createMenuAndControl(option);
-			} else {
-				createMenu(option);
-			}
+			createMenu(option);
 		}
 		element.init();
 		option.done();
@@ -321,88 +267,6 @@ layui.define(['table', 'jquery', 'element'], function (exports) {
 		$("#" + option.elem).html(menuHtml);
 	}
 
-	function createMenuAndControl(option) {
-		var control = '<div style="width: ' + option.controlWidth + 'px;white-space: nowrap;overflow-x: scroll;overflow: hidden;" class="control"><ul class="layui-nav pear-nav-control pc layui-hide-xs" style="width: fit-content;">';
-		var controlPe = '<ul class="layui-nav pear-nav-control layui-hide-sm">';
-		// 声 明 头 部
-		var menu = '<div class="layui-side-scroll ' + option.theme + '">'
-		// 开 启 同 步 操 作
-		var index = 0;
-		var controlItemPe = '<dl class="layui-nav-child">';
-		$.each(option.data, function (i, item) {
-			var menuItem = '';
-			var controlItem = '';
-			if (i === option.defaultMenu) {
-				controlItem = '<li pear-href="' + item.href + '" pear-title="' + item.title + '" pear-id="' + item.id +
-					'" class="layui-this layui-nav-item"><a href="#">' + item.title + '</a></li>';
-				menuItem = '<ul  pear-id="' + item.id + '" lay-filter="' + option.elem +
-					'" class="layui-nav arrow layui-nav-tree pear-nav-tree">';
-
-				controlPe += '<li class="layui-nav-item"><a class="pe-title" href="javascript:;" >' + item.title + '</a>';
-
-				controlItemPe += '<dd  pear-href="' + item.href + '" pear-title="' + item.title + '" pear-id="' + item.id +
-					'"><a href="javascript:void(0);">' + item.title + '</a></dd>';
-			} else {
-
-				controlItem = '<li  pear-href="' + item.href + '" pear-title="' + item.title + '" pear-id="' + item.id +
-					'" class="layui-nav-item"><a href="#">' + item.title + '</a></li>';
-
-				menuItem = '<ul style="display:none" pear-id="' + item.id + '" lay-filter="' + option.elem +
-					'" class="layui-nav arrow layui-nav-tree pear-nav-tree">';
-
-				controlItemPe += '<dd pear-href="' + item.href + '" pear-title="' + item.title + '" pear-id="' + item.id +
-					'"><a href="javascript:void(0);">' + item.title + '</a></dd>';
-
-			}
-			index++;
-			$.each(item.children, function (i, note) {
-				// 创 建 每 一 个 菜 单 项
-				var content = '<li class="layui-nav-item" >';
-				var href = "javascript:;";
-				var target = "";
-				var className = "site-demo-active";
-				if (note.openType == "_blank" && note.type == 1) {
-					href = note.href;
-					target = "target='_blank'";
-					className = "";
-				}
-				// 判 断 菜 单 类 型 0 是 不可跳转的目录 1 是 可 点 击 跳 转 的 菜 单
-				if (note.type == 0) {
-					// 创 建 目 录 结 构
-					content += '<a  href="' + href + '" ' + target + ' menu-type="' + note.type + '" menu-id="' + note.id +
-						'" ><i class="' + note.icon + '"></i><span>' + note.title +
-						'</span></a>';
-				} else if (note.type == 1) {
-					// 创 建 菜 单 结 构
-					content += '<a ' + target + ' class="' + className + '" menu-open-type="' + note.openType + '" menu-type="' + note.type + '" menu-url="' + note.href +
-						'" menu-id="' + note.id +
-						'" menu-title="' + note.title + '" href="' + href + '"><i class="' + note.icon +
-						'"></i><span>' + note.title + '</span></a>';
-				}
-				content += loadchild(note);
-				content += '</li>';
-				menuItem += content;
-			})
-			menu += menuItem + '</ul>';
-			control += controlItem;
-		})
-		controlItemPe += "</li></dl></ul>"
-		controlPe += controlItemPe;
-		$("#" + option.control).html(control + "</div>");
-		$("#" + option.control).append(controlPe);
-		$("#" + option.elem).html(menu);
-		$("#" + option.control + " .pear-nav-control").on("click", "[pear-id]", function () {
-			$("#" + option.elem).find(".pear-nav-tree").css({
-				display: 'none'
-			});
-			$("#" + option.elem).find(".pear-nav-tree[pear-id='" + $(this).attr("pear-id") + "']").css({
-				display: 'block'
-			});
-			$("#" + option.control).find(".pe-title").html($(this).attr("pear-title"));
-			$("#" + option.control).find("")
-			option.change($(this).attr("pear-id"), $(this).attr("pear-title"), $(this).attr("pear-href"))
-		})
-	}
 
 	/** 加载子菜单 (递归)*/
 	function loadchild(obj) {
@@ -498,32 +362,6 @@ layui.define(['table', 'jquery', 'element'], function (exports) {
 		}
 	}
 
-	function rationalizeHeaderControlWidth(option) {
-		var $headerControl = $("#" + option.control);
-		var $nextEl = $headerControl.next();
-		var rationalizeWidth;
-		if ($nextEl.length) {
-			rationalizeWidth = $nextEl.position().left - $headerControl.position().left;
-		} else {
-			rationalizeWidth = $headerControl.parent().innerWidth() - $headerControl.position().left;
-		}
-
-		if (option.controlWidth && rationalizeWidth >= option.controlWidth) {
-			rationalizeWidth = option.controlWidth;
-		}
-		$("#" + option.control + " .control").css({ "width": rationalizeWidth, "transition": "width .15s" });
-	}
-
-	function rationalizeHeaderControlWidthAuto(option) {
-		$(window).on('resize', function () {
-			rationalizeHeaderControlWidth(option);
-		})
-		$(document).ready(function () {
-			setTimeout(() => {
-				rationalizeHeaderControlWidth(option);
-			}, 1000);
-		});
-	}
 
 	exports(MOD_NAME, new menu());
 })

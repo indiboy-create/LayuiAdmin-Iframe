@@ -10,9 +10,9 @@ layui.config({
 	version: "4.0.3"
 }).extend({
 	admin: "admin",
-	page: "page",
+
 	tabPage: "tabPage",
 	menu: "menu",
-	fullscreen: "fullscreen",
+
 	tools: "tools"
 }).use([], function () { });

@@ -43,7 +43,7 @@ LayuiAdmin-Iframe
 # 1. 安装依赖
 npm install
 
-# 2. 启动开发服务器（默认 http://localhost:8080，自动打开浏览器）
+# 2. 启动开发服务器（默认 http://localhost:5173，自动打开浏览器）
 npm run dev
 
 # 3. 构建到 dist/（静态拷贝 src 并压缩 JS/CSS）
