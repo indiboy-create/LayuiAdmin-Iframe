@@ -103,11 +103,12 @@ npm install @indiboy-create/layuiadmin-iframe
 3. 第三方目录 `component/layui/`、`admin/plugin/` 原样拷贝、不压缩（通过 `SKIP_PREFIXES` 配置跳过）
 4. 注入缓存刷新标记：把 `pear.js` 中 `layui.config` 的 `version` 替换为构建时间戳，并给 HTML 中本地 `link/script/img/iframe` 等资源追加 `?t=<构建戳>`（不维护手写版本号）
 5. 合并 `pear.css`、`module/menu.css`、`module/tabPage.css` 为 `pear.bundle.css`，首页只加载一个样式文件
+6. 正式产物移除调试能力：删除 `admin/js/debug.js` 及其 HTML 引用，并把 `window.adminDebug` 视为 `undefined` 交由 Terser 消除调试分支（`dist-debug` 完整保留）
 
 产物目录：
 
-- `dist/`：Terser/CleanCSS 压缩、`debug=false`，用于部署与 npm 包
-- `dist-debug/`：不压缩、`debug=true`，用于线上问题排查与源码级断点
+- `dist/`：Terser/CleanCSS 压缩、`debug=false`、不含调试模块，用于部署与 npm 包
+- `dist-debug/`：不压缩、`debug=true`、保留 `debug.js`，用于线上问题排查与源码级断点
 
 ## 调试
 

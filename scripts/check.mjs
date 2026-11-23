@@ -29,7 +29,7 @@ const REQUIRED_FILES = [
 	'component/pear/module/menu.js',
 	'component/pear/module/tabPage.js',
 	'component/pear/css/pear.css',
-	'admin/js/debug.js',
+
 	'admin/js/bootstrap.js',
 	'admin/js/login.js',
 	'admin/config/pear.config.json',
@@ -97,6 +97,26 @@ if (await exists(join(dist, INDEX_PAGE))) {
 	const indexHtml = await readFile(join(dist, INDEX_PAGE), 'utf8');
 	if (!/component\/pear\/pear\.js\?t=[\w-]+/.test(indexHtml)) {
 		errors.push(`${INDEX_PAGE} 的 pear.js 引用缺少构建戳（?t=），发布后缓存可能不会刷新`);
+	}
+}
+
+if (dirName === 'dist') {
+	const DEBUG_ASSET = 'admin/js/debug.js';
+	if (await exists(join(dist, DEBUG_ASSET))) {
+		errors.push(`正式产物不应包含 ${DEBUG_ASSET}`);
+	}
+	for (const htmlFile of htmlFiles) {
+		const html = await readFile(htmlFile, 'utf8');
+		if (html.includes(DEBUG_ASSET)) {
+			errors.push(`${pathLabel(htmlFile)} 仍引用 ${DEBUG_ASSET}`);
+		}
+	}
+	const adminPath = join(dist, 'component', 'pear', 'module', 'admin.js');
+	if (await exists(adminPath)) {
+		const adminSource = await readFile(adminPath, 'utf8');
+		if (adminSource.includes('adminDebug')) {
+			errors.push('正式产物 admin.js 仍包含调试代码（adminDebug）');
+		}
 	}
 }
 

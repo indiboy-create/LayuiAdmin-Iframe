@@ -48,7 +48,9 @@ async function minify() {
 
 		const content = await readFile(file, 'utf8');
 		if (ext === '.js') {
-			const result = await terserMinify(content, { compress: true, mangle: true });
+			// 正式产物移除调试分支：把 window.adminDebug 视作 undefined，交由 Terser 消除
+			const source = content.split('window.adminDebug').join('undefined');
+			const result = await terserMinify(source, { compress: true, mangle: true });
 			if (result.code) await writeFile(file, result.code);
 		} else {
 			const result = cleanCss.minify(content);
@@ -138,12 +140,32 @@ async function bundlePearCss() {
 	}
 }
 
+// 正式产物移除调试模块与引用，只保留在 dist-debug
+async function stripDebugAssets() {
+	await rm(join(dist, 'admin', 'js', 'debug.js'), { force: true });
+
+	const files = (await walk(dist)).filter((file) => extname(file).toLowerCase() === '.html');
+	for (const file of files) {
+		const content = await readFile(file, 'utf8');
+		const next = content.replace(
+			/[ \t]*<script\b[^>]*src=["'][^"']*admin\/js\/debug\.js["'][^>]*><\/script>\r?\n?/g,
+			''
+		);
+		if (next !== content) {
+			await writeFile(file, next);
+		}
+	}
+}
+
 // 清空旧产物 -> 整体拷贝 -> 注入构建标记 -> 压缩 / 保留可读
 await rm(dist, { recursive: true, force: true });
 await cp(src, dist, { recursive: true });
 
 const buildStamp = await stampPearBuild();
 await bundlePearCss();
+if (!noMinify) {
+	await stripDebugAssets();
+}
 await stampHtmlAssets(buildStamp);
 
 // 正式构建强制关闭调试，避免调试日志进入线上产物
@@ -154,5 +176,7 @@ if (!noMinify) {
 }
 
 console.log(
-	noMinify ? `构建完成（未压缩，已开启调试）：${dist}` : `构建完成（已关闭调试）：${dist}`
+	noMinify
+		? `构建完成（未压缩，保留调试模块）：${dist}`
+		: `构建完成（已压缩，已移除调试模块）：${dist}`
 );
