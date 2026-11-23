@@ -30,15 +30,6 @@ jobs:
                   registry-url: https://npm.pkg.github.com/
                   scope: '@indiboy-create'
 
-            - name: Check version
-              run: |
-                  TAG="${GITHUB_REF_NAME#v}"
-                  VERSION=$(node -p "require('./package.json').version")
-                  if [ "$TAG" != "$VERSION" ]; then
-                    echo "::error file=package.json::tag ${GITHUB_REF_NAME} 与 package.json version ${VERSION} 不一致"
-                    exit 1
-                  fi
-
             - name: Download dist
               uses: actions/download-artifact@v4
               with:

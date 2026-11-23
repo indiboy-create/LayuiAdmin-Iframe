@@ -86,10 +86,10 @@ npm run preview
 
 ## 自动部署与发布
 
-推送 `v*` 标签（如 `v1.0.0`）会同时触发两条工作流，二者复用 `.github/workflows/ci.yml` 中的质量检查（`workflow_call`，包含依赖安装、lint、构建、产物校验并上传 `dist` 产物）：
+推送 `v*` 标签会同时触发两条工作流，二者复用 `.github/workflows/ci.yml` 中的质量检查（`workflow_call`，包含依赖安装、lint、构建、产物校验并上传 `dist` 产物）：
 
 - **Deploy GitHub Pages**（`.github/workflows/deploy.yml`）：下载 `dist` 产物后部署到 GitHub Pages，访问地址为 <https://indiboy-create.github.io/LayuiAdmin-Iframe/>。首次部署需在仓库 `Settings → Pages → Source` 中选择 **GitHub Actions**。
-- **Release Package**（`.github/workflows/release.yml`）：校验标签与 `package.json` 版本一致后，将 `dist` 打包为 zip 并发布到 GitHub Packages，同时自动创建 Release 并附加 zip。工作流文件变更只会在其合并到默认分支后生效。
+- **Release Package**（`.github/workflows/release.yml`）：将 `dist` 打包为 zip 并发布到 GitHub Packages，同时自动创建 Release 并附加 zip。工作流文件变更只会在其合并到默认分支后生效。
 
 向默认分支提交 Pull Request 时，`.github/workflows/verify.yml` 同样调用 `ci.yml` 执行检查（传 `upload-artifact: false`，不额外上传产物）。
 
