@@ -212,6 +212,11 @@
 	],
 	"other": {
 		"keepLoad": 1200,
+		"watermark": {
+			"text": "13888888888",
+			"fontSize": 13,
+			"opacity": 0.2
+		},
 		"links": {
 			"repository": "https://github.com/indiboy-create/LayuiAdmin-Iframe",
 			"preview": "https://indiboy-create.github.io/LayuiAdmin-Iframe/"

@@ -92,16 +92,17 @@ if (await exists(join(dist, PEAR_ENTRY))) {
 	}
 }
 
-const INDEX_PAGE = 'index.html';
-if (await exists(join(dist, INDEX_PAGE))) {
-	const indexHtml = await readFile(join(dist, INDEX_PAGE), 'utf8');
-	if (!/component\/pear\/pear\.js\?t=[\w-]+/.test(indexHtml)) {
-		errors.push(`${INDEX_PAGE} 的 pear.js 引用缺少构建戳（?t=），发布后缓存可能不会刷新`);
+const DEBUG_ASSET = 'admin/js/debug.js';
+
+// 每个页面都应至少有一个带构建戳的本地资源引用
+for (const htmlFile of htmlFiles) {
+	const html = await readFile(htmlFile, 'utf8');
+	if (!/\b(?:src|href)=["'][^"']+\?t=[\w-]+["']/.test(html)) {
+		errors.push(`${pathLabel(htmlFile)} 未包含带构建戳（?t=）的本地资源引用`);
 	}
 }
 
 if (dirName === 'dist') {
-	const DEBUG_ASSET = 'admin/js/debug.js';
 	if (await exists(join(dist, DEBUG_ASSET))) {
 		errors.push(`正式产物不应包含 ${DEBUG_ASSET}`);
 	}
@@ -116,6 +117,18 @@ if (dirName === 'dist') {
 		const adminSource = await readFile(adminPath, 'utf8');
 		if (adminSource.includes('adminDebug')) {
 			errors.push('正式产物 admin.js 仍包含调试代码（adminDebug）');
+		}
+	}
+}
+
+if (dirName === 'dist-debug') {
+	if (!(await exists(join(dist, DEBUG_ASSET)))) {
+		errors.push(`未压缩产物应保留 ${DEBUG_ASSET}`);
+	}
+	for (const page of ['index.html', 'login.html']) {
+		const content = await readFile(join(dist, page), 'utf8');
+		if (!content.includes(DEBUG_ASSET)) {
+			errors.push(`${page} 应保留 ${DEBUG_ASSET} 引用（未压缩产物）`);
 		}
 	}
 }

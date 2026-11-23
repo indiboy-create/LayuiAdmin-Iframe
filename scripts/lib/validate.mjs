@@ -1,5 +1,8 @@
-import { readdir, readFile, stat } from 'node:fs/promises';
-import { dirname, join, relative, resolve } from 'node:path';
+import { readFile } from 'node:fs/promises';
+import { dirname, resolve } from 'node:path';
+import { walk, exists, shownPath } from './fs-utils.mjs';
+
+export { walk, exists, shownPath };
 
 // 外部链接、锚点、脚本协议等无需校验
 export const SKIP_PATTERN = /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i;
@@ -13,33 +16,6 @@ const REFERENCE_PATTERN = {
 	html: /\b(?:src|href)\s*=\s*["']([^"']+)["']/gi,
 	css: /url\(\s*(['"]?)([^'")]*)\1\s*\)/gi,
 };
-
-export async function walk(dir) {
-	const entries = await readdir(dir, { withFileTypes: true });
-	const files = [];
-	for (const entry of entries) {
-		const fullPath = join(dir, entry.name);
-		if (entry.isDirectory()) {
-			files.push(...(await walk(fullPath)));
-		} else {
-			files.push(fullPath);
-		}
-	}
-	return files;
-}
-
-export async function exists(target) {
-	try {
-		await stat(target);
-		return true;
-	} catch {
-		return false;
-	}
-}
-
-export function shownPath(rootDir, file) {
-	return relative(rootDir, file).replace(/\\/g, '/');
-}
 
 export async function findMissingReferences({ rootDir, files, kind }) {
 	const pattern = REFERENCE_PATTERN[kind];
@@ -150,5 +126,23 @@ export function validateRuntimeConfig(config, configPath, errors) {
 		typeof config.other.keepLoad !== 'number'
 	) {
 		errors.push(`${configPath} 的 other.keepLoad 应为数字`);
+	}
+
+	const watermark = config.other && config.other.watermark;
+	if (watermark) {
+		if (watermark.text !== undefined && typeof watermark.text !== 'string') {
+			errors.push(`${configPath} 的 other.watermark.text 应为字符串`);
+		}
+		if (watermark.fontSize !== undefined && typeof watermark.fontSize !== 'number') {
+			errors.push(`${configPath} 的 other.watermark.fontSize 应为数字`);
+		}
+		if (
+			watermark.opacity !== undefined &&
+			(typeof watermark.opacity !== 'number' ||
+				watermark.opacity < 0 ||
+				watermark.opacity > 1)
+		) {
+			errors.push(`${configPath} 的 other.watermark.opacity 应为 0~1 的数字`);
+		}
 	}
 }

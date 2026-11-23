@@ -92,6 +92,14 @@ echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" >> .npmrc
 npm install @indiboy-create/layuiadmin-iframe
 ```
 
+Windows（PowerShell）：
+
+```powershell
+Add-Content .npmrc '@indiboy-create:registry=https://npm.pkg.github.com'
+Add-Content .npmrc "//npm.pkg.github.com/:_authToken=$env:GITHUB_TOKEN"
+npm install @indiboy-create/layuiadmin-iframe
+```
+
 包内容为 `dist/` 下的静态资源，解压后即可作为站点部署。
 
 ## 构建说明
@@ -115,6 +123,7 @@ npm install @indiboy-create/layuiadmin-iframe
 - 统一日志开关：URL 加 `?debug=1` 开启、`?debug=0` 关闭；控制台可执行 `adminDebug.enable()` / `adminDebug.disable()` 临时切换
 - 可调试构建：`npm run build:debug`（不压缩、`pear.config.json` 的 `debug` 置为 `true`）
 - 断点调试：仓库内置 `.vscode/launch.json`，按 F5 选择「调试 LayuiAdmin-Iframe」即可；若开发服务器已在运行，选「复用已运行的 dev server」那条
+- 预览未压缩产物：`npx vite preview --outDir ../dist-debug --port 4174`（`npm run preview` 只能预览 `dist/`）
 
 ## 自动部署与发布
 
