@@ -16,6 +16,24 @@ layui.define(['jquery', 'tools', 'element', 'layer', 'tabPage', 'menu', 'theme']
 
 		var body = $('body');
 
+		function isFrameLoaded(frame) {
+			try {
+				return frame.contentDocument && frame.contentDocument.readyState === "complete";
+			} catch (error) {
+				return false;
+			}
+		}
+
+		function waitFrameLoad(frame) {
+			return new Promise(function (resolve) {
+				if (!frame || isFrameLoaded(frame)) {
+					resolve();
+					return;
+				}
+				frame.addEventListener("load", resolve, { once: true });
+			});
+		}
+
 		var pearAdmin = new function () {
 
 			this.configuration = {};
@@ -23,6 +41,10 @@ layui.define(['jquery', 'tools', 'element', 'layer', 'tabPage', 'menu', 'theme']
 			this.configurationPath = "admin/config/pear.config.json";
 
 			this.instances = {};
+
+			this.menuReady = Promise.resolve();
+
+			this.frameReady = Promise.resolve();
 
 			/**
 			 * @since Pear Admin 4.0
@@ -128,28 +150,31 @@ layui.define(['jquery', 'tools', 'element', 'layer', 'tabPage', 'menu', 'theme']
 			 * 侧边菜单
 			 */
 			this.menuRender = function (param) {
-				pearAdmin.instances.menu = menu.render({
-					elem: 'side',
-					async: param.menu.async,
-					method: param.menu.method,
+				pearAdmin.menuReady = new Promise(function (resolve) {
+					pearAdmin.instances.menu = menu.render({
+						elem: 'side',
+						async: param.menu.async,
+						method: param.menu.method,
 
-					accordion: param.menu.accordion,
-					data: param.menu.data,
-					url: param.menu.data,
-					parseData: false,
-					defaultMenu: 0,
-					change: function () {
-						compatible();
-					},
-					done: function () {
-						pearAdmin.instances.menu.isCollapse = param.menu.collapse;
-						pearAdmin.instances.menu.selectItem(param.menu.select);
-						if (param.menu.collapse) {
-							if ($(window).width() >= 768) {
-								collapse()
+						accordion: param.menu.accordion,
+						data: param.menu.data,
+						url: param.menu.data,
+						parseData: false,
+						defaultMenu: 0,
+						change: function () {
+							compatible();
+						},
+						done: function () {
+							resolve();
+							pearAdmin.instances.menu.isCollapse = param.menu.collapse;
+							pearAdmin.instances.menu.selectItem(param.menu.select);
+							if (param.menu.collapse) {
+								if ($(window).width() >= 768) {
+									collapse()
+								}
 							}
 						}
-					}
+					});
 				});
 			}
 
@@ -212,13 +237,36 @@ layui.define(['jquery', 'tools', 'element', 'layer', 'tabPage', 'menu', 'theme']
 					}
 					compatible();
 				})
+
+				var $active = $("#content .layui-tab-content .layui-show");
+				var frame = $active.find("iframe").get(0);
+				if (!$active.length) {
+					frame = $("#content iframe").get(0);
+				}
+				pearAdmin.frameReady = waitFrameLoad(frame);
 			}
 
 			this.keepLoad = function (param) {
-				compatible()
-				setTimeout(function () {
+				compatible();
+
+				var maxWait = typeof param.other.keepLoad === "number" ? param.other.keepLoad : 3000;
+				var timer = null;
+
+				var timeout = new Promise(function (resolve) {
+					timer = setTimeout(resolve, maxWait);
+				});
+
+				function done() {
+					if (timer) {
+						clearTimeout(timer);
+					}
 					$(".loader-wrapper").fadeOut(200);
-				}, param.other.keepLoad)
+				}
+
+				Promise.race([
+					Promise.all([pearAdmin.menuReady, pearAdmin.frameReady]),
+					timeout
+				]).then(done, done);
 			}
 
 			/***

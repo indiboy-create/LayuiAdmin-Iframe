@@ -9,7 +9,6 @@
 		"method": "GET",
 		"accordion": true,
 		"collapse": false,
-
 		"select": "10",
 		"async": true
 	},
@@ -33,128 +32,109 @@
 			{
 				"id": "default",
 				"label": "默认",
-				"side": "#20222A",
-				"header": "",
-				"logo": ""
+				"base": "#20222A"
 			},
 			{
 				"id": "dark-blue",
 				"label": "深海蓝",
-				"side": "#03152A",
-				"header": "",
-				"logo": ""
+				"base": "#03152A"
 			},
 			{
 				"id": "coffee",
 				"label": "咖啡棕",
-				"side": "#2E241B",
-				"header": "",
-				"logo": ""
+				"base": "#2E241B"
 			},
 			{
 				"id": "purple-red",
 				"label": "紫罗兰",
-				"side": "#50314F",
-				"header": "",
-				"logo": ""
+				"base": "#50314F"
 			},
 			{
 				"id": "ocean",
 				"label": "海洋蓝",
-				"side": "#344058",
-				"header": "",
+				"base": "#344058",
 				"logo": "#1E9FFF"
 			},
 			{
 				"id": "green",
 				"label": "墨绿",
-				"side": "#3A3D49",
-				"header": "",
+				"base": "#3A3D49",
 				"logo": "#2F9688"
 			},
 			{
 				"id": "red",
 				"label": "橙红",
-				"side": "#20222A",
-				"header": "",
+				"base": "#20222A",
 				"logo": "#F78400"
 			},
 			{
 				"id": "fashion-red",
 				"label": "时尚红",
-				"side": "#28333E",
-				"header": "",
+				"base": "#28333E",
 				"logo": "#AA3130"
 			},
 			{
 				"id": "classic-black",
 				"label": "经典黑",
-				"side": "#24262F",
-				"header": "",
+				"base": "#24262F",
 				"logo": "#3A3D49"
 			},
 			{
 				"id": "green-header",
 				"label": "青绿顶栏",
-				"side": "",
+				"base": "#20222A",
 				"header": "#2F9688",
 				"logo": "#226A62"
 			},
 			{
 				"id": "ocean-header",
 				"label": "海洋蓝顶栏",
-				"side": "#344058",
+				"base": "#344058",
 				"header": "#1E9FFF",
 				"logo": "#0085E8"
 			},
 			{
 				"id": "classic-black-header",
 				"label": "经典黑顶栏",
-				"side": "",
-				"header": "#393D49",
-				"logo": ""
+				"base": "#20222A",
+				"header": "#393D49"
 			},
 			{
 				"id": "purple-red-header",
 				"label": "紫罗兰顶栏",
-				"side": "#50314F",
-				"header": "#50314F",
-				"logo": "#50314F"
+				"base": "#50314F",
+				"header": "#50314F"
 			},
 			{
 				"id": "fashion-red-header",
 				"label": "时尚红顶栏",
-				"side": "#28333E",
-				"header": "#AA3130",
-				"logo": "#28333E"
+				"base": "#28333E",
+				"header": "#AA3130"
 			},
 			{
 				"id": "green-header-2",
 				"label": "薄荷绿顶栏",
-				"side": "#28333E",
+				"base": "#28333E",
 				"header": "#16baaa",
 				"logo": "#16baaa"
 			},
 			{
 				"id": "classic-style1",
 				"label": "经典风格一",
-				"side": "#393D49",
-				"header": "#23262E",
-				"logo": "#393D49"
+				"base": "#393D49",
+				"header": "#23262E"
 			},
 			{
 				"id": "classic-style2",
 				"label": "经典风格二",
-				"side": "#001529",
-				"header": "#1890FF",
-				"logo": "#001529"
+				"base": "#001529",
+				"header": "#1890FF"
 			},
 			{
 				"id": "classic-style3",
 				"label": "经典风格三",
-				"side": "#25282A",
-				"header": "#35BDB2",
-				"logo": "#25282A"
+				"base": "#25282A",
+				"header": "#35BDB2"
 			}
 		]
 	},
@@ -211,7 +191,7 @@
 		}
 	],
 	"other": {
-		"keepLoad": 1200,
+		"keepLoad": 3000,
 		"watermark": {
 			"text": "13888888888",
 			"fontSize": 13,

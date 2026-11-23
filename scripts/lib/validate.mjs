@@ -12,6 +12,8 @@ export const SKIP_URL_PATTERN = /^(?:var\(|\$\{)/i;
 
 const SCHEME_FIELDS = ['id', 'label'];
 
+const SCHEME_COLOR_FIELDS = ['base', 'header', 'logo'];
+
 const REFERENCE_PATTERN = {
 	html: /\b(?:src|href)\s*=\s*["']([^"']+)["']/gi,
 	css: /url\(\s*(['"]?)([^'")]*)\1\s*\)/gi,
@@ -98,6 +100,11 @@ export function validateThemeConfig(config, configPath, errors) {
 		for (const field of SCHEME_FIELDS) {
 			if (!scheme[field]) {
 				errors.push(`${configPath} 的 theme.schemes[${index}] 缺少 ${field}`);
+			}
+		}
+		for (const field of SCHEME_COLOR_FIELDS) {
+			if (scheme[field] !== undefined && typeof scheme[field] !== 'string') {
+				errors.push(`${configPath} 的 theme.schemes[${index}] 的 ${field} 应为字符串`);
 			}
 		}
 		if (schemeIds.has(String(scheme.id))) {

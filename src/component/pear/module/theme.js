@@ -22,11 +22,25 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		return result;
 	}
 
+	var DEFAULT_SIDE = "#20222A";
+	var DEFAULT_HEADER = "#FFFFFF";
+
+	function normalizeScheme(scheme) {
+		var base = scheme.base || scheme.side || DEFAULT_SIDE;
+		return {
+			id: scheme.id,
+			label: scheme.label,
+			side: base,
+			header: scheme.header || DEFAULT_HEADER,
+			logo: scheme.logo || base
+		};
+	}
+
 	function getSchemeList() {
 		var list = config && config.theme && config.theme.schemes;
-		return list && list.length ? list : [
-			{ id: "default", label: "default", side: "#20222A", header: "", logo: "" }
-		];
+		return list && list.length
+			? list.map(normalizeScheme)
+			: [normalizeScheme({ id: "default", label: "default" })];
 	}
 
 	function resolveScheme(option) {
@@ -64,8 +78,8 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 	}
 
 	function applyScheme(scheme) {
-		var side = scheme.side || "#20222A";
-		var header = scheme.header || "#FFFFFF";
+		var side = scheme.side || DEFAULT_SIDE;
+		var header = scheme.header || DEFAULT_HEADER;
 		var logo = scheme.logo || side;
 		var style = document.documentElement.style;
 		style.setProperty("--scheme-side", side);

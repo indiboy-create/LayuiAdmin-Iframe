@@ -107,6 +107,20 @@ npm install @indiboy-create/layuiadmin-iframe
 
 包内容为 `dist/` 下的静态资源，解压后即可作为站点部署。
 
+## 配色方案
+
+`pear.config.json` 的 `theme.schemes` 只需声明基色，其余字段由 `theme.js` 派生：
+
+- `base`：侧栏基色（缺省 `#20222A`），同时作为 LOGO 底色
+- `header`：顶栏底色（缺省 `#FFFFFF`）
+- `logo`：LOGO 底色，缺省与 `base` 相同；需要独立品牌色时显式覆盖
+
+旧格式的 `side` 仍然兼容，与 `base` 等价。
+
+## 首屏加载
+
+`other.keepLoad` 是首屏 loading 的最长等待时间（毫秒）。菜单与当前标签的 iframe 都就绪后立即隐藏 loading；超过该时间仍未就绪则强制隐藏，避免弱网白屏。
+
 ## 构建说明
 
 由于 Layui 模块加载依赖 `document.currentScript` 与 `layui.config({ base: ... })`，不能使用 Vite 打包（会破坏模块加载）。因此构建采用静态拷贝脚本 [scripts/build.mjs](scripts/build.mjs)：

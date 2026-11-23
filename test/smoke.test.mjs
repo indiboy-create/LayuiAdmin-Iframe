@@ -70,6 +70,23 @@ describe('主题配置', () => {
 		assert.deepEqual(errors, [], errors.join('\n'));
 	});
 
+	it('配色方案使用基色精简格式', async () => {
+		const config = await readJson('admin/config/pear.config.json');
+		for (const scheme of config.theme.schemes) {
+			assert.ok(scheme.base, `${scheme.id} 缺少基色 base`);
+			assert.equal(scheme.side, undefined, `${scheme.id} 应使用 base 而非 side`);
+			for (const field of ['base', 'header', 'logo']) {
+				if (scheme[field] !== undefined) {
+					assert.match(
+						scheme[field],
+						/^#[0-9a-f]{3,8}$/i,
+						`${scheme.id} 的 ${field} 不是颜色值`
+					);
+				}
+			}
+		}
+	});
+
 	it('首页标签指向存在的页面', async () => {
 		const config = await readJson('admin/config/pear.config.json');
 		assert.ok(

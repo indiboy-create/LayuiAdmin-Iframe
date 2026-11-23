@@ -30,8 +30,6 @@ const REQUIRED_FILES = [
 	'component/pear/module/tabPage.js',
 	'component/pear/css/pear.css',
 
-	'admin/js/bootstrap.js',
-	'admin/js/login.js',
 	'admin/config/pear.config.json',
 	'api/menu.json',
 ];
