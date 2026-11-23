@@ -7,7 +7,12 @@ export default [
 		ignores: [
 			'node_modules/**',
 			'dist/**',
-			'src/component/**',
+			'src/component/layui/**',
+			'src/component/pear/pear.js',
+			'src/component/pear/module/admin.js',
+			'src/component/pear/module/menu.js',
+			'src/component/pear/module/tabPage.js',
+			'src/component/pear/module/tools.js',
 			'src/admin/plugin/**',
 			'.codeartsdoer/**',
 		],

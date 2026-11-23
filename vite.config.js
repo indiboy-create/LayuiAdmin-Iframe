@@ -11,6 +11,10 @@ export default defineConfig({
 		strictPort: true,
 		open: false,
 	},
+	preview: {
+		port: 4173,
+		strictPort: true,
+	},
 	build: {
 		// build.outDir 供 `vite preview` 使用，与构建脚本输出的 dist 保持一致
 		outDir: resolve(process.cwd(), 'dist'),

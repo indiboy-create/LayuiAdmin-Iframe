@@ -35,10 +35,12 @@
 		"build:debug": "node scripts/build.mjs --no-minify",
 		"preview": "vite preview",
 		"check": "node scripts/check.mjs",
+		"check:release": "node scripts/check.mjs --strict-debug",
 		"test": "node --test test/smoke.test.mjs",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
 		"format": "prettier --write \"src/**/*\" \"scripts/**/*.mjs\" \"test/**/*.mjs\" \"*.config.js\" \".github/workflows/*.yml\"",
+		"prepublishOnly": "node scripts/check.mjs",
 		"prepare": "husky || true"
 	},
 	"devDependencies": {

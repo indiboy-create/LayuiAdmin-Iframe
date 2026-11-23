@@ -8,6 +8,7 @@ import {
 	walk,
 	findMissingReferences,
 	validateThemeConfig,
+	validateRuntimeConfig,
 	collectLeafMenus,
 } from '../scripts/lib/validate.mjs';
 
@@ -65,6 +66,7 @@ describe('主题配置', () => {
 		const config = await readJson('admin/config/pear.config.json');
 		const errors = [];
 		validateThemeConfig(config, 'admin/config/pear.config.json', errors);
+		validateRuntimeConfig(config, 'admin/config/pear.config.json', errors);
 		assert.deepEqual(errors, [], errors.join('\n'));
 	});
 

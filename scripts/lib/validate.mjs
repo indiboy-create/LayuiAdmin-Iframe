@@ -140,3 +140,15 @@ export function validateThemeConfig(config, configPath, errors) {
 		);
 	}
 }
+export function validateRuntimeConfig(config, configPath, errors) {
+	if (config.tab && config.tab.max !== undefined && typeof config.tab.max !== 'number') {
+		errors.push(`${configPath} 的 tab.max 应为数字`);
+	}
+	if (
+		config.other &&
+		config.other.keepLoad !== undefined &&
+		typeof config.other.keepLoad !== 'number'
+	) {
+		errors.push(`${configPath} 的 other.keepLoad 应为数字`);
+	}
+}

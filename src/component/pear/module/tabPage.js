@@ -62,9 +62,10 @@ layui.define(['jquery', 'element', 'dropdown', 'layer'], function (exports) {
 		option.roll = opt.roll !== false;
 
 		if (option.session) {
-			if (sessionStorage.getItem(option.elem + "-pear-tab-page-data") != null) {
-				tabData = JSON.parse(sessionStorage.getItem(option.elem + "-pear-tab-page-data"));
-				option.data = JSON.parse(sessionStorage.getItem(option.elem + "-pear-tab-page-data"));
+			var storedTabs = readTabSession(option.elem);
+			if (storedTabs.length > 0) {
+				tabData = storedTabs;
+				option.data = storedTabs;
 				tabDataCurrent = sessionStorage.getItem(option.elem + "-pear-tab-page-data-current");
 				tabData.forEach(function (item, index) {
 					if (item.id == tabDataCurrent) {

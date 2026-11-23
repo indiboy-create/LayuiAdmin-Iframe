@@ -7,7 +7,8 @@
 	})();
 
 	layui.config({
-		base: rootPath + "module/"
+		base: rootPath + "module/",
+		version: ""
 	}).extend({
 		admin: "admin",
 

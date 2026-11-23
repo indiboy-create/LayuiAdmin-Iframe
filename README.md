@@ -70,11 +70,27 @@ npm run preview
 | `npm run build` | 构建产物到 `dist/` |
 | `npm run build:debug` | 可调试构建（不压缩、强制开启 debug） |
 | `npm run preview` | 本地预览 `dist/` |
-| `npm run check` | 校验构建产物（入口文件、HTML/CSS 资源引用、JSON 与主题配置） |
+| `npm run check` | 校验构建产物（入口文件、HTML/CSS 资源引用、JSON 与主题配置、体积预算） |
+| `npm run check:release` | 同上，并强制校验正式产物 `debug=false`（CI 使用） |
 | `npm run test` | 运行冒烟测试（菜单/主题/页面结构） |
 | `npm run lint` | ESLint 检查 |
 | `npm run lint:fix` | ESLint 检查并自动修复 |
 | `npm run format` | Prettier 格式化 `src`、`scripts`、`test`、根配置文件与 GitHub 工作流 |
+
+## 从 GitHub Packages 安装
+
+```bash
+# 1. 配置 GitHub Packages registry（写入用户级或项目级 .npmrc）
+echo "@indiboy-create:registry=https://npm.pkg.github.com" >> .npmrc
+
+# 2. 使用具备 read:packages 权限的 GitHub Token
+echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" >> .npmrc
+
+# 3. 安装
+npm install @indiboy-create/layuiadmin-iframe
+```
+
+包内容为 `dist/` 下的静态资源，解压后即可作为站点部署。
 
 ## 构建说明
 
@@ -83,6 +99,14 @@ npm run preview
 1. 清空并整体拷贝 `src/` 到 `dist/`
 2. 使用 Terser 压缩 `.js`、CleanCSS 压缩 `.css`
 3. 第三方目录 `component/layui/`、`admin/plugin/` 原样拷贝、不压缩（通过 `SKIP_PREFIXES` 配置跳过）
+4. 注入缓存刷新标记：把 `pear.js` 中 `layui.config` 的 `version` 替换为构建时间戳，并给 HTML 中本地 `link/script/img/iframe` 等资源追加 `?t=<构建戳>`（不维护手写版本号）
+5. 合并 `pear.css`、`module/menu.css`、`module/tabPage.css` 为 `pear.bundle.css`，首页只加载一个样式文件
+
+## 调试
+
+- 统一日志开关：URL 加 `?debug=1` 开启、`?debug=0` 关闭；控制台可执行 `adminDebug.enable()` / `adminDebug.disable()` 临时切换
+- 可调试构建：`npm run build:debug`（不压缩、`pear.config.json` 的 `debug` 置为 `true`）
+- 断点调试：仓库内置 `.vscode/launch.json`，按 F5 选择「调试 LayuiAdmin-Iframe」即可；若开发服务器已在运行，选「复用已运行的 dev server」那条
 
 ## 自动部署与发布
 
