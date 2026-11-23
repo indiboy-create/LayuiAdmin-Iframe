@@ -74,12 +74,14 @@ layui.define(['jquery', 'element'], function (exports) {
 			};
 			var pathParts = [];
 			var ancestor = hash(dom);
-			while (ancestor) {
+			var depth = 0;
+			while (ancestor && depth < 10) {
 				var ancestorTitle = ancestor.find("span").text();
 				if (ancestorTitle !== "") {
 					pathParts.unshift(ancestorTitle);
 				}
 				ancestor = hash(ancestor);
+				depth++;
 			}
 			if (pathParts.length > 0) {
 				data['menuPath'] = pathParts.join(" / ") + " / " + data['menuPath'];
@@ -97,7 +99,7 @@ layui.define(['jquery', 'element'], function (exports) {
 
 	function hash(dom) {
 		var d = dom.parent().parent().prev();
-		if (d.prop("tagName") === "UL") {
+		if (d.length === 0 || d.prop("tagName") === "UL") {
 			return null;
 		}
 		return d;
