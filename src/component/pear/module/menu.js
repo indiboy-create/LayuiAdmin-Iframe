@@ -112,14 +112,20 @@ layui.define(['jquery', 'element'], function (exports) {
 		menu.addClass(skin);
 	}
 
+	function findMenuLink(elem, id) {
+		return $("#" + elem + " a[menu-id]").filter(function () {
+			return $(this).attr("menu-id") === String(id);
+		});
+	}
+
 	menu.prototype.selectItem = function (pearId) {
 
-		$("#" + this.option.elem + " a[menu-id='" + pearId + "']").parents(".pear-nav-tree").find(".layui-this").removeClass(
+		findMenuLink(this.option.elem, pearId).parents(".pear-nav-tree").find(".layui-this").removeClass(
 			"layui-this");
 		if (!$("#" + this.option.elem).is(".pear-nav-mini")) {
 			var openEle = null;
 			var openEleHeight = 0;
-			$($("#" + this.option.elem + " a[menu-id='" + pearId + "']").parents('.layui-nav-child').get().reverse()).each(function () {
+			$(findMenuLink(this.option.elem, pearId).parents('.layui-nav-child').get().reverse()).each(function () {
 				if (!$(this).parent().is('.layui-nav-itemed')) {
 					if (openEleHeight == 0) {
 						openEle = $(this);
@@ -156,7 +162,7 @@ layui.define(['jquery', 'element'], function (exports) {
 				});
 			}
 		}
-		$("#" + this.option.elem + " a[menu-id='" + pearId + "']").parent().addClass("layui-this");
+		findMenuLink(this.option.elem, pearId).parent().addClass("layui-this");
 	}
 
 	var activeMenus = [];
@@ -165,7 +171,7 @@ layui.define(['jquery', 'element'], function (exports) {
 		var config = this.option;
 		if ($("#" + this.option.elem).is(".pear-nav-mini")) {
 			$.each(activeMenus, function (i, item) {
-				$("#" + elem + " a[menu-id='" + $(this).attr("menu-id") + "']").parent().addClass("layui-nav-itemed");
+				findMenuLink(elem, $(this).attr("menu-id")).parent().addClass("layui-nav-itemed");
 			})
 			$("#" + this.option.elem).removeClass("pear-nav-mini");
 			$("#" + this.option.elem).animate({

@@ -28,16 +28,21 @@ LayuiAdmin-Iframe
 │   │   ├── css/            # 主题样式（含 login.css）
 │   │   ├── images/         # 静态图片
 │   │   ├── js/             # 调试开关与页面脚本（debug/about/message/table）
-│   │   └── plugin/         # 插件（如 waterMark）
+
 │   ├── api/                # 菜单/接口数据（menu.json）
 │   └── component/
 │       ├── layui/          # 第三方 Layui 库（构建时不压缩）
 │       └── pear/           # Pear Admin 模块（admin/menu/tabPage/theme/tools）
 ├── test/
-│   └── smoke.test.mjs      # 冒烟测试（菜单/主题/页面结构）
+│   ├── smoke.test.mjs      # 冒烟测试（菜单/主题/页面结构）
+│   └── build.test.mjs      # 构建子步骤单测（构建戳/样式合并/调试剥离）
 ├── scripts/
-│   ├── build.mjs           # 构建脚本（静态拷贝 + 压缩）
-│   └── check.mjs           # 产物校验脚本
+│   ├── build.mjs           # 构建流程编排（临时目录 + 原子替换）
+│   ├── check.mjs           # 产物校验脚本
+│   └── lib/
+│       ├── fs-utils.mjs    # 文件遍历 / 存在性工具
+│       ├── validate.mjs    # 引用与配置校验规则
+│       └── build/          # 构建子步骤（stamp / bundle-css / strip-debug / minify / config）
 ├── .github/workflows/      # CI（ci.yml 复用）+ 部署 / 发布 / 校验工作流
 ├── vite.config.js          # Vite 开发服务器配置
 ├── eslint.config.js        # ESLint 配置
@@ -108,7 +113,7 @@ npm install @indiboy-create/layuiadmin-iframe
 
 1. 清空并整体拷贝 `src/` 到产物目录：压缩版 `dist/`，未压缩版 `dist-debug/`
 2. 使用 Terser 压缩 `.js`、CleanCSS 压缩 `.css`
-3. 第三方目录 `component/layui/`、`admin/plugin/` 原样拷贝、不压缩（通过 `SKIP_PREFIXES` 配置跳过）
+3. 第三方目录 `component/layui/` 原样拷贝、不压缩（通过 `SKIP_PREFIXES` 配置跳过）
 4. 注入缓存刷新标记：把 `pear.js` 中 `layui.config` 的 `version` 替换为构建时间戳，并给 HTML 中本地 `link/script/img/iframe` 等资源追加 `?t=<构建戳>`（不维护手写版本号）
 5. 合并 `pear.css`、`module/menu.css`、`module/tabPage.css` 为 `pear.bundle.css`，首页只加载一个样式文件
 6. 正式产物移除调试能力：删除 `admin/js/debug.js` 及其 HTML 引用，并把 `window.adminDebug` 视为 `undefined` 交由 Terser 消除调试分支（`dist-debug` 完整保留）

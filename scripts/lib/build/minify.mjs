@@ -5,7 +5,7 @@ import CleanCSS from 'clean-css';
 import { walk } from '../fs-utils.mjs';
 
 // 第三方目录：原样拷贝，不压缩
-const SKIP_PREFIXES = ['component/layui/', 'admin/plugin/'];
+const SKIP_PREFIXES = ['component/layui/'];
 
 // 调试分支替换范围：仅项目自有脚本
 const DEBUG_SCOPE = ['admin/js/', 'component/pear/module/'];

@@ -1,4 +1,4 @@
-import { cp, rm } from 'node:fs/promises';
+import { cp, rename, rm } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { stampPearBuild, stampHtmlAssets } from './lib/build/stamp.mjs';
@@ -14,31 +14,38 @@ const src = resolve(root, 'src');
 // 可调试构建：跳过压缩，输出源码级可读产物（默认输出到 dist-debug）
 const noMinify = process.argv.includes('--no-minify');
 const outArg = process.argv.find((arg) => arg.startsWith('--out='));
-const dist = resolve(
+const target = resolve(
 	root,
 	outArg ? outArg.slice('--out='.length) : noMinify ? 'dist-debug' : 'dist'
 );
 
-// 清空旧产物 -> 整体拷贝 -> 注入构建标记 -> 合并样式 -> 剥离调试 -> 压缩
-await rm(dist, { recursive: true, force: true });
-await cp(src, dist, { recursive: true });
+// 构建到临时目录，全部成功后再原子替换，避免中断留下半成品
+const staging = `${target}.tmp`;
+await rm(staging, { recursive: true, force: true });
+await cp(src, staging, { recursive: true });
 
-const buildStamp = await stampPearBuild(dist);
-await bundlePearCss(dist);
-if (!noMinify) {
-	await stripDebugAssets(dist);
+try {
+	const buildStamp = await stampPearBuild(staging);
+	await bundlePearCss(staging);
+	if (!noMinify) {
+		await stripDebugAssets(staging);
+	}
+	await stampHtmlAssets(staging, buildStamp);
+	// 正式构建强制关闭调试，避免调试日志进入线上产物
+	await setDebugConfig(staging, noMinify);
+	if (!noMinify) {
+		await minify(staging);
+	}
+} catch (error) {
+	await rm(staging, { recursive: true, force: true });
+	throw error;
 }
-await stampHtmlAssets(dist, buildStamp);
 
-// 正式构建强制关闭调试，避免调试日志进入线上产物
-await setDebugConfig(dist, noMinify);
-
-if (!noMinify) {
-	await minify(dist);
-}
+await rm(target, { recursive: true, force: true });
+await rename(staging, target);
 
 console.log(
 	noMinify
-		? `构建完成（未压缩，保留调试模块）：${dist}`
-		: `构建完成（已压缩，已移除调试模块）：${dist}`
+		? `构建完成（未压缩，保留调试模块）：${target}`
+		: `构建完成（已压缩，已移除调试模块）：${target}`
 );

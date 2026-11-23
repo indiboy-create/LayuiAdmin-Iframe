@@ -14,7 +14,7 @@ export default [
 			'src/component/pear/module/menu.js',
 			'src/component/pear/module/tabPage.js',
 			'src/component/pear/module/tools.js',
-			'src/admin/plugin/**',
+
 			'.codeartsdoer/**',
 		],
 	},
@@ -29,7 +29,6 @@ export default [
 				...globals.node,
 				layui: 'readonly',
 				layer: 'readonly',
-				gwm: 'readonly',
 			},
 		},
 	},

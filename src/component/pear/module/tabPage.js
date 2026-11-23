@@ -25,6 +25,12 @@ layui.define(['jquery', 'element', 'dropdown', 'layer'], function (exports) {
 		return `<iframe id="${item.id}" type="_iframe" data-frameid="${item.id}" scrolling="auto" frameborder="0" src="${item.url}" style="width:100%;height:100%;" allowfullscreen="true"></iframe>`;
 	}
 
+	function findTabTitle(elem, id) {
+		return $(".layui-tab[lay-filter='" + elem + "'] .layui-tab-title li").filter(function () {
+			return $(this).attr("lay-id") === String(id);
+		});
+	}
+
 	function readTabSession(elem) {
 		var stored = sessionStorage.getItem(elem + "-pear-tab-page-data");
 		try {
@@ -265,7 +271,7 @@ layui.define(['jquery', 'element', 'dropdown', 'layer'], function (exports) {
 	}
 
 	tabPage.prototype.changeTabTitleById = function (id, title) {
-		var currentTab = $(".layui-tab[lay-filter='" + this.option.elem + "'] .layui-tab-title [lay-id='" + id + "'] .title");
+		var currentTab = findTabTitle(this.option.elem, id).find(".title");
 		currentTab.html(title);
 	}
 
@@ -279,7 +285,7 @@ layui.define(['jquery', 'element', 'dropdown', 'layer'], function (exports) {
 	tabPage.prototype.removeTab = function (id) {
 		var elem = this.option.elem;
 		if (id != undefined) {
-			var currentTab = $(".layui-tab[lay-filter='" + elem + "'] .layui-tab-title [lay-id='" + id + "']");
+			var currentTab = findTabTitle(elem, id);
 			if (currentTab.find("span").is(".able-close")) {
 				tabDelete(elem, id, () => { });
 			}
@@ -426,8 +432,8 @@ layui.define(['jquery', 'element', 'dropdown', 'layer'], function (exports) {
 	}
 
 	function tabDelete(elem, id, callback) {
-		var tabTitle = $(".layui-tab[lay-filter='" + elem + "']").find(".layui-tab-title");
-		var removeTab = tabTitle.find("li[lay-id='" + id + "']");
+
+		var removeTab = findTabTitle(elem, id);
 		var nextNode = removeTab.next("li");
 		if (!removeTab.hasClass("layui-this")) {
 			removeTab.remove();
