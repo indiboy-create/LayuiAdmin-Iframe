@@ -11,7 +11,9 @@ import {
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
-const dist = resolve(root, 'dist');
+const dirArg = process.argv.find((arg) => arg.startsWith('--dir='));
+const dirName = dirArg ? dirArg.slice('--dir='.length) : 'dist';
+const dist = resolve(root, dirName);
 
 // 构建产物必须包含的入口与核心资源
 const REQUIRED_FILES = [

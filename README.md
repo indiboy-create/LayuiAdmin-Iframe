@@ -67,11 +67,13 @@ npm run preview
 | 命令 | 说明 |
 | --- | --- |
 | `npm run dev` | 启动 Vite 开发服务器 |
-| `npm run build` | 构建产物到 `dist/` |
-| `npm run build:debug` | 可调试构建（不压缩、强制开启 debug） |
+| `npm run build` | 构建压缩产物到 `dist/` |
+| `npm run build:debug` | 构建未压缩产物到 `dist-debug/`（强制开启 debug） |
+| `npm run build:all` | 同时构建 `dist/` 与 `dist-debug/` |
 | `npm run preview` | 本地预览 `dist/` |
-| `npm run check` | 校验构建产物（入口文件、HTML/CSS 资源引用、JSON 与主题配置、体积预算） |
-| `npm run check:release` | 同上，并强制校验正式产物 `debug=false`（CI 使用） |
+| `npm run check` | 校验 `dist/`（入口文件、HTML/CSS 资源引用、JSON 与主题配置、体积预算、缓存戳） |
+| `npm run check:debug` | 校验未压缩产物 `dist-debug/` |
+| `npm run check:release` | 校验 `dist/` 并强制 `debug=false`（CI 使用） |
 | `npm run test` | 运行冒烟测试（菜单/主题/页面结构） |
 | `npm run lint` | ESLint 检查 |
 | `npm run lint:fix` | ESLint 检查并自动修复 |
@@ -96,11 +98,16 @@ npm install @indiboy-create/layuiadmin-iframe
 
 由于 Layui 模块加载依赖 `document.currentScript` 与 `layui.config({ base: ... })`，不能使用 Vite 打包（会破坏模块加载）。因此构建采用静态拷贝脚本 [scripts/build.mjs](scripts/build.mjs)：
 
-1. 清空并整体拷贝 `src/` 到 `dist/`
+1. 清空并整体拷贝 `src/` 到产物目录：压缩版 `dist/`，未压缩版 `dist-debug/`
 2. 使用 Terser 压缩 `.js`、CleanCSS 压缩 `.css`
 3. 第三方目录 `component/layui/`、`admin/plugin/` 原样拷贝、不压缩（通过 `SKIP_PREFIXES` 配置跳过）
 4. 注入缓存刷新标记：把 `pear.js` 中 `layui.config` 的 `version` 替换为构建时间戳，并给 HTML 中本地 `link/script/img/iframe` 等资源追加 `?t=<构建戳>`（不维护手写版本号）
 5. 合并 `pear.css`、`module/menu.css`、`module/tabPage.css` 为 `pear.bundle.css`，首页只加载一个样式文件
+
+产物目录：
+
+- `dist/`：Terser/CleanCSS 压缩、`debug=false`，用于部署与 npm 包
+- `dist-debug/`：不压缩、`debug=true`，用于线上问题排查与源码级断点
 
 ## 调试
 
@@ -110,10 +117,10 @@ npm install @indiboy-create/layuiadmin-iframe
 
 ## 自动部署与发布
 
-推送 `v*` 标签会同时触发两条工作流，二者复用 `.github/workflows/ci.yml` 中的质量检查（`workflow_call`，包含依赖安装、lint、构建、产物校验并上传 `dist` 产物）：
+推送 `v*` 标签会同时触发两条工作流，二者复用 `.github/workflows/ci.yml` 中的质量检查（`workflow_call`，包含依赖安装、lint、构建、产物校验并上传 `dist` 产物；发布场景会额外构建并上传未压缩的 `dist-debug`）：
 
 - **Deploy GitHub Pages**（`.github/workflows/deploy.yml`）：下载 `dist` 产物后部署到 GitHub Pages，访问地址为 <https://indiboy-create.github.io/LayuiAdmin-Iframe/>。首次部署需在仓库 `Settings → Pages → Source` 中选择 **GitHub Actions**。
-- **Release Package**（`.github/workflows/release.yml`）：将 `dist` 打包为 zip 并发布到 GitHub Packages，同时自动创建 Release 并附加 zip。工作流文件变更只会在其合并到默认分支后生效。
+- **Release Package**（`.github/workflows/release.yml`）：将 `dist` 与 `dist-debug` 分别打包为 `layuiadmin-iframe-<tag>.zip`、`layuiadmin-iframe-<tag>-debug.zip`，发布到 GitHub Packages 并在 Release 中附加两个 zip。工作流文件变更只会在其合并到默认分支后生效。
 
 向默认分支提交 Pull Request 时，`.github/workflows/verify.yml` 同样调用 `ci.yml` 执行检查（传 `upload-artifact: false`，不额外上传产物）。
 

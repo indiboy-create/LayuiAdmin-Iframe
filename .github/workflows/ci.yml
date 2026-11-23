@@ -7,6 +7,10 @@ on:
                 description: 是否上传 dist 产物
                 type: boolean
                 default: true
+            build-debug:
+                description: 是否额外构建未压缩产物 dist-debug
+                type: boolean
+                default: false
 
 permissions:
     contents: read
@@ -39,6 +43,23 @@ jobs:
 
             - name: Verify site
               run: npm run check:release
+
+            - name: Build debug
+              if: ${{ inputs.build-debug }}
+              run: npm run build:debug
+
+            - name: Verify debug site
+              if: ${{ inputs.build-debug }}
+              run: npm run check:debug
+
+            - name: Upload dist-debug
+              if: ${{ inputs.build-debug }}
+              uses: actions/upload-artifact@v4
+              with:
+                  name: dist-debug
+                  path: dist-debug
+                  retention-days: 1
+                  if-no-files-found: error
 
             - name: Upload dist
               if: ${{ inputs.upload-artifact }}

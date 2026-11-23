@@ -7,6 +7,7 @@ export default [
 		ignores: [
 			'node_modules/**',
 			'dist/**',
+			'dist-debug/**',
 			'src/component/layui/**',
 			'src/component/pear/pear.js',
 			'src/component/pear/module/admin.js',

@@ -7,15 +7,19 @@ import CleanCSS from 'clean-css';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
 const src = resolve(root, 'src');
-const dist = resolve(root, 'dist');
+
+// 可调试构建：跳过压缩，输出源码级可读产物（默认输出到 dist-debug）
+const noMinify = process.argv.includes('--no-minify');
+const outArg = process.argv.find((arg) => arg.startsWith('--out='));
+const dist = resolve(
+	root,
+	outArg ? outArg.slice('--out='.length) : noMinify ? 'dist-debug' : 'dist'
+);
 
 // 第三方目录：原样拷贝，不压缩
 const SKIP_PREFIXES = ['component/layui/', 'admin/plugin/'];
 
 const cleanCss = new CleanCSS({ level: 2 });
-
-// 可调试构建：跳过压缩，输出源码级可读产物
-const noMinify = process.argv.includes('--no-minify');
 
 // 递归收集目录下所有文件
 async function walk(dir) {
