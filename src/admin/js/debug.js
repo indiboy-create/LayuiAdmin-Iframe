@@ -39,7 +39,7 @@
 			if (value === '0') {
 				return false;
 			}
-		} catch (error) {
+		} catch {
 			return null;
 		}
 		return null;

@@ -1,31 +1,32 @@
 <!doctype html>
-<html>
+<html lang="zh-CN">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 		<title>登录</title>
+		<link rel="stylesheet" href="component/layui/css/layui.css" />
 		<link rel="stylesheet" href="component/pear/css/pear.css" />
-		<link rel="stylesheet" href="admin/css/other/login.css" />
+		<link rel="stylesheet" href="admin/css/login.css" />
 		<link rel="stylesheet" href="admin/css/variables.css" />
-		<script>
-			if (window.self != window.top) {
-				top.location.reload();
-			}
-		</script>
+		<script src="admin/js/login-guard.js"></script>
 	</head>
 
 	<body>
 		<div class="login-page" style="background-image: url(admin/images/background.svg)">
 			<div class="layui-row">
 				<div class="layui-col-sm6 login-bg layui-hide-xs">
-					<img class="login-bg-img" src="admin/images/banner.png" alt="" />
+					<img class="login-bg-img" src="admin/images/banner.webp" alt="登录页插图" />
 				</div>
 				<div class="layui-col-sm6 layui-col-xs12 login-form">
 					<div class="layui-form">
 						<div class="form-center">
 							<div class="form-center-box">
 								<div class="top-log-title">
-									<img class="top-log" src="admin/images/logo.png" alt="" />
+									<img
+										class="top-log"
+										src="admin/images/logo.png"
+										alt="LayuiAdmin-Iframe"
+									/>
 									<span>LayuiAdmin-Iframe</span>
 								</div>
 								<div class="top-desc">
@@ -52,9 +53,9 @@
 											</div>
 											<input
 												type="password"
-												name="confirmPassword"
+												name="password"
 												value=""
-												lay-verify="required|confirmPassword"
+												lay-verify="required"
 												placeholder="密码"
 												autocomplete="off"
 												class="layui-input"
@@ -70,7 +71,6 @@
 												</div>
 												<input
 													lay-verify="required"
-													value="VBJFQ"
 													placeholder="验证码"
 													autocomplete="off"
 													class="layui-input"
@@ -79,7 +79,7 @@
 										</div>
 										<img
 											src="admin/images/captcha.gif"
-											alt=""
+											alt="验证码"
 											class="verification-img"
 										/>
 									</div>
@@ -120,21 +120,6 @@
 		<script src="admin/js/debug.js"></script>
 		<script src="component/layui/layui.js"></script>
 		<script src="component/pear/pear.js"></script>
-		<script>
-			layui.use(['form'], function () {
-				var form = layui.form;
-
-				// 登 录 提 交
-				form.on('submit(login)', function (data) {
-					/// 验证
-
-					/// 登录
-
-					/// 动画
-
-					return false;
-				});
-			});
-		</script>
+		<script src="admin/js/login.js"></script>
 	</body>
 </html>

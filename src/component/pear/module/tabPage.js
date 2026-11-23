@@ -1,18 +1,45 @@
-layui.define(['jquery', 'element', 'dropdown'], function (exports) {
+layui.define(['jquery', 'element', 'dropdown', 'layer'], function (exports) {
 	"use strict";
 
 	var MOD_NAME = 'tabPage',
 		$ = layui.jquery,
 		dropdown = layui.dropdown,
+		layer = layui.layer,
 		element = layui.element;
 
 	var tabPage = function (opt) {
 		this.option = opt;
 	};
 
-	var tabData = new Array();
+	var tabData = [];
 	var tabDataCurrent = 0;
 	var contextTabDOM;
+
+	function titleHtml(item) {
+		return `<span class="pear-tab-page-active"></span>
+					 <span class="${item.close ? 'able-close' : 'disable-close'} title">${item.title}</span>
+					 <i class="layui-icon layui-unselect layui-tab-close">ဆ</i>`;
+	}
+
+	function frameHtml(item) {
+		return `<iframe id="${item.id}" type="_iframe" data-frameid="${item.id}" scrolling="auto" frameborder="0" src="${item.url}" style="width:100%;height:100%;" allowfullscreen="true"></iframe>`;
+	}
+
+	function readTabSession(elem) {
+		var stored = sessionStorage.getItem(elem + "-pear-tab-page-data");
+		try {
+			return stored ? JSON.parse(stored) : [];
+		} catch (error) {
+			return [];
+		}
+	}
+
+	function saveTabSession(elem, id) {
+		sessionStorage.setItem(elem + "-pear-tab-page-data", JSON.stringify(tabData));
+		if (id !== undefined) {
+			sessionStorage.setItem(elem + "-pear-tab-page-data-current", id);
+		}
+	}
 
 	tabPage.prototype.render = function (opt) {
 
@@ -30,6 +57,9 @@ layui.define(['jquery', 'element', 'dropdown'], function (exports) {
 			closeEvent: opt.closeEvent,
 			tabMax: opt.tabMax,
 		}
+
+		option.tool = opt.tool !== false;
+		option.roll = opt.roll !== false;
 
 		if (option.session) {
 			if (sessionStorage.getItem(option.elem + "-pear-tab-page-data") != null) {
@@ -56,6 +86,19 @@ layui.define(['jquery', 'element', 'dropdown'], function (exports) {
 			rollPage("right", option);
 		})
 		element.init();
+
+		$.each(option.data || [], function (i, item) {
+			element.tabAdd(option.elem, {
+				id: item.id,
+				title: titleHtml(item),
+				content: frameHtml(item)
+			});
+		});
+
+		var defaultTab = option.data && option.data[option.index];
+		if (defaultTab) {
+			element.tabChange(option.elem, defaultTab.id);
+		}
 
 		$("#" + option.elem).width(opt.width);
 		$("#" + option.elem).height(opt.height);
@@ -178,13 +221,25 @@ layui.define(['jquery', 'element', 'dropdown'], function (exports) {
 		return new tabPage(option);
 	}
 
+	var clickCallbacks = {};
+	var boundClickElems = {};
+
 	tabPage.prototype.click = function (callback) {
-		var option = this.option;
 		var elem = this.option.elem;
-		element.on('tab(' + this.option.elem + ')', function (data) {
+		clickCallbacks[elem] = callback;
+
+		if (boundClickElems[elem]) {
+			return;
+		}
+		boundClickElems[elem] = true;
+
+		element.on('tab(' + elem + ')', function () {
 			var id = $("#" + elem + " .layui-tab-title .layui-this").attr("lay-id");
-			sessionStorage.setItem(option.elem + "-pear-tab-page-data-current", id);
-			callback(id);
+			sessionStorage.setItem(elem + "-pear-tab-page-data-current", id);
+			var handler = clickCallbacks[elem];
+			if (typeof handler === 'function') {
+				handler(id);
+			}
 		});
 	}
 
@@ -282,9 +337,7 @@ layui.define(['jquery', 'element', 'dropdown'], function (exports) {
 		}
 		opt.type = "_iframe";
 
-		var title = `<span class="pear-tab-page-active"></span>
-					 <span class="${opt.close ? 'able-close' : 'disable-close'} title">${opt.title}</span>
-					 <i class="layui-icon layui-unselect layui-tab-close">ဆ</i>`;
+		var title = titleHtml(opt);
 
 		if ($(".layui-tab[lay-filter='" + this.option.elem + "'] .layui-tab-title li[lay-id]").length <=
 			0) {
@@ -294,7 +347,7 @@ layui.define(['jquery', 'element', 'dropdown'], function (exports) {
 			element.tabAdd(this.option.elem, {
 				id: opt.id,
 				title: title,
-				content: `<iframe id="${opt.id}" type="${opt.type}" data-frameid="${opt.id}" scrolling="auto" frameborder="0" src="${opt.url}" style="width:100%;height:100%;" allowfullscreen="true"></iframe>`
+				content: frameHtml(opt)
 			});
 
 			tabData.push(opt);
@@ -329,7 +382,7 @@ layui.define(['jquery', 'element', 'dropdown'], function (exports) {
 				element.tabAdd(this.option.elem, {
 					id: opt.id,
 					title: title,
-					content: `<iframe id="${opt.id}" type="${opt.type}" data-frameid="${opt.id}" scrolling="auto" frameborder="0" src="${opt.url}" style="width:100%;height:100%;" allowfullscreen="true"></iframe>`
+					content: frameHtml(opt)
 				});
 				tabData.push(opt);
 				sessionStorage.setItem(that.option.elem + "-pear-tab-page-data", JSON.stringify(tabData));
@@ -359,7 +412,10 @@ layui.define(['jquery', 'element', 'dropdown'], function (exports) {
 		}
 
 		$iframe.attr("src", $iframe.attr("src"));
-		$iframe.on("load", function () {
+		$iframe.off("load").on("load", function () {
+			if (!$iframeLoad || !$iframeLoad.length) {
+				return;
+			}
 			$iframeLoad.fadeOut(1000, function () {
 				$iframeLoad.css({
 					display: "none"
@@ -378,12 +434,10 @@ layui.define(['jquery', 'element', 'dropdown'], function (exports) {
 				.parent();
 			tabContent.remove();
 
-			tabData = JSON.parse(sessionStorage.getItem(elem + "-pear-tab-page-data"));
-			tabDataCurrent = sessionStorage.getItem(elem + "-pear-tab-page-data-current");
-			tabData = tabData.filter(function (item) {
+			tabData = readTabSession(elem).filter(function (item) {
 				return item.id != id;
 			})
-			sessionStorage.setItem(elem + "-pear-tab-page-data", JSON.stringify(tabData));
+			saveTabSession(elem);
 			return false;
 		}
 
@@ -399,13 +453,10 @@ layui.define(['jquery', 'element', 'dropdown'], function (exports) {
 			$("#" + elem + " [id='" + currId + "']").parent().addClass("layui-show");
 		}
 		callback(currId);
-		tabData = JSON.parse(sessionStorage.getItem(elem + "-pear-tab-page-data"));
-		tabDataCurrent = sessionStorage.getItem(elem + "-pear-tab-page-data-current");
-		tabData = tabData.filter(function (item) {
+		tabData = readTabSession(elem).filter(function (item) {
 			return item.id != id;
 		})
-		sessionStorage.setItem(elem + "-pear-tab-page-data", JSON.stringify(tabData));
-		sessionStorage.setItem(elem + "-pear-tab-page-data-current", currId);
+		saveTabSession(elem, currId);
 		removeTab.remove();
 		var tabContent = $(".layui-tab[lay-filter='" + elem + "']").find("*[id='" + id + "']").parent();
 		tabContent.remove();
@@ -426,48 +477,22 @@ layui.define(['jquery', 'element', 'dropdown'], function (exports) {
 		if (option.roll == true && option.tool != false) {
 			type = "layui-tab-rollTool";
 		}
-		var tab = '<div class="pear-tab-page ' + type + ' layui-tab" lay-filter="' + option.elem +
-			'" lay-allowClose="true">';
 
-		var headers = '<ul class="layui-tab-title">';
-		var content = '<div class="layui-tab-content">';
-		var loading = '<div class="pear-tab-page-loading"><div class="ball-loader"><span></span><span></span><span></span><span></span></div></div>'
 		var control = `<div class="layui-tab-control">
 							<li class="layui-tab-prev layui-icon layui-icon-left"></li>
 							<li class="layui-tab-next layui-icon layui-icon-right"></li>
 							<li class="layui-tab-tool layui-icon layui-icon-down"></li>
 						</div>`;
+		var loading =
+			'<div class="pear-tab-page-loading"><div class="ball-loader"><span></span><span></span><span></span><span></span></div></div>';
 
-		// 处 理 选 项 卡 头 部
-		var index = 0;
-
-		$.each(option.data, function (i, item) {
-
-			var titleItem = `<li lay-id="${item.id}" class="${option.index == index ? 'layui-this' : ''}">
-								<span class="pear-tab-page-active"></span>
-								<span class="${item.close ? 'able-close' : 'disable-close'} title">
-									${item.title}
-								</span>
-                                <i class="layui-icon layui-unselect layui-tab-close">ဆ</i></li>
-							</li>`;
-
-			headers += titleItem;
-
-			content += `<div class="${option.index == index ? 'layui-show' : ''} layui-tab-item"><iframe id="${item.id}" type="_iframe" data-frameid="${item.id}" scrolling="auto" frameborder="0" src="${item.url}" style="width:100%;height:100%;" allowfullscreen="true"></iframe></div>`
-
-			index++;
-		});
-
-		headers += '</ul>';
-		content += '</div>';
-
-		tab += headers;
-		tab += control;
-		tab += content;
-		tab += loading;
-		tab += '</div>';
-		tab += ''
-		return tab;
+		return '<div class="pear-tab-page ' + type + ' layui-tab" lay-filter="' + option.elem +
+			'" lay-allowClose="true">' +
+			'<ul class="layui-tab-title"></ul>' +
+			control +
+			'<div class="layui-tab-content"></div>' +
+			loading +
+			'</div>';
 	}
 
 	function rollPage(d, option) {

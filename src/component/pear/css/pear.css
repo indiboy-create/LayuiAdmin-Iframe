@@ -1,7 +1,4 @@
-@import url("../../layui/css/layui.css");
-@import url("module/menu.css");
 
-@import url("module/tabPage.css");
 
 *::-webkit-scrollbar {
     width: 6px;

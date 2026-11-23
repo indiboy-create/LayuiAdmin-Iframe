@@ -9,7 +9,7 @@ export default defineConfig({
 	server: {
 		port: 5173,
 		strictPort: true,
-		open: true,
+		open: false,
 	},
 	build: {
 		// build.outDir 供 `vite preview` 使用，与构建脚本输出的 dist 保持一致

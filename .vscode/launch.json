@@ -1,0 +1,31 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "msedge",
+			"request": "launch",
+			"name": "调试 LayuiAdmin-Iframe (Edge)",
+			"url": "http://localhost:5173/login.html",
+			"webRoot": "${workspaceFolder}/src",
+			"runtimeArgs": ["--remote-allow-origins=*"],
+			"preLaunchTask": "vite:dev"
+		},
+		{
+			"type": "chrome",
+			"request": "launch",
+			"name": "调试 LayuiAdmin-Iframe (Chrome)",
+			"url": "http://localhost:5173/login.html",
+			"webRoot": "${workspaceFolder}/src",
+			"runtimeArgs": ["--remote-allow-origins=*"],
+			"preLaunchTask": "vite:dev"
+		},
+		{
+			"type": "msedge",
+			"request": "launch",
+			"name": "调试 LayuiAdmin-Iframe (复用已运行的 dev server)",
+			"url": "http://localhost:5173/login.html",
+			"webRoot": "${workspaceFolder}/src",
+			"runtimeArgs": ["--remote-allow-origins=*"]
+		}
+	]
+}

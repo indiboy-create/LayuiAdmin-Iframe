@@ -1,17 +1,17 @@
 [
 	{
-		"id": 1,
+		"id": "1",
 		"title": "工作空间",
 		"icon": "layui-icon layui-icon-console",
 		"type": 0,
 		"children": [
 			{
 				"id": "10",
-				"title": "分析页",
+				"title": "首页",
 				"icon": "layui-icon layui-icon-console",
 				"type": 1,
 				"openType": "_iframe",
-				"href": "layui.html"
+				"href": "home.html"
 			},
 			{
 				"id": "11",
@@ -19,34 +19,34 @@
 				"icon": "layui-icon layui-icon-console",
 				"type": 1,
 				"openType": "_iframe",
-				"href": "layui.html"
+				"href": "workbench.html"
 			}
 		]
 	},
 	{
-		"id": 9,
+		"id": "9",
 		"title": "列表页面",
 		"icon": "layui-icon layui-icon-auz",
 		"type": 0,
 		"children": [
 			{
-				"id": 91,
+				"id": "91",
 				"title": "查询表格",
 				"icon": "layui-icon layui-icon-face-smile",
 				"type": 1,
 				"openType": "_iframe",
-				"href": "layui.html"
+				"href": "table.html"
 			}
 		]
 	},
 	{
-		"id": 2,
+		"id": "2",
 		"title": "扩展组件",
 		"icon": "layui-icon layui-icon-auz",
 		"type": 0,
 		"children": [
 			{
-				"id": 21,
+				"id": "21",
 				"title": "核心方法",
 				"icon": "layui-icon layui-icon-face-smile",
 				"type": 1,
@@ -54,7 +54,7 @@
 				"href": "layui.html"
 			},
 			{
-				"id": 23,
+				"id": "23",
 				"title": "高级栅格",
 				"icon": "layui-icon layui-icon-face-smile",
 				"type": 1,
@@ -62,7 +62,7 @@
 				"href": "layui.html"
 			},
 			{
-				"id": 24,
+				"id": "24",
 				"title": "消息提示",
 				"icon": "layui-icon layui-icon-face-smile",
 				"type": 1,
@@ -70,7 +70,7 @@
 				"href": "layui.html"
 			},
 			{
-				"id": 25,
+				"id": "25",
 				"title": "路由过渡",
 				"icon": "layui-icon layui-icon-face-smile",
 				"type": 1,

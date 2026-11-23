@@ -1,18 +1,21 @@
-window.rootPath = (function (src) {
-	src = document.currentScript
-		? document.currentScript.src
-		: document.scripts[document.scripts.length - 1].src;
-	return src.substring(0, src.lastIndexOf("/") + 1);
+(function () {
+	var rootPath = (function (src) {
+		src = document.currentScript
+			? document.currentScript.src
+			: document.scripts[document.scripts.length - 1].src;
+		return src.substring(0, src.lastIndexOf("/") + 1);
+	})();
+
+	layui.config({
+		base: rootPath + "module/",
+		version: "1.0.0"
+	}).extend({
+		admin: "admin",
+
+		tabPage: "tabPage",
+		menu: "menu",
+
+		tools: "tools",
+		theme: "theme"
+	}).use([], function () { });
 })();
-
-layui.config({
-	base: rootPath + "module/",
-	version: "4.0.3"
-}).extend({
-	admin: "admin",
-
-	tabPage: "tabPage",
-	menu: "menu",
-
-	tools: "tools"
-}).use([], function () { });

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="utf-8" />
+		<title>首页</title>
+		<meta name="renderer" content="webkit" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link href="component/layui/css/layui.css" rel="stylesheet" media="all" />
+		<link href="component/pear/css/pear.css" rel="stylesheet" media="all" />
+		<link href="component/layui/css/extend.css" rel="stylesheet" media="all" />
+	</head>
+
+	<body class="iframe-container">
+		<div class="layui-card">
+			<div class="layui-card-header">数据概览</div>
+			<div class="layui-card-body">
+				<div class="layui-row layui-col-space15">
+					<div class="layui-col-md3 layui-col-xs6">
+						<div class="layui-card">
+							<div class="layui-card-body">
+								<div class="layui-font-12 layui-font-gray">今日访问</div>
+								<div class="layui-font-24 layui-font-blue">12,846</div>
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-md3 layui-col-xs6">
+						<div class="layui-card">
+							<div class="layui-card-body">
+								<div class="layui-font-12 layui-font-gray">订单总数</div>
+								<div class="layui-font-24 layui-font-green">1,024</div>
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-md3 layui-col-xs6">
+						<div class="layui-card">
+							<div class="layui-card-body">
+								<div class="layui-font-12 layui-font-gray">待办任务</div>
+								<div class="layui-font-24 layui-font-orange">36</div>
+							</div>
+						</div>
+					</div>
+					<div class="layui-col-md3 layui-col-xs6">
+						<div class="layui-card">
+							<div class="layui-card-body">
+								<div class="layui-font-12 layui-font-gray">系统消息</div>
+								<div class="layui-font-24 layui-font-red">8</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="layui-card">
+			<div class="layui-card-header">模板说明</div>
+			<div class="layui-card-body">
+				<p>本页为 iframe 模式下的首页示例，可直接替换为业务首页。</p>
+				<p>
+					左侧菜单通过 <code>api/menu.json</code> 配置，标签页由
+					<code>admin/config/pear.config.json</code> 控制。
+				</p>
+			</div>
+		</div>
+
+		<script src="component/layui/layui.js"></script>
+	</body>
+</html>

@@ -13,12 +13,14 @@ layui.define(['jquery', 'element'],
             this.debounce = function (fn, time) {
                 var timer = null
                 return function () {
-                    var arg = arguments[0]
+                    var args = arguments
+                    var context = this
                     if (timer) {
                         clearTimeout(timer)
                     }
                     timer = setTimeout(function () {
-                        fn(arg)
+                        timer = null
+                        fn.apply(context, args)
                     }, time)
                 }
             }

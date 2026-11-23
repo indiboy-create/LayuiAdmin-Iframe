@@ -10,8 +10,13 @@ permissions:
     packages: write
 
 jobs:
+    quality:
+        name: Lint, build and verify
+        uses: ./.github/workflows/ci.yml
+
     release:
-        name: Build and publish dist
+        name: Publish dist
+        needs: quality
         runs-on: ubuntu-latest
         steps:
             - name: Checkout
@@ -20,16 +25,10 @@ jobs:
             - name: Setup Node
               uses: actions/setup-node@v4
               with:
-                  node-version: 22
+                  node-version: 24
                   cache: npm
                   registry-url: https://npm.pkg.github.com/
                   scope: '@indiboy-create'
-
-            - name: Install dependencies
-              run: npm ci
-
-            - name: Lint
-              run: npm run lint
 
             - name: Check version
               run: |
@@ -40,11 +39,11 @@ jobs:
                     exit 1
                   fi
 
-            - name: Build
-              run: npm run build
-
-            - name: Verify site
-              run: npm run check
+            - name: Download dist
+              uses: actions/download-artifact@v4
+              with:
+                  name: dist
+                  path: dist
 
             - name: Package dist
               run: |

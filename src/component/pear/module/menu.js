@@ -1,4 +1,4 @@
-layui.define(['table', 'jquery', 'element'], function (exports) {
+layui.define(['jquery', 'element'], function (exports) {
 	"use strict";
 
 	var MOD_NAME = 'menu',
@@ -29,6 +29,8 @@ layui.define(['table', 'jquery', 'element'], function (exports) {
 			done: opt.done ? opt.done : function () { }
 		}
 
+		this.option = option;
+
 		var tempDone = option.done;
 
 		option.done = function () {
@@ -52,9 +54,9 @@ layui.define(['table', 'jquery', 'element'], function (exports) {
 			window.setTimeout(function () { renderMenu(option); }, 500);
 		}
 
-		$("#" + opt.elem).height(option.height)
+		$("#" + opt.elem).height(option.height);
 
-return new menu(option);
+		return this;
 	}
 
 	menu.prototype.click = function (clickEvent) {
@@ -70,27 +72,17 @@ return new menu(option);
 				menuType: dom.attr("menu-type"),
 				menuOpenType: dom.attr("menu-open-type")
 			};
-			var doms = hash(dom);
-			if (doms != null) {
-				if (doms.text() != '') {
-					data['menuPath'] = doms.find("span").text() + " / " + data['menuPath'];
+			var pathParts = [];
+			var ancestor = hash(dom);
+			while (ancestor) {
+				var ancestorTitle = ancestor.find("span").text();
+				if (ancestorTitle !== "") {
+					pathParts.unshift(ancestorTitle);
 				}
+				ancestor = hash(ancestor);
 			}
-			if (doms != null) {
-				var domss = hash(doms);
-				if (domss != null) {
-					if (domss.text() != '') {
-						data['menuPath'] = domss.find("span").text() + " / " + data['menuPath'];
-					}
-				}
-			}
-			if (domss != null) {
-				var domsss = hash(domss);
-				if (domsss != null) {
-					if (domsss.text() != '') {
-						data['menuPath'] = domsss.find("span").text() + " / " + data['menuPath'];
-					}
-				}
+			if (pathParts.length > 0) {
+				data['menuPath'] = pathParts.join(" / ") + " / " + data['menuPath'];
 			}
 			if ($("#" + _this.option.elem).is(".pear-nav-mini")) {
 				if (_this.option.accordion) {
@@ -165,7 +157,7 @@ return new menu(option);
 		$("#" + this.option.elem + " a[menu-id='" + pearId + "']").parent().addClass("layui-this");
 	}
 
-	var activeMenus;
+	var activeMenus = [];
 	menu.prototype.collapse = function (time) {
 		var elem = this.option.elem;
 		var config = this.option;
@@ -228,8 +220,29 @@ return new menu(option);
 		option.done();
 	}
 
+	function escapeHtml(value) {
+		return String(value === undefined || value === null ? "" : value)
+			.replace(/&/g, "&amp;")
+			.replace(/</g, "&lt;")
+			.replace(/>/g, "&gt;")
+			.replace(/"/g, "&quot;")
+			.replace(/'/g, "&#39;");
+	}
+
+	function safeHref(url) {
+		var value = String(url === undefined || url === null ? "" : url).trim();
+		if (!value || /^(?:javascript|data|vbscript):/i.test(value)) {
+			return "javascript:;";
+		}
+		return escapeHtml(value);
+	}
+
+	function safeOpenType(type) {
+		return type === "_blank" || type === "_layer" || type === "_iframe" ? type : "_iframe";
+	}
+
 	function createMenu(option) {
-		var menuHtml = '<div style="height:100%!important;" class="pear-side-scroll layui-side-scroll ' + option.theme + '"><ul lay-filter="' + option.elem +
+		var menuHtml = '<div style="height:100%!important;" class="pear-side-scroll layui-side-scroll ' + escapeHtml(option.theme) + '"><ul lay-filter="' + escapeHtml(option.elem) +
 			'" class="layui-nav arrow   pear-menu layui-nav-tree pear-nav-tree" ' + (option.accordion ? "lay-accordion" : "") + '>'
 		$.each(option.data, function (i, item) {
 			var content = '<li class="layui-nav-item" >';
@@ -238,22 +251,22 @@ return new menu(option);
 			}
 			var href = "javascript:;";
 			var target = "";
-			var className = "site-demo-active"
-			if (item.openType == "_blank" && item.type == 1) {
-				href = item.href;
+			var className = "site-demo-active";
+			var openType = safeOpenType(item.openType);
+			if (openType === "_blank" && item.type == 1) {
+				href = safeHref(item.href);
 				target = "target='_blank'";
 				className = "";
 			}
 			if (item.type == 0) {
-				// 创 建 目 录 结 构
-				content += '<a  href="javascript:;" menu-type="' + item.type + '" menu-id="' + item.id + '" href="' + href +
-					'" ' + target + '><i class="' + item.icon + '"></i><span>' + item.title +
+				content += '<a href="' + href + '" menu-type="' + escapeHtml(item.type) + '" menu-id="' + escapeHtml(item.id) +
+					'" ' + target + '><i class="' + escapeHtml(item.icon) + '"></i><span>' + escapeHtml(item.title) +
 					'</span></a>';
 			} else if (item.type == 1) {
-				content += '<a class="' + className + '" menu-type="' + item.type + '" menu-open-type="' + item.openType + '"  menu-url="' + item.href + '" menu-id="' +
-					item.id +
-					'" menu-title="' + item.title + '"  href="' + href + '"  ' + target + '><i class="' + item.icon +
-					'"></i><span>' + item.title + '</span></a>';
+				content += '<a class="' + className + '" menu-type="' + escapeHtml(item.type) + '" menu-open-type="' + openType + '" menu-url="' + safeHref(item.href) + '" menu-id="' +
+					escapeHtml(item.id) +
+					'" menu-title="' + escapeHtml(item.title) + '" href="' + href + '" ' + target + '><i class="' + escapeHtml(item.icon) +
+					'"></i><span>' + escapeHtml(item.title) + '</span></a>';
 			}
 			// 调 用 递 归 方 法 加 载 无 限 层 级 的 子 菜 单 
 			content += loadchild(item);
@@ -285,21 +298,22 @@ return new menu(option);
 				var href = "javascript:;";
 				var target = "";
 				var className = "site-demo-active";
-				if (note.openType == "_blank" && note.type == 1) {
-					href = note.href;
+				var openType = safeOpenType(note.openType);
+				if (openType === "_blank" && note.type == 1) {
+					href = safeHref(note.href);
 					target = "target='_blank'";
 					className = "";
 				}
 				// 判 断 子 项 类 型
 				if (note.type == 0) {
 					// 创 建 目 录 结 构
-					content += '<a ' + target + '  href="' + href + '" menu-type="' + note.type + '" menu-id="' + note.id +
-						'"><i class="' + note.icon + '"></i><span>' + note.title + '</span></a>';
+					content += '<a ' + target + ' href="' + href + '" menu-type="' + escapeHtml(note.type) + '" menu-id="' + escapeHtml(note.id) +
+						'"><i class="' + escapeHtml(note.icon) + '"></i><span>' + escapeHtml(note.title) + '</span></a>';
 				} else if (note.type == 1) {
 					// 创 建 菜 单 结 构
-					content += '<a ' + target + ' class="' + className + '" menu-open-type="' + note.openType + '" menu-type="' + note.type + '" menu-url="' + note.href +
-						'" menu-id="' + note.id + '" menu-title="' + note.title + '" menu-icon="' + note.icon + '" href="' + href +
-						'" ><i class="' + note.icon + '"></i><span>' + note.title + '</span></a>';
+					content += '<a ' + target + ' class="' + className + '" menu-open-type="' + openType + '" menu-type="' + escapeHtml(note.type) + '" menu-url="' + safeHref(note.href) +
+						'" menu-id="' + escapeHtml(note.id) + '" menu-title="' + escapeHtml(note.title) + '" menu-icon="' + escapeHtml(note.icon) + '" href="' + href +
+						'" ><i class="' + escapeHtml(note.icon) + '"></i><span>' + escapeHtml(note.title) + '</span></a>';
 				}
 				// 加 载 子 项 目 录
 				content += loadchild(note);
@@ -357,8 +371,8 @@ return new menu(option);
 			});
 
 		} else {
-			$("#" + option.elem + " .layui-nav-item").off('mouseenter').unbind('mouseleave');
-			$("#" + option.elem + " dd").off('mouseenter').unbind('mouseleave');
+			$("#" + option.elem + " .layui-nav-item").off('mouseenter mouseleave');
+			$("#" + option.elem + " dd").off('mouseenter mouseleave');
 		}
 	}
 

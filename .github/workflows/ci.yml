@@ -1,0 +1,50 @@
+name: CI
+
+on:
+    workflow_call:
+        inputs:
+            upload-artifact:
+                description: 是否上传 dist 产物
+                type: boolean
+                default: true
+
+permissions:
+    contents: read
+
+jobs:
+    quality:
+        name: Lint, test, build and verify
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 24
+                  cache: npm
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Lint
+              run: npm run lint
+
+            - name: Test
+              run: npm run test
+
+            - name: Build
+              run: npm run build
+
+            - name: Verify site
+              run: npm run check
+
+            - name: Upload dist
+              if: ${{ inputs.upload-artifact }}
+              uses: actions/upload-artifact@v4
+              with:
+                  name: dist
+                  path: dist
+                  retention-days: 1
+                  if-no-files-found: error

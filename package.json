@@ -3,9 +3,25 @@
 	"version": "1.0.0",
 	"type": "module",
 	"description": "LayuiAdmin-Iframe - 基于 Layui 的后台管理系统前端模板",
+	"keywords": [
+		"layui",
+		"admin",
+		"iframe",
+		"template",
+		"dashboard"
+	],
+	"author": "indiboy-create",
+	"license": "MIT",
+	"homepage": "https://indiboy-create.github.io/LayuiAdmin-Iframe/",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/indiboy-create/LayuiAdmin-Iframe.git"
+	},
+	"bugs": {
+		"url": "https://github.com/indiboy-create/LayuiAdmin-Iframe/issues"
+	},
+	"engines": {
+		"node": "^20.19.0 || ^22.13.0 || >=24"
 	},
 	"publishConfig": {
 		"registry": "https://npm.pkg.github.com/"
@@ -19,10 +35,11 @@
 		"build:debug": "node scripts/build.mjs --no-minify",
 		"preview": "vite preview",
 		"check": "node scripts/check.mjs",
+		"test": "node --test test/smoke.test.mjs",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
-		"format": "prettier --write \"src/**/*\"",
-		"prepare": "husky"
+		"format": "prettier --write \"src/**/*\" \"scripts/**/*.mjs\" \"test/**/*.mjs\" \"*.config.js\" \".github/workflows/*.yml\"",
+		"prepare": "husky || true"
 	},
 	"devDependencies": {
 		"@commitlint/cli": "^21.2.4",

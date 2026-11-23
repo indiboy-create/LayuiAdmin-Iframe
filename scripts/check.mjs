@@ -1,6 +1,7 @@
-import { readdir, readFile, stat } from 'node:fs/promises';
-import { dirname, extname, join, relative, resolve } from 'node:path';
+import { readFile } from 'node:fs/promises';
+import { dirname, extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { exists, walk, findMissingReferences, validateThemeConfig } from './lib/validate.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
@@ -10,40 +11,30 @@ const dist = resolve(root, 'dist');
 const REQUIRED_FILES = [
 	'index.html',
 	'login.html',
+	'home.html',
+	'table.html',
 	'component/layui/layui.js',
 	'component/pear/pear.js',
+	'component/pear/module/theme.js',
+	'component/pear/module/admin.js',
+	'component/pear/module/menu.js',
+	'component/pear/module/tabPage.js',
 	'component/pear/css/pear.css',
+	'admin/js/debug.js',
+	'admin/js/bootstrap.js',
+	'admin/js/login.js',
 	'admin/config/pear.config.json',
 	'api/menu.json',
 ];
 
-// 外部链接、锚点、脚本协议等无需校验
-const SKIP_PATTERN = /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i;
-
-async function walk(dir) {
-	const entries = await readdir(dir, { withFileTypes: true });
-	const files = [];
-	for (const entry of entries) {
-		const fullPath = join(dir, entry.name);
-		if (entry.isDirectory()) {
-			files.push(...(await walk(fullPath)));
-		} else {
-			files.push(fullPath);
-		}
-	}
-	return files;
-}
-
-async function exists(target) {
-	try {
-		await stat(target);
-		return true;
-	} catch {
-		return false;
-	}
-}
+const CONFIG_PATH = 'admin/config/pear.config.json';
 
 const errors = [];
+
+if (!(await exists(dist))) {
+	console.error('::error::未找到构建产物 dist/，请先执行 npm run build');
+	process.exit(1);
+}
 
 for (const file of REQUIRED_FILES) {
 	if (!(await exists(join(dist, file)))) {
@@ -51,28 +42,33 @@ for (const file of REQUIRED_FILES) {
 	}
 }
 
-const htmlFiles = (await walk(dist)).filter((file) => extname(file).toLowerCase() === '.html');
+const files = await walk(dist);
+const htmlFiles = files.filter((file) => extname(file).toLowerCase() === '.html');
+const cssFiles = files.filter((file) => extname(file).toLowerCase() === '.css');
+const jsonFiles = files.filter((file) => extname(file).toLowerCase() === '.json');
 
-for (const htmlFile of htmlFiles) {
-	const html = await readFile(htmlFile, 'utf8');
-	const attrPattern = /\b(?:src|href)\s*=\s*["']([^"']+)["']/gi;
+errors.push(...(await findMissingReferences({ rootDir: dist, files: htmlFiles, kind: 'html' })));
+errors.push(...(await findMissingReferences({ rootDir: dist, files: cssFiles, kind: 'css' })));
 
-	for (const match of html.matchAll(attrPattern)) {
-		const rawValue = match[1].trim();
-		if (!rawValue || SKIP_PATTERN.test(rawValue)) continue;
-
-		const cleanValue = rawValue.split('#')[0].split('?')[0];
-		if (!cleanValue) continue;
-
-		const target = cleanValue.startsWith('/')
-			? resolve(dist, cleanValue.slice(1))
-			: resolve(dirname(htmlFile), cleanValue);
-
-		if (!(await exists(target))) {
-			const shown = relative(dist, htmlFile).replace(/\\/g, '/');
-			errors.push(`${shown} 引用的资源不存在：${rawValue}`);
+let config = null;
+for (const jsonFile of jsonFiles) {
+	const label = pathLabel(jsonFile);
+	try {
+		const parsed = JSON.parse(await readFile(jsonFile, 'utf8'));
+		if (label === CONFIG_PATH) {
+			config = parsed;
 		}
+	} catch (error) {
+		errors.push(`${label} JSON 解析失败：${error.message}`);
 	}
+}
+
+if (config) {
+	validateThemeConfig(config, CONFIG_PATH, errors);
+}
+
+function pathLabel(file) {
+	return file.slice(dist.length + 1).replace(/\\/g, '/');
 }
 
 if (errors.length) {
@@ -82,4 +78,6 @@ if (errors.length) {
 	process.exit(1);
 }
 
-console.log(`检查通过：${htmlFiles.length} 个 HTML 页面，${REQUIRED_FILES.length} 个必要文件`);
+console.log(
+	`检查通过：${htmlFiles.length} 个 HTML、${cssFiles.length} 个 CSS、${jsonFiles.length} 个 JSON，${REQUIRED_FILES.length} 个必要文件`
+);
