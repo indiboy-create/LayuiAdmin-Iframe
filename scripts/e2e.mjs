@@ -170,10 +170,14 @@ try {
 	);
 	ok('login.html 与后台资源隔离', !/(?:theme\/admin|component\/mytsa)\//.test(login.text));
 
-	const loginBootstrap = await request(base, '/component/login/js/login-bootstrap.js');
+	ok('login.html 引入登录模块入口', login.text.includes('component/login/login.js'));
+
+	const loginBootstrap = await request(base, '/component/login/module/loginBootstrap.js');
 	ok(
-		'login-bootstrap.js 接管登录提交',
-		loginBootstrap.status === 200 && loginBootstrap.text.includes('Auth.login'),
+		'loginBootstrap 模块接管登录提交',
+		loginBootstrap.status === 200 &&
+			/submit\(login\)/.test(loginBootstrap.text) &&
+			/\.login\(/.test(loginBootstrap.text),
 		`HTTP ${loginBootstrap.status}`
 	);
 

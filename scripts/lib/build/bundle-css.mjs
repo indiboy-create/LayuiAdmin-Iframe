@@ -45,7 +45,7 @@ export async function bundleAdminCss(distDir) {
 	}
 	await writeFile(join(cssDir, 'admin.bundle.css'), content);
 
-	// 合并后这两份只被 index.html 引用，删除避免产物冗余；variables.css 仍被登录页使用
+	// 合并后这两份只被 index.html 引用，删除避免产物冗余；variables.css 保留作为合并源
 	await Promise.all([
 		rm(join(cssDir, 'admin.css'), { force: true }),
 		rm(join(cssDir, 'reset.css'), { force: true }),

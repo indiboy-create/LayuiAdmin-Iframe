@@ -11,7 +11,6 @@ import {
 	hashTree,
 	withStamp,
 } from '../scripts/lib/build/stamp.mjs';
-import { stripDebugAssets } from '../scripts/lib/build/strip-debug.mjs';
 import { bundleMytsaCss, bundleAdminCss } from '../scripts/lib/build/bundle-css.mjs';
 import { replaceDirectory } from '../scripts/lib/build/replace.mjs';
 
@@ -44,11 +43,6 @@ async function createFixture() {
 		'.tab{}\n',
 		'utf8'
 	);
-	await writeFile(
-		join(dir, 'theme', 'admin', 'js', 'debug.js'),
-		'window.adminDebug = {};\n',
-		'utf8'
-	);
 	await writeFile(join(dir, 'theme', 'admin', 'js', 'app.js'), 'window.app = 1;\n', 'utf8');
 	await writeFile(join(dir, 'theme', 'admin', 'css', 'admin.css'), '.admin{}\n', 'utf8');
 	await writeFile(join(dir, 'theme', 'admin', 'css', 'variables.css'), ':root{}\n', 'utf8');
@@ -67,7 +61,6 @@ async function createFixture() {
 			'<link rel="stylesheet" href="theme/admin/css/reset.css">',
 			'</head>',
 			'<body>',
-			'<script src="theme/admin/js/debug.js"></script>',
 			'<script src="theme/admin/js/app.js"></script>',
 			'<img src="theme/admin/images/a.png">',
 			'<a href="home.html">首页</a>',
@@ -208,19 +201,6 @@ describe('构建子步骤', () => {
 			withStamp('theme/admin/js/app.js?t=old&x=1', 'abc'),
 			'theme/admin/js/app.js?t=old&x=1'
 		);
-	});
-
-	it('stripDebugAssets 删除 debug.js 与引用，保留其他脚本', async () => {
-		fixtureDir = await createFixture();
-		await stripDebugAssets(fixtureDir);
-
-		await assert.rejects(
-			() => readFile(join(fixtureDir, 'theme', 'admin', 'js', 'debug.js'), 'utf8'),
-			/ENOENT/
-		);
-		const html = await readFile(join(fixtureDir, 'index.html'), 'utf8');
-		assert.doesNotMatch(html, /debug\.js/);
-		assert.match(html, /app\.js/);
 	});
 
 	it('bundleMytsaCss 合并样式并改写 index.html', async () => {

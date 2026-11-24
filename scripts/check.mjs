@@ -13,10 +13,7 @@ import {
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
-const dirArg = process.argv.find((arg) => arg.startsWith('--dir='));
-const dirName = dirArg ? dirArg.slice('--dir='.length) : 'dist';
-const isMinified = dirName === 'dist';
-const dist = resolve(root, dirName);
+const dist = resolve(root, 'dist');
 
 // 构建产物必须包含的入口与核心资源
 const REQUIRED_FILES = [
@@ -39,10 +36,12 @@ const REQUIRED_FILES = [
 	'component/mytsa/module/menu.js',
 	'component/mytsa/module/tabPage.js',
 	'component/mytsa/css/mytsa.css',
-	'component/login/js/auth.js',
-	'component/login/js/login-bootstrap.js',
-	'theme/login/css/login.css',
-	'theme/login/css/variables.css',
+	'component/login/login.js',
+	'component/login/css/login.css',
+	'component/login/css/variables.css',
+	'component/login/module/auth.js',
+	'component/login/module/loginGuard.js',
+	'component/login/module/loginBootstrap.js',
 
 	'api/mytsa.config.json',
 	'theme/admin/js/watermark.js',
@@ -53,7 +52,6 @@ const REQUIRED_FILES = [
 
 const CONFIG_PATH = 'api/mytsa.config.json';
 
-const strictDebug = process.argv.includes('--strict-debug');
 const SIZE_LIMIT = 500 * 1024;
 
 // 按类型设置体积预算，防止单页/单文件在后续改动中悄悄膨胀；
@@ -116,9 +114,6 @@ for (const jsonFile of jsonFiles) {
 if (config) {
 	validateThemeConfig(config, CONFIG_PATH, errors);
 	validateRuntimeConfig(config, CONFIG_PATH, errors);
-	if (strictDebug && config.debug !== false) {
-		errors.push(`${CONFIG_PATH} 的 debug 应为 false，当前为 ${JSON.stringify(config.debug)}`);
-	}
 }
 
 // 演示凭据提醒：默认口令会随产物发布，仅提示不阻断构建
@@ -145,11 +140,6 @@ if (await exists(join(dist, MYTSA_ENTRY))) {
 		errors.push(`${MYTSA_ENTRY} 未注入构建标记（version 为空），layui 模块缓存不会刷新`);
 	}
 }
-
-const DEBUG_ASSETS = {
-	'index.html': 'theme/admin/js/debug.js',
-	'login.html': 'theme/login/js/debug.js',
-};
 
 // 每个页面都应至少有一个带构建戳的本地资源引用，并声明不被搜索引擎收录
 for (const htmlFile of htmlFiles) {
@@ -205,46 +195,10 @@ if (config && config.menu && typeof config.menu.data === 'string') {
 	}
 }
 
-if (dirName === 'dist') {
-	for (const asset of Object.values(DEBUG_ASSETS)) {
-		if (await exists(join(dist, asset))) {
-			errors.push(`正式产物不应包含 ${asset}`);
-		}
-	}
-	for (const htmlFile of htmlFiles) {
-		const html = await readFile(htmlFile, 'utf8');
-		for (const asset of Object.values(DEBUG_ASSETS)) {
-			if (html.includes(asset)) {
-				errors.push(`${pathLabel(htmlFile)} 仍引用 ${asset}`);
-			}
-		}
-	}
-	const adminPath = join(dist, 'component', 'mytsa', 'module', 'admin.js');
-	if (await exists(adminPath)) {
-		const adminSource = await readFile(adminPath, 'utf8');
-		if (adminSource.includes('adminDebug')) {
-			errors.push('正式产物 admin.js 仍包含调试代码（adminDebug）');
-		}
-	}
-}
-
-if (dirName === 'dist-debug') {
-	for (const [page, asset] of Object.entries(DEBUG_ASSETS)) {
-		if (!(await exists(join(dist, asset)))) {
-			errors.push(`未压缩产物应保留 ${asset}`);
-		}
-		const content = await readFile(join(dist, page), 'utf8');
-		if (!content.includes(asset)) {
-			errors.push(`${page} 应保留 ${asset} 引用（未压缩产物）`);
-		}
-	}
-}
-
 for (const file of files) {
 	const info = await stat(file);
 	const label = pathLabel(file);
-	// 类型预算只对压缩产物生效；未压缩的 dist-debug 保留源码体量，仅受兜底上限约束
-	const budget = isMinified ? BUDGETS.find((item) => item.match(label)) : undefined;
+	const budget = BUDGETS.find((item) => item.match(label));
 	const limit = budget ? budget.limit : SIZE_LIMIT;
 	if (info.size > limit) {
 		const scope = budget ? budget.label : '单文件';
@@ -275,7 +229,5 @@ console.log(
 	`检查通过：${htmlFiles.length} 个 HTML、${cssFiles.length} 个 CSS、${jsonFiles.length} 个 JSON，${REQUIRED_FILES.length} 个必要文件`
 );
 console.log(
-	isMinified
-		? '尺寸预算：HTML≤8KB、项目脚本≤20KB、项目 CSS≤16KB、图片≤40KB、JSON≤12KB（component/layui/ 不参与）'
-		: '尺寸预算：未压缩产物仅校验单文件 500KB 兜底上限'
+	'尺寸预算：HTML≤8KB、项目脚本≤20KB、项目 CSS≤16KB、图片≤40KB、JSON≤12KB（component/layui/ 不参与）'
 );

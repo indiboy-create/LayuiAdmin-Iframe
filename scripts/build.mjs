@@ -11,22 +11,14 @@ import {
 	hashFile,
 } from './lib/build/stamp.mjs';
 import { bundleMytsaCss, bundleAdminCss } from './lib/build/bundle-css.mjs';
-import { stripDebugAssets } from './lib/build/strip-debug.mjs';
 import { minify } from './lib/build/minify.mjs';
-import { setDebugConfig } from './lib/build/config.mjs';
 import { removePathWithRetry, replaceDirectory } from './lib/build/replace.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
 const src = resolve(root, 'src');
 
-// 可调试构建：跳过压缩，输出源码级可读产物（默认输出到 dist-debug）
-const noMinify = process.argv.includes('--no-minify');
-const outArg = process.argv.find((arg) => arg.startsWith('--out='));
-const target = resolve(
-	root,
-	outArg ? outArg.slice('--out='.length) : noMinify ? 'dist-debug' : 'dist'
-);
+const target = resolve(root, 'dist');
 
 // 构建到临时目录，全部成功后再原子替换，避免中断留下半成品
 const staging = `${target}.tmp`;
@@ -37,14 +29,7 @@ try {
 	await stampMytsaBuild(staging);
 	await bundleMytsaCss(staging);
 	await bundleAdminCss(staging);
-	if (!noMinify) {
-		await stripDebugAssets(staging);
-	}
-	// 正式构建强制关闭调试，避免调试日志进入线上产物
-	await setDebugConfig(staging, noMinify);
-	if (!noMinify) {
-		await minify(staging);
-	}
+	await minify(staging);
 
 	// 以最终产物内容计算每文件哈希，HTML 引用的资源按各自内容加戳
 	const assetHashes = await hashTree(staging);
@@ -71,8 +56,4 @@ try {
 
 await replaceDirectory(staging, target);
 
-console.log(
-	noMinify
-		? `构建完成（未压缩，保留调试模块）：${target}`
-		: `构建完成（已压缩，已移除调试模块）：${target}`
-);
+console.log(`构建完成（已压缩）：${target}`);

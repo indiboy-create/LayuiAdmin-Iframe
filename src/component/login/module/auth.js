@@ -1,8 +1,8 @@
-(function (window) {
+layui.define(function (exports) {
 	'use strict';
 
 	/**
-	 * 登录页鉴权：仅负责读取 api/auth.json、校验账号密码并写入会话。
+	 * 登录模块：读取 api/auth.json、校验账号密码并写入会话。
 	 * 账号密码明文存储，仅用于演示；真实项目必须由后端签发凭证。
 	 */
 	var AUTH_URL = 'api/auth.json';
@@ -104,18 +104,13 @@
 			);
 	}
 
-	window.Auth = {
+	if (document.querySelector('script[data-guard-login]')) {
+		guardLoginPage();
+	}
+
+	exports('auth', {
 		login: login,
 		guardLoginPage: guardLoginPage,
 		session: session,
-	};
-
-	var currentScript = document.currentScript;
-	if (
-		currentScript &&
-		currentScript.hasAttribute &&
-		currentScript.hasAttribute('data-guard-login')
-	) {
-		guardLoginPage();
-	}
-})(window);
+	});
+});

@@ -36,9 +36,7 @@ layui.define(
 		function logError(title, error) {
 			var detail = error && error.message ? error.message : String(error || '');
 			var message = (title ? title + '：' : '') + detail;
-			if (window.adminDebug) {
-				window.adminDebug.error(message);
-			} else if (window.console && window.console.error) {
+			if (window.console && window.console.error) {
 				window.console.error('[admin] ' + message);
 			}
 		}
@@ -264,10 +262,6 @@ layui.define(
 			 * 启动构建
 			 */
 			this.apply = function (configuration) {
-				if (window.adminDebug) {
-					window.adminDebug.setConfig(configuration && configuration.debug === true);
-				}
-
 				if (!configuration || typeof configuration !== 'object') {
 					mytsaAdmin.reportError('配置加载失败', '配置文件内容为空或格式错误');
 					mytsaAdmin.keepLoad(null);

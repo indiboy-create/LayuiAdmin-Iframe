@@ -7,10 +7,6 @@ on:
                 description: 是否上传 dist 产物
                 type: boolean
                 default: true
-            build-debug:
-                description: 是否额外构建未压缩产物 dist-debug
-                type: boolean
-                default: false
 
 permissions:
     contents: read
@@ -54,7 +50,7 @@ jobs:
               run: npm run build
 
             - name: Verify site
-              run: npm run check:release
+              run: npm run check
 
             - name: Verify package contents
               if: ${{ matrix.node-version == 24 }}
@@ -63,23 +59,6 @@ jobs:
             - name: E2E smoke
               if: ${{ matrix.node-version == 24 }}
               run: npm run e2e
-
-            - name: Build debug
-              if: ${{ inputs.build-debug && matrix.node-version == 24 }}
-              run: npm run build:debug
-
-            - name: Verify debug site
-              if: ${{ inputs.build-debug && matrix.node-version == 24 }}
-              run: npm run check:debug
-
-            - name: Upload dist-debug
-              if: ${{ inputs.build-debug && matrix.node-version == 24 }}
-              uses: actions/upload-artifact@v7
-              with:
-                  name: dist-debug
-                  path: dist-debug
-                  retention-days: 1
-                  if-no-files-found: error
 
             - name: Upload dist
               if: ${{ inputs.upload-artifact && matrix.node-version == 24 }}

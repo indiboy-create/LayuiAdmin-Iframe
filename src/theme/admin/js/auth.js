@@ -3,7 +3,7 @@
 
 	/**
 	 * 后台入口鉴权：只负责读取会话、拦截未登录访问和退出登录。
-	 * 登录逻辑独立在 component/login/js/auth.js，两套资源互不依赖。
+	 * 登录逻辑独立在 component/login/module/auth.js，两套资源互不依赖。
 	 */
 	var SESSION_KEY = 'mytsa-admin-session';
 

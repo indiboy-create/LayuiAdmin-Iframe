@@ -20,8 +20,8 @@
 
 - [ ] `npx eslint .` 通过
 - [ ] `npm run test` 通过
-- [ ] `npm run build:all` 成功
-- [ ] `npm run check:release`、`npm run check:debug` 通过
+- [ ] `npm run build` 成功
+- [ ] `npm run check` 通过
 - [ ] `npm run e2e` 通过
 - [ ] `npx prettier --check "src/**/*" "scripts/**/*.mjs" "test/**/*.mjs" "*.config.js" ".github/workflows/*.yml" README.md` 通过
 - [ ] 已在浏览器（`npm run dev` 或 `npm run preview`）手工验证改动路径

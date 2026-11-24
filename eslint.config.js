@@ -4,14 +4,7 @@ import globals from 'globals';
 export default [
 	{
 		// 忽略第三方/构建产物/缓存
-		ignores: [
-			'node_modules/**',
-			'dist/**',
-			'dist-debug/**',
-			'src/component/layui/**',
-
-			'.codeartsdoer/**',
-		],
+		ignores: ['node_modules/**', 'dist/**', 'src/component/layui/**', '.codeartsdoer/**'],
 	},
 	js.configs.recommended,
 	{

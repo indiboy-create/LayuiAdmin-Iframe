@@ -8,14 +8,6 @@ import { walk } from '../fs-utils.mjs';
 // 第三方目录：原样拷贝，不压缩
 const SKIP_PREFIXES = ['component/layui/'];
 
-// 调试分支替换范围：仅项目自有脚本
-const DEBUG_SCOPE = [
-	'theme/admin/js/',
-	'theme/login/js/',
-	'component/login/js/',
-	'component/mytsa/module/',
-];
-
 const cleanCss = new CleanCSS({ level: 2 });
 
 // HTML 只做空白与注释收缩，内联脚本/样式交给各自压缩器，避免语义被改
@@ -48,11 +40,7 @@ export async function minify(distDir) {
 			const result = await htmlMinify(content, HTML_OPTIONS);
 			if (result) await writeFile(file, result);
 		} else if (ext === '.js') {
-			// 正式产物移除调试分支：仅在项目自有脚本内把 window.adminDebug 视作 undefined
-			const source = DEBUG_SCOPE.some((prefix) => rel.startsWith(prefix))
-				? content.split('window.adminDebug').join('undefined')
-				: content;
-			const result = await terserMinify(source, { compress: true, mangle: true });
+			const result = await terserMinify(content, { compress: true, mangle: true });
 			if (result.code) await writeFile(file, result.code);
 		} else {
 			const result = cleanCss.minify(content);

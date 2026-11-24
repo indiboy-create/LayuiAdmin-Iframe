@@ -63,8 +63,6 @@ for (const path of required) {
 
 const forbidden = files.filter(
 	(path) =>
-		path === 'dist-debug' ||
-		path.startsWith('dist-debug/') ||
 		path.startsWith('src/') ||
 		path.startsWith('test/') ||
 		path.startsWith('node_modules/') ||

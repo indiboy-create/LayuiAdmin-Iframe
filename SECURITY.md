@@ -25,7 +25,7 @@
 
 模板本身不包含服务端，以下事项由使用方负责：
 
-- **演示口令**：`src/api/auth.json` 内置 `admin` / `admin123` 仅用于本地演示，鉴权逻辑在前端（`api/auth.json` 同样会被打进 npm 包与发布 zip）。上线前必须替换口令，最好整体替换为真实后端登录；`npm run check:release` 在检测到默认口令时只会给出提示，不阻断构建，请不要忽略。
+- **演示口令**：`src/api/auth.json` 内置 `admin` / `admin123` 仅用于本地演示，鉴权逻辑在前端（`api/auth.json` 同样会被打进 npm 包与发布 zip）。上线前必须替换口令，最好整体替换为真实后端登录；`npm run check` 在检测到默认口令时只会给出提示，不阻断构建，请不要忽略。
 - **Referrer-Policy**：页面内已用 `<meta name="referrer" content="no-referrer">` 声明策略，生产环境也可改由服务端下发 `Referrer-Policy: no-referrer` 响应头。
 - **传输层**：必须通过 HTTPS 部署，避免口令与业务数据在链路上明文传输。
 - **访问控制**：静态模板无法阻止直接访问子页地址；`index.html` 之外的页面应通过服务端鉴权或网关策略保护，不要仅依赖前端跳转。

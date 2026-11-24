@@ -12,10 +12,12 @@
 - 主题资源 `css/`、`images/`、`js/` 移入 `src/theme/admin/`；页面引用、构建脚本、校验与文档路径同步更新。
 - 登录页与后台入口资源隔离：登录样式/图片移至 `src/theme/login/`，登录脚本移至 `src/component/login/`，`auth.js` 拆为登录与后台两份；除 `component/layui/` 外不再共用资源。
 - iframe 子页面移入 `src/theme/iframe/` 并完成资源隔离：样式、脚本与配置独立到该目录，除 `component/layui/` 外不再引用后台/登录资源；E2E 增加隔离断言。
+- `component/login` 按 `component/mytsa` 的组件方式重写：新增 `login.js` 入口，`auth`、`loginGuard`、`loginBootstrap` 改为 `module/` 下的 layui 模块，样式移入 `component/login/css/`；校验与 E2E 同步更新。
 
 ### Removed
 
 - 移除页面 CSP `<meta>` 声明、`admin/js/csp-guard.js` 及其引用，并同步移除构建检查与端到端冒烟中的 CSP 断言；保留 `referrer no-referrer` 与外置脚本约定。
+- 移除整套 debug 功能：`debug.js`、`adminDebug`、URL/存储/配置开关、`strip-debug`/`config` 构建步骤、`dist-debug` 与 `build:debug`/`check:debug`/`check:release` 命令及相关 CI/文档；发布产物只保留压缩版 `dist/`。
 
 ## [1.0.1] - 2026-11-24
 
