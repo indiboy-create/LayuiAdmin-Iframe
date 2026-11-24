@@ -15,14 +15,64 @@ layui.define(['jquery', 'element', 'dropdown', 'layer'], function (exports) {
 	var tabDataCurrent = 0;
 	var contextTabDOM;
 
+	// 存储可能在隐私模式或配额不足时抛异常，统一包一层避免标签页初始化中断
+	function readTabStorage(key) {
+		try {
+			return window.sessionStorage.getItem(key);
+		} catch (error) {
+			return null;
+		}
+	}
+
+	function writeTabStorage(key, value) {
+		try {
+			window.sessionStorage.setItem(key, value);
+		} catch (error) {
+			// 存储不可用时忽略，标签仅在当前内存中保留
+		}
+	}
+
+	function removeTabStorage(key) {
+		try {
+			window.sessionStorage.removeItem(key);
+		} catch (error) {
+			// 忽略
+		}
+	}
+
+	function escapeHtml(value) {
+		return String(value === undefined || value === null ? "" : value)
+			.replace(/&/g, "&amp;")
+			.replace(/</g, "&lt;")
+			.replace(/>/g, "&gt;")
+			.replace(/"/g, "&quot;")
+			.replace(/'/g, "&#39;");
+	}
+
+	function safeUrl(value) {
+		var url = String(value === undefined || value === null ? "" : value).trim();
+		// 这里必须匹配控制字符与空白，用于防止 scheme 被空白/控制字符混淆
+		// eslint-disable-next-line no-control-regex
+		if (/^(?:javascript|vbscript):/i.test(url.replace(/[\u0000-\u0020]/g, ""))) {
+			return "about:blank";
+		}
+		return url;
+	}
+
+	function findFrame(elem, id) {
+		return $(".layui-tab[lay-filter='" + elem + "'] .layui-tab-content [data-frameid]").filter(function () {
+			return $(this).attr("data-frameid") === String(id);
+		});
+	}
+
 	function titleHtml(item) {
 		return `<span class="pear-tab-page-active"></span>
-					 <span class="${item.close ? 'able-close' : 'disable-close'} title">${item.title}</span>
-					 <i class="layui-icon layui-unselect layui-tab-close">ဆ</i>`;
+					 <span class="${item.close ? 'able-close' : 'disable-close'} title">${escapeHtml(item.title)}</span>
+					 <i class="layui-icon layui-unselect layui-tab-close" aria-hidden="true">ဆ</i>`;
 	}
 
 	function frameHtml(item) {
-		return `<iframe id="${item.id}" type="_iframe" data-frameid="${item.id}" scrolling="auto" frameborder="0" src="${item.url}" style="width:100%;height:100%;" allowfullscreen="true"></iframe>`;
+		return `<iframe id="${escapeHtml(item.id)}" type="_iframe" data-frameid="${escapeHtml(item.id)}" title="${escapeHtml(item.title || item.id)}" scrolling="auto" frameborder="0" src="${escapeHtml(safeUrl(item.url))}" style="width:100%;height:100%;" allowfullscreen="true"></iframe>`;
 	}
 
 	function findTabTitle(elem, id) {
@@ -31,8 +81,191 @@ layui.define(['jquery', 'element', 'dropdown', 'layer'], function (exports) {
 		});
 	}
 
+	function decorateTabs(elem) {
+		var $tab = $(".layui-tab[lay-filter='" + elem + "']");
+		if (!$tab.length) {
+			return;
+		}
+
+		var $title = $tab.find(".layui-tab-title");
+		var $panels = $tab.find(".layui-tab-content > div");
+
+		$title.attr("role", "tablist");
+		$title.find("li[lay-id]").each(function (index) {
+			var $li = $(this);
+			var selected = $li.hasClass("layui-this");
+			var tabId = "pear-tab-" + elem + "-" + String($li.attr("lay-id") || index).replace(/[^\w-]/g, "");
+			var panel = $panels.eq(index).get(0);
+
+			$li.attr({
+				role: "tab",
+				id: tabId,
+				tabindex: selected ? "0" : "-1",
+				"aria-selected": selected ? "true" : "false",
+				"aria-keyshortcuts": "Delete"
+			});
+
+			if (panel) {
+				panel.id = panel.id || tabId + "-panel";
+				$li.attr("aria-controls", panel.id);
+				$(panel).attr({
+					role: "tabpanel",
+					"aria-labelledby": tabId,
+					tabindex: "0"
+				});
+			}
+		});
+	}
+
+	function bindTabKeyboard(option) {
+		var elem = option.elem;
+		var $title = $(".layui-tab[lay-filter='" + elem + "'] .layui-tab-title");
+
+		$title
+			.off("keydown.pearA11y")
+			.on("keydown.pearA11y", "li[role='tab']", function (event) {
+				var $items = $title.find("li[role='tab']");
+				if (!$items.length) {
+					return;
+				}
+
+				var index = $items.index(this);
+				var next;
+
+				switch (event.key) {
+					case "ArrowRight":
+					case "ArrowDown":
+						next = $items.eq((index + 1) % $items.length);
+						break;
+					case "ArrowLeft":
+					case "ArrowUp":
+						next = $items.eq((index - 1 + $items.length) % $items.length);
+						break;
+					case "Home":
+						next = $items.first();
+						break;
+					case "End":
+						next = $items.last();
+						break;
+					case "Delete":
+						if ($(this).find("span").is(".able-close")) {
+							event.preventDefault();
+							tabDelete(elem, $(this).attr("lay-id"), option.closeEvent);
+							window.setTimeout(function () {
+								$title.find("li.layui-this").trigger("focus");
+							}, 0);
+						}
+						return;
+					case "Enter":
+					case " ":
+						event.preventDefault();
+						element.tabChange(elem, $(this).attr("lay-id"));
+						return;
+					default:
+						return;
+				}
+
+				if (!next || !next.length || next.get(0) === this) {
+					return;
+				}
+
+				event.preventDefault();
+				element.tabChange(elem, next.attr("lay-id"));
+				decorateTabs(elem);
+				next.trigger("focus");
+			});
+	}
+
+	function isFrameBlank(frame) {
+		try {
+			var doc = frame.contentDocument;
+			return !doc || !doc.body || doc.body.textContent.trim() === "";
+		} catch (error) {
+			// 跨域页面无法读取内容，交给浏览器处理
+			return false;
+		}
+	}
+
+	function showFrameError(frame, url) {
+		var $frame = $(frame);
+		if ($frame.siblings(".pear-frame-error").length) {
+			return;
+		}
+
+		$frame.parent().css("position", "relative");
+
+		var $hint = $("<div class='pear-frame-error' role='alert'></div>").css({
+			position: "absolute",
+			top: 0,
+			left: 0,
+			right: 0,
+			bottom: 0,
+			"z-index": 2,
+			display: "flex",
+			"flex-direction": "column",
+			"align-items": "center",
+			"justify-content": "center",
+			background: "#fff",
+			color: "#666"
+		});
+		$hint.append('<i class="layui-icon layui-icon-face-cry" style="font-size:42px;color:#c2c2c2"></i>');
+		$hint.append('<p style="margin:12px 0 4px">页面加载失败</p>');
+		$hint.append(
+			$("<p class='pear-frame-error-url' style='margin:0 0 16px;font-size:12px;color:#999'></p>").text(
+				url || ""
+			)
+		);
+
+		var $retry = $('<button type="button" class="layui-btn layui-btn-sm">重新加载</button>');
+		$retry.on("click", function () {
+			$hint.remove();
+			try {
+				frame.contentWindow.location.reload();
+			} catch (error) {
+				frame.setAttribute("src", url || frame.getAttribute("src") || "");
+			}
+		});
+		$hint.append($retry);
+
+		$frame.after($hint);
+	}
+
+	function guardFrame(elem, id, url) {
+		var frame = findFrame(elem, id).get(0);
+		if (!frame) {
+			return;
+		}
+
+		var timer = null;
+		var settled = false;
+
+		function settle(failed) {
+			if (settled) {
+				return;
+			}
+			settled = true;
+			window.clearTimeout(timer);
+			if (failed) {
+				showFrameError(frame, url);
+			}
+		}
+
+		timer = window.setTimeout(function () {
+			settle(true);
+		}, 15000);
+
+		if (frame.contentDocument && frame.contentDocument.readyState === "complete") {
+			settle(isFrameBlank(frame));
+			return;
+		}
+
+		$(frame).one("load", function () {
+			settle(isFrameBlank(frame));
+		});
+	}
+
 	function readTabSession(elem) {
-		var stored = sessionStorage.getItem(elem + "-pear-tab-page-data");
+		var stored = readTabStorage(elem + "-pear-tab-page-data");
 		try {
 			return stored ? JSON.parse(stored) : [];
 		} catch (error) {
@@ -41,9 +274,9 @@ layui.define(['jquery', 'element', 'dropdown', 'layer'], function (exports) {
 	}
 
 	function saveTabSession(elem, id) {
-		sessionStorage.setItem(elem + "-pear-tab-page-data", JSON.stringify(tabData));
+		writeTabStorage(elem + "-pear-tab-page-data", JSON.stringify(tabData));
 		if (id !== undefined) {
-			sessionStorage.setItem(elem + "-pear-tab-page-data-current", id);
+			writeTabStorage(elem + "-pear-tab-page-data-current", id);
 		}
 	}
 
@@ -55,9 +288,8 @@ layui.define(['jquery', 'element', 'dropdown', 'layer'], function (exports) {
 			index: opt.index,
 			tool: opt.tool || true,
 			roll: opt.roll || true,
-			success: opt.success ? opt.success : function (id) { },
+			success: opt.success ? opt.success : function () { },
 			session: opt.session ? opt.session : false,
-			preload: opt.preload ? opt.preload : false,
 			height: opt.height || "100%",
 			width: opt.width || "100%",
 			closeEvent: opt.closeEvent,
@@ -72,7 +304,7 @@ layui.define(['jquery', 'element', 'dropdown', 'layer'], function (exports) {
 			if (storedTabs.length > 0) {
 				tabData = storedTabs;
 				option.data = storedTabs;
-				tabDataCurrent = sessionStorage.getItem(option.elem + "-pear-tab-page-data-current");
+				tabDataCurrent = readTabStorage(option.elem + "-pear-tab-page-data-current");
 				tabData.forEach(function (item, index) {
 					if (item.id == tabDataCurrent) {
 						option.index = index;
@@ -115,7 +347,7 @@ layui.define(['jquery', 'element', 'dropdown', 'layer'], function (exports) {
 
 		closeEvent(option);
 
-		option.success(sessionStorage.getItem(option.elem + "-pear-tab-page-data-current"));
+		option.success(readTabStorage(option.elem + "-pear-tab-page-data-current"));
 
 		dropdown.render({
 			elem: `#${option.elem} .layui-tab-control > .layui-icon-down`,
@@ -133,12 +365,13 @@ layui.define(['jquery', 'element', 'dropdown', 'layer'], function (exports) {
 			click: function (obj) {
 
 				const id = obj.id;
+				var currentId, tabtitle;
 
 				if (id === 1) {
 					var currentTab = $(".layui-tab[lay-filter='" + option.elem +
 						"'] .layui-tab-title .layui-this");
 					if (currentTab.find("span").is(".able-close")) {
-						var currentId = currentTab.attr("lay-id");
+						currentId = currentTab.attr("lay-id");
 						tabDelete(option.elem, currentId, option.closeEvent, option);
 					} else {
 						layer.msg("当前页面不允许关闭", {
@@ -147,10 +380,10 @@ layui.define(['jquery', 'element', 'dropdown', 'layer'], function (exports) {
 						})
 					}
 				} else if (id === 2) {
-					var currentId = $(".layui-tab[lay-filter='" + option.elem +
+					currentId = $(".layui-tab[lay-filter='" + option.elem +
 						"'] .layui-tab-title .layui-this").attr("lay-id");
-					var tabtitle = $(".layui-tab[lay-filter='" + option.elem + "'] .layui-tab-title li");
-					$.each(tabtitle, function (i) {
+					tabtitle = $(".layui-tab[lay-filter='" + option.elem + "'] .layui-tab-title li");
+					$.each(tabtitle, function () {
 						if ($(this).attr("lay-id") != currentId) {
 							if ($(this).find("span").is(".able-close")) {
 								tabDelete(option.elem, $(this).attr("lay-id"), option.closeEvent,
@@ -159,10 +392,10 @@ layui.define(['jquery', 'element', 'dropdown', 'layer'], function (exports) {
 						}
 					})
 				} else {
-					var currentId = $(".layui-tab[lay-filter='" + option.elem +
+					currentId = $(".layui-tab[lay-filter='" + option.elem +
 						"'] .layui-tab-title .layui-this").attr("lay-id");
-					var tabtitle = $(".layui-tab[lay-filter='" + option.elem + "'] .layui-tab-title li");
-					$.each(tabtitle, function (i) {
+					tabtitle = $(".layui-tab[lay-filter='" + option.elem + "'] .layui-tab-title li");
+					$.each(tabtitle, function () {
 						if ($(this).find("span").is(".able-close")) {
 							tabDelete(option.elem, $(this).attr("lay-id"), option.closeEvent, option);
 						}
@@ -225,6 +458,8 @@ layui.define(['jquery', 'element', 'dropdown', 'layer'], function (exports) {
 			})
 
 		mousewheelAndTouchmoveHandler(option)
+		bindTabKeyboard(option);
+		decorateTabs(option.elem);
 		return new tabPage(option);
 	}
 
@@ -242,7 +477,8 @@ layui.define(['jquery', 'element', 'dropdown', 'layer'], function (exports) {
 
 		element.on('tab(' + elem + ')', function () {
 			var id = $("#" + elem + " .layui-tab-title .layui-this").attr("lay-id");
-			sessionStorage.setItem(elem + "-pear-tab-page-data-current", id);
+			decorateTabs(elem);
+			writeTabStorage(elem + "-pear-tab-page-data-current", id);
 			var handler = clickCallbacks[elem];
 			if (typeof handler === 'function') {
 				handler(id);
@@ -266,13 +502,13 @@ layui.define(['jquery', 'element', 'dropdown', 'layer'], function (exports) {
 	}
 
 	tabPage.prototype.clear = function () {
-		sessionStorage.removeItem(this.option.elem + "-pear-tab-page-data");
-		sessionStorage.removeItem(this.option.elem + "-pear-tab-page-data-current");
+		removeTabStorage(this.option.elem + "-pear-tab-page-data");
+		removeTabStorage(this.option.elem + "-pear-tab-page-data-current");
 	}
 
 	tabPage.prototype.changeTabTitleById = function (id, title) {
 		var currentTab = findTabTitle(this.option.elem, id).find(".title");
-		currentTab.html(title);
+		currentTab.text(title === undefined || title === null ? "" : String(title));
 	}
 
 	/**
@@ -339,6 +575,8 @@ layui.define(['jquery', 'element', 'dropdown', 'layer'], function (exports) {
 	 */
 	tabPage.prototype.changePage = function (opt) {
 
+		var that = this;
+
 		if (opt.type === "_blank") {
 			return;
 		}
@@ -349,17 +587,16 @@ layui.define(['jquery', 'element', 'dropdown', 'layer'], function (exports) {
 		if ($(".layui-tab[lay-filter='" + this.option.elem + "'] .layui-tab-title li[lay-id]").length <=
 			0) {
 
-			var that = this;
-
 			element.tabAdd(this.option.elem, {
 				id: opt.id,
 				title: title,
 				content: frameHtml(opt)
 			});
+			guardFrame(that.option.elem, opt.id, opt.url);
 
 			tabData.push(opt);
-			sessionStorage.setItem(that.option.elem + "-pear-tab-page-data", JSON.stringify(tabData));
-			sessionStorage.setItem(that.option.elem + "-pear-tab-page-data-current", opt.id);
+			writeTabStorage(that.option.elem + "-pear-tab-page-data", JSON.stringify(tabData));
+			writeTabStorage(that.option.elem + "-pear-tab-page-data-current", opt.id);
 
 		} else {
 
@@ -385,19 +622,20 @@ layui.define(['jquery', 'element', 'dropdown', 'layer'], function (exports) {
 					}
 				}
 
-				var that = this;
 				element.tabAdd(this.option.elem, {
 					id: opt.id,
 					title: title,
 					content: frameHtml(opt)
 				});
+				guardFrame(that.option.elem, opt.id, opt.url);
 				tabData.push(opt);
-				sessionStorage.setItem(that.option.elem + "-pear-tab-page-data", JSON.stringify(tabData));
-				sessionStorage.setItem(that.option.elem + "-pear-tab-page-data-current", opt.id);
+				writeTabStorage(that.option.elem + "-pear-tab-page-data", JSON.stringify(tabData));
+				writeTabStorage(that.option.elem + "-pear-tab-page-data-current", opt.id);
 			}
 		}
 		element.tabChange(this.option.elem, opt.id);
-		sessionStorage.setItem(this.option.elem + "-pear-tab-page-data-current", opt.id);
+		writeTabStorage(this.option.elem + "-pear-tab-page-data-current", opt.id);
+		decorateTabs(this.option.elem);
 	}
 
 	/**
@@ -437,14 +675,13 @@ layui.define(['jquery', 'element', 'dropdown', 'layer'], function (exports) {
 		var nextNode = removeTab.next("li");
 		if (!removeTab.hasClass("layui-this")) {
 			removeTab.remove();
-			var tabContent = $(".layui-tab[lay-filter='" + elem + "']").find("*[id='" + id + "']")
-				.parent();
-			tabContent.remove();
+			findFrame(elem, id).parent().remove();
 
 			tabData = readTabSession(elem).filter(function (item) {
 				return item.id != id;
 			})
 			saveTabSession(elem);
+			decorateTabs(elem);
 			return false;
 		}
 
@@ -452,12 +689,12 @@ layui.define(['jquery', 'element', 'dropdown', 'layer'], function (exports) {
 		if (nextNode.length) {
 			nextNode.addClass("layui-this");
 			currId = nextNode.attr("lay-id");
-			$("#" + elem + " [id='" + currId + "']").parent().addClass("layui-show");
+			findFrame(elem, currId).parent().addClass("layui-show");
 		} else {
 			var prevNode = removeTab.prev("li");
 			prevNode.addClass("layui-this");
 			currId = prevNode.attr("lay-id");
-			$("#" + elem + " [id='" + currId + "']").parent().addClass("layui-show");
+			findFrame(elem, currId).parent().addClass("layui-show");
 		}
 		callback(currId);
 		tabData = readTabSession(elem).filter(function (item) {
@@ -465,8 +702,8 @@ layui.define(['jquery', 'element', 'dropdown', 'layer'], function (exports) {
 		})
 		saveTabSession(elem, currId);
 		removeTab.remove();
-		var tabContent = $(".layui-tab[lay-filter='" + elem + "']").find("*[id='" + id + "']").parent();
-		tabContent.remove();
+		findFrame(elem, id).parent().remove();
+		decorateTabs(elem);
 	}
 
 	/**
@@ -549,7 +786,7 @@ layui.define(['jquery', 'element', 'dropdown', 'layer'], function (exports) {
 		$("#" + option.elem + "closeOther").click(function () {
 			var currentId = contextTabDOM.attr("lay-id");
 			var tabtitle = $(".layui-tab[lay-filter='" + option.elem + "'] .layui-tab-title li");
-			$.each(tabtitle, function (i) {
+			$.each(tabtitle, function () {
 				if ($(this).attr("lay-id") != currentId) {
 					if ($(this).find("span").is(".able-close")) {
 						tabDelete(option.elem, $(this).attr("lay-id"), option.closeEvent,
@@ -562,7 +799,7 @@ layui.define(['jquery', 'element', 'dropdown', 'layer'], function (exports) {
 
 		$("#" + option.elem + "closeAll").click(function () {
 			var tabtitle = $(".layui-tab[lay-filter='" + option.elem + "'] .layui-tab-title li");
-			$.each(tabtitle, function (i) {
+			$.each(tabtitle, function () {
 				if ($(this).find("span").is(".able-close")) {
 					tabDelete(option.elem, $(this).attr("lay-id"), option.closeEvent, option);
 				}
@@ -606,7 +843,7 @@ layui.define(['jquery', 'element', 'dropdown', 'layer'], function (exports) {
 			var distanceX = touchX - touch.pageX
 			var scrollLeft = $tabTitle.scrollLeft();
 			touchX = touch.pageX
-			$tabTitle.scrollLeft(scrollLeft += distanceX)
+			$tabTitle.scrollLeft(scrollLeft + distanceX)
 		});
 	}
 

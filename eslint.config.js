@@ -9,11 +9,6 @@ export default [
 			'dist/**',
 			'dist-debug/**',
 			'src/component/layui/**',
-			'src/component/pear/pear.js',
-			'src/component/pear/module/admin.js',
-			'src/component/pear/module/menu.js',
-			'src/component/pear/module/tabPage.js',
-			'src/component/pear/module/tools.js',
 
 			'.codeartsdoer/**',
 		],
@@ -30,6 +25,10 @@ export default [
 				layui: 'readonly',
 				layer: 'readonly',
 			},
+		},
+		rules: {
+			// catch 参数常用于兜底，不视为必须使用的变量
+			'no-unused-vars': ['error', { caughtErrors: 'none', args: 'after-used' }],
 		},
 	},
 ];

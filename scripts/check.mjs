@@ -32,6 +32,7 @@ const REQUIRED_FILES = [
 
 	'admin/config/pear.config.json',
 	'api/menu.json',
+	'api/auth.json',
 ];
 
 const CONFIG_PATH = 'admin/config/pear.config.json';

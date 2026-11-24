@@ -1,7 +1,6 @@
 layui.define(['jquery', 'element'],
     function (exports) {
 
-        var $ = layui.jquery;
         var tools = new function () {
 
             /**

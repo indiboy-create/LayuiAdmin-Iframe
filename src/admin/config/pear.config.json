@@ -15,8 +15,7 @@
 	"tab": {
 		"keepState": true,
 		"session": true,
-		"preload": false,
-		"max": 30,
+		"max": 10,
 		"index": {
 			"id": "10",
 			"type": "_iframe",
@@ -193,7 +192,7 @@
 	"other": {
 		"keepLoad": 3000,
 		"watermark": {
-			"text": "13888888888",
+			"text": "LayuiAdmin-Iframe",
 			"fontSize": 13,
 			"opacity": 0.2
 		},

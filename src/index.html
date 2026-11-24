@@ -15,10 +15,15 @@
 		<link rel="stylesheet" href="admin/css/admin.css" />
 		<link rel="stylesheet" href="admin/css/variables.css" />
 		<link rel="stylesheet" href="admin/css/reset.css" />
+		<script src="admin/js/auth.js"></script>
+		<script>
+			Auth.guard();
+		</script>
 	</head>
 	<!-- 结 构 代 码 -->
 
 	<body class="layui-layout-body pear-admin">
+		<a class="pear-skip-link" href="#content">跳到主内容</a>
 		<!-- 布 局 框 架 -->
 		<div class="layui-layout layui-layout-admin">
 			<!-- 顶 部 样 式 -->
@@ -127,7 +132,7 @@
 			<!-- 视 图 页 面 -->
 			<div class="layui-body">
 				<!-- 内 容 页 面 -->
-				<div id="content"></div>
+				<div id="content" tabindex="-1"></div>
 			</div>
 
 			<!-- 遮 盖 层 -->
@@ -156,6 +161,16 @@
 				'use strict';
 
 				var admin = layui.admin;
+				var current = Auth.session();
+
+				if (current) {
+					var nameEl = document.querySelector(
+						'.layui-header .layui-nav-right .user cite'
+					);
+					if (nameEl) {
+						nameEl.textContent = current.name;
+					}
+				}
 
 				admin.setConfigurationPath('admin/config/pear.config.json');
 
@@ -163,10 +178,24 @@
 
 				admin.logout(function () {
 					return new Promise((resolve) => {
+						Auth.logout();
 						resolve(true);
 					});
 				});
 			});
+			// 跳过导航链接：聚焦时显形（:focus 在窗口失焦场景不一定匹配，补一个类兜底）
+			(function () {
+				var skipLink = document.querySelector('.pear-skip-link');
+				if (!skipLink) {
+					return;
+				}
+				skipLink.addEventListener('focus', function () {
+					skipLink.classList.add('is-focused');
+				});
+				skipLink.addEventListener('blur', function () {
+					skipLink.classList.remove('is-focused');
+				});
+			})();
 		</script>
 	</body>
 </html>

@@ -79,6 +79,7 @@ npm run preview
 | `npm run check` | 校验 `dist/`（入口文件、HTML/CSS 资源引用、JSON 与主题配置、体积预算、缓存戳） |
 | `npm run check:debug` | 校验未压缩产物 `dist-debug/` |
 | `npm run check:release` | 校验 `dist/` 并强制 `debug=false`（CI 使用） |
+| `npm run e2e` | 在 `dist/` 上起临时静态服务做 HTTP 链路 E2E（入口页、鉴权/菜单 JSON、静态资源 200） |
 | `npm run test` | 运行冒烟测试（菜单/主题/页面结构） |
 | `npm run lint` | ESLint 检查 |
 | `npm run lint:fix` | ESLint 检查并自动修复 |
@@ -117,9 +118,38 @@ npm install @indiboy-create/layuiadmin-iframe
 
 旧格式的 `side` 仍然兼容，与 `base` 等价。
 
+## 登录与鉴权
+
+项目内置演示级前端鉴权：登录页请求 `api/auth.json` 校验账号密码，成功后写入会话（勾选“自动登录”存 `localStorage`，否则存 `sessionStorage`）；未登录直接访问 `index.html` 会被重定向回登录页，注销时清除会话并返回登录页。
+
+演示账号：`admin / admin123`，明文存储，仅用于测试环境，上线前务必替换账号或移除 `api/auth.json`。
+
+这条链路只用于拦住误入和直接输入后台地址的访问，不能阻止用户读取该 JSON、改写本地存储，也无法保护被直接打开的 iframe 子页面。需要真实防护时，应由后端签发凭证并在服务端拦截入口页。
+
+## 标签页与懒加载
+
+标签页按需创建：只有点击菜单时才会为该页面创建 iframe，首屏仅加载 `tab.index` 指定的首页，不会一次性建出所有页面的 iframe。
+
+`tab.max` 控制同时打开的标签页上限，默认 10；达到上限后继续打开会提示“最多打开 10 个标签页”。`tab.session` 为 `true` 时刷新会恢复已打开的标签。
+
 ## 首屏加载
 
-`other.keepLoad` 是首屏 loading 的最长等待时间（毫秒）。菜单与当前标签的 iframe 都就绪后立即隐藏 loading；超过该时间仍未就绪则强制隐藏，避免弱网白屏。
+`other.keepLoad` 是首屏 loading 的最长等待时间（毫秒）。菜单与当前标签的 iframe 都就绪后立即隐藏 loading；超过该时间仍未就绪则强制隐藏，避免弱网白屏。配置或菜单加载失败时会结束 loading 并弹出/展示可重试的提示，不会停在首屏动画。
+
+## 可访问性与水印
+
+- 水印文本取自 `pear.config.json` 的 `other.watermark.text`（默认 `LayuiAdmin-Iframe`）。水印绘制在单独的 `.pear-watermark-layer` 覆盖层上（`position: fixed`、`pointer-events: none`、`z-index: 10`），不会再被卡片白色背景遮住，也不会拦截鼠标事件。
+- 标签栏与菜单补齐 ARIA：标签容器 `role="tablist"`、标签项 `role="tab"` + `aria-selected` + `aria-controls`（指向对应 `tabpanel`）、内容面板 `role="tabpanel"` + `aria-labelledby`；菜单 `role="menu"`、可点击项 `role="menuitem"`、含子菜单的项带 `aria-haspopup` 与 `aria-expanded`（展开后自动同步）；每个 iframe 的 `title` 取自对应标签标题。
+- 键盘可完整操作：
+  - 标签页：焦点进入标签后，`←/→`（或 `↑/↓`）切换相邻标签，`Home`/`End` 跳到首尾，`Delete` 关闭当前标签（首页等不可关闭的标签会忽略），切换后焦点跟随到新标签。
+  - 菜单：`↑/↓` 在同级可见菜单项间移动，`→` 展开子菜单，`←` 收起子菜单。
+  - 页面顶部提供“跳到主内容”链接，首次按 `Tab` 即可跳到内容区并聚焦。
+- 焦点样式统一用 `:focus-visible` 描边（主色 `--global-primary-color`），并尊重 `prefers-reduced-motion`。
+- iframe 加载失败时会在该标签内覆盖显示“页面加载失败 + 页面地址 + 重新加载”面板：同源页面返回空内容会立即判定，15 秒内未触发 `load` 也会提示；跨域页面无法读取内容，不做误判。
+
+## 端到端冒烟
+
+`npm run e2e` 在构建产物 `dist/` 上起一个临时静态服务，验证 `index.html`、`login.html`、`api/auth.json`、`api/menu.json`、`admin/config/pear.config.json` 的可用性与关键配置，并逐个请求两个入口页引用的本地静态资源，确认构建后的路径没有断链。该检查会读取 `tab.max`（应为 10）、`menu.data` 等配置，可作为发布前的最后一道链路验证。
 
 ## 构建说明
 
@@ -128,7 +158,7 @@ npm install @indiboy-create/layuiadmin-iframe
 1. 清空并整体拷贝 `src/` 到产物目录：压缩版 `dist/`，未压缩版 `dist-debug/`
 2. 使用 Terser 压缩 `.js`、CleanCSS 压缩 `.css`
 3. 第三方目录 `component/layui/` 原样拷贝、不压缩（通过 `SKIP_PREFIXES` 配置跳过）
-4. 注入缓存刷新标记：把 `pear.js` 中 `layui.config` 的 `version` 替换为构建时间戳，并给 HTML 中本地 `link/script/img/iframe` 等资源追加 `?t=<构建戳>`（不维护手写版本号）
+4. 注入缓存刷新标记：把 `pear.js` 中 `layui.config` 的 `version` 替换为构建时间戳；给 HTML 中本地 `link/script/img/iframe` 等资源追加 `?t=<构建戳>`；`pear.config.json` 中指向本地 `.json` 的 `menu.data` 同样追加该戳，外部接口地址保持原样、交给服务端 ETag 控制（不维护手写版本号，请求时也不再拼随机数）
 5. 合并 `pear.css`、`module/menu.css`、`module/tabPage.css` 为 `pear.bundle.css`，首页只加载一个样式文件
 6. 正式产物移除调试能力：删除 `admin/js/debug.js` 及其 HTML 引用，并把 `window.adminDebug` 视为 `undefined` 交由 Terser 消除调试分支（`dist-debug` 完整保留）
 
@@ -136,6 +166,8 @@ npm install @indiboy-create/layuiadmin-iframe
 
 - `dist/`：Terser/CleanCSS 压缩、`debug=false`、不含调试模块，用于部署与 npm 包
 - `dist-debug/`：不压缩、`debug=true`、保留 `debug.js`，用于线上问题排查与源码级断点
+
+产物替换是带重试的原子操作：旧目录先改名为 `.bak-<时间戳>` 备份，新目录再改名就位；Windows 下遇到 `EPERM`/`EBUSY`（目录被编辑器或预览进程短暂占用）会退避重试，仍失败则把备份改回原位并保留旧产物，不会出现删了一半、两头皆空的情况。
 
 ## 调试
 
@@ -146,7 +178,9 @@ npm install @indiboy-create/layuiadmin-iframe
 
 ## 自动部署与发布
 
-推送 `v*` 标签会同时触发两条工作流，二者复用 `.github/workflows/ci.yml` 中的质量检查（`workflow_call`，包含依赖安装、lint、构建、产物校验并上传 `dist` 产物；发布场景会额外构建并上传未压缩的 `dist-debug`）：
+推送 `v*` 标签会同时触发两条工作流，二者复用 `.github/workflows/ci.yml` 中的质量检查（`workflow_call`，包含依赖安装、lint、测试、构建、产物校验与 E2E；发布场景会额外构建未压缩的 `dist-debug`）：
+
+质量检查按 Node 20 / 22 / 24 三版本矩阵执行，产物构建与 artifact 上传只在 Node 24 任务进行（避免同名 artifact 冲突），E2E 也只在 Node 24 任务跑。
 
 - **Deploy GitHub Pages**（`.github/workflows/deploy.yml`）：下载 `dist` 产物后部署到 GitHub Pages，访问地址为 <https://indiboy-create.github.io/LayuiAdmin-Iframe/>。首次部署需在仓库 `Settings → Pages → Source` 中选择 **GitHub Actions**。
 - **Release Package**（`.github/workflows/release.yml`）：将 `dist` 与 `dist-debug` 分别打包为 `layuiadmin-iframe-<tag>.zip`、`layuiadmin-iframe-<tag>-debug.zip`，发布到 GitHub Packages 并在 Release 中附加两个 zip。工作流文件变更只会在其合并到默认分支后生效。
@@ -154,6 +188,11 @@ npm install @indiboy-create/layuiadmin-iframe
 向默认分支提交 Pull Request 时，`.github/workflows/verify.yml` 同样调用 `ci.yml` 执行检查（传 `upload-artifact: false`，不额外上传产物）。
 
 站点信息（仓库与在线预览地址）统一配置在 `pear.config.json` 的 `other.links`，由「关于我们」弹窗读取。
+
+## 依赖维护
+
+- `.github/dependabot.yml` 每周一 09:00（Asia/Shanghai）检查 npm 与 GitHub Actions 依赖：npm 的小版本与补丁合并为一个 PR，GitHub Actions 的更新合并为一个 PR；大版本（semver-major）不自动提交，需人工评估后升级。
+- CI 在 Node 24 任务中执行 `npm audit --audit-level=high`，出现高危及以上漏洞会直接阻断流水线，其余版本矩阵不重复跑审计。
 
 ## 提交规范
 

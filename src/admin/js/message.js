@@ -38,10 +38,24 @@ layui.use(['jquery'], function () {
 		context.fillText(text, 0, 0);
 
 		var background = 'url(' + canvas.toDataURL('image/png') + ')';
-		$('.watermark').css({
+
+		// 水印单独放到覆盖层：直接画在 .watermark 容器上会被卡片白色底遮住
+		var $layer = $('.pear-watermark-layer');
+		if (!$layer.length) {
+			$layer = $('<div class="pear-watermark-layer" aria-hidden="true"></div>').appendTo(
+				'body'
+			);
+		}
+		$layer.css({
 			'background-image': background,
 			'background-repeat': 'repeat',
-			position: 'relative',
+			position: 'fixed',
+			top: 0,
+			left: 0,
+			right: 0,
+			bottom: 0,
+			'pointer-events': 'none',
+			'z-index': 10,
 		});
 	}
 

@@ -38,11 +38,12 @@
 		"check": "node scripts/check.mjs",
 		"check:debug": "node scripts/check.mjs --dir=dist-debug",
 		"check:release": "node scripts/check.mjs --strict-debug",
+		"e2e": "node scripts/e2e.mjs",
 		"test": "node --test test/smoke.test.mjs test/build.test.mjs",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
 		"format": "prettier --write \"src/**/*\" \"scripts/**/*.mjs\" \"test/**/*.mjs\" \"*.config.js\" \".github/workflows/*.yml\"",
-		"prepublishOnly": "node scripts/check.mjs",
+		"prepublishOnly": "npm run build && npm run check:release",
 		"prepare": "husky || true"
 	},
 	"devDependencies": {

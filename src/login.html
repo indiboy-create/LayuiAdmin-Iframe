@@ -9,6 +9,10 @@
 		<link rel="stylesheet" href="admin/css/login.css" />
 		<link rel="stylesheet" href="admin/css/variables.css" />
 		<script src="admin/js/login-guard.js"></script>
+		<script src="admin/js/auth.js"></script>
+		<script>
+			Auth.guardLoginPage();
+		</script>
 	</head>
 
 	<body>
@@ -18,7 +22,7 @@
 					<img class="login-bg-img" src="admin/images/banner.webp" alt="登录页插图" />
 				</div>
 				<div class="layui-col-sm6 layui-col-xs12 login-form">
-					<div class="layui-form">
+					<form class="layui-form" onsubmit="return false;">
 						<div class="form-center">
 							<div class="form-center-box">
 								<div class="top-log-title">
@@ -39,10 +43,13 @@
 												<i class="layui-icon layui-icon-username"></i>
 											</div>
 											<input
+												name="username"
 												lay-verify="required"
 												placeholder="账户"
-												autocomplete="off"
+												autocomplete="username"
 												class="layui-input"
+												aria-label="账户"
+												aria-required="true"
 											/>
 										</div>
 									</div>
@@ -57,9 +64,11 @@
 												value=""
 												lay-verify="required"
 												placeholder="密码"
-												autocomplete="off"
+												autocomplete="current-password"
 												class="layui-input"
 												lay-affix="eye"
+												aria-label="密码"
+												aria-required="true"
 											/>
 										</div>
 									</div>
@@ -69,9 +78,10 @@
 												<div class="layui-input-prefix">
 													<i class="layui-icon layui-icon-auz"></i>
 												</div>
+												<!-- 演示占位：验证码不参与校验，不强制填写 -->
 												<input
-													lay-verify="required"
 													placeholder="验证码"
+													aria-label="验证码"
 													autocomplete="off"
 													class="layui-input"
 												/>
@@ -95,6 +105,12 @@
 											</div>
 										</div>
 									</div>
+									<div
+										class="login-alert"
+										id="login-alert"
+										role="alert"
+										aria-live="assertive"
+									></div>
 									<div class="login-btn">
 										<button
 											type="button"
@@ -112,7 +128,7 @@
 								</div>
 							</div>
 						</div>
-					</div>
+					</form>
 				</div>
 			</div>
 		</div>
@@ -121,12 +137,50 @@
 		<script src="component/layui/layui.js"></script>
 		<script src="component/pear/pear.js"></script>
 		<script>
-			layui.use(['form'], function () {
+			layui.use(['form', 'layer'], function () {
 				'use strict';
 
 				var form = layui.form;
+				var layer = layui.layer;
 
-				form.on('submit(login)', function () {
+				form.on('submit(login)', function (data) {
+					var field = data.field || {};
+					var button = data.elem;
+
+					if (button) {
+						button.disabled = true;
+					}
+
+					Auth.login(field.username, field.password, !!field['like1[write]'])
+						.then(function () {
+							window.location.href = 'index.html';
+						})
+						.catch(function (error) {
+							if (button) {
+								button.disabled = false;
+							}
+
+							var message = error && error.message ? error.message : '登录失败';
+							var alert = document.getElementById('login-alert');
+							if (alert) {
+								alert.textContent = message;
+							}
+
+							var username = document.querySelector('input[name="username"]');
+							var password = document.querySelector('input[name="password"]');
+							if (username) {
+								username.setAttribute('aria-invalid', 'true');
+							}
+							if (password) {
+								password.setAttribute('aria-invalid', 'true');
+							}
+
+							layer.msg(message, {
+								icon: 2,
+								time: 2000,
+							});
+						});
+
 					return false;
 				});
 			});

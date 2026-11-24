@@ -218,3 +218,17 @@ body {
 		width: 95%;
 	}
 }
+
+/* 登录失败提示：屏幕阅读器可同步播报 */
+.login-alert {
+	min-height: 20px;
+	margin: 0 0 4px;
+	color: #ff5722;
+	font-size: 13px;
+	line-height: 20px;
+	text-align: left;
+}
+
+.layui-input[aria-invalid='true'] {
+	border-color: #ff5722;
+}

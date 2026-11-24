@@ -12,6 +12,31 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 
 	var body = $('body');
 
+	// 存储可能在隐私模式、禁用 Cookie 或配额不足时抛异常，统一包一层避免中断主题渲染
+	function readStorage(key) {
+		try {
+			return window.localStorage.getItem(key);
+		} catch (error) {
+			return null;
+		}
+	}
+
+	function writeStorage(key, value) {
+		try {
+			window.localStorage.setItem(key, value);
+		} catch (error) {
+			// 存储不可用时忽略，主题仅在本次会话生效
+		}
+	}
+
+	function removeStorage(key) {
+		try {
+			window.localStorage.removeItem(key);
+		} catch (error) {
+			// 忽略
+		}
+	}
+
 	function getItemById(list, id) {
 		var result = null;
 		$.each(list || [], function (i, item) {
@@ -49,7 +74,7 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		if (option.theme.allowCustom === false) {
 			return fallback;
 		}
-		return getItemById(schemes, localStorage.getItem("theme-scheme")) || fallback;
+		return getItemById(schemes, readStorage("theme-scheme")) || fallback;
 	}
 
 	function getColorById(id) {
@@ -87,15 +112,15 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		style.setProperty("--scheme-logo", logo);
 		style.setProperty("--scheme-side-text", isLightColor(side) ? "#000000" : "#FFFFFF");
 		style.setProperty("--scheme-header-text", isLightColor(header) ? "#000000" : "#FFFFFF");
-		localStorage.setItem("theme-scheme", scheme.id);
+		writeStorage("theme-scheme", scheme.id);
 	}
 
 	function applyCustomTheme() {
 		var style = document.documentElement.style;
-		var side = localStorage.getItem("theme-custom-side");
-		var selected = localStorage.getItem("theme-custom-selected");
-		var logo = localStorage.getItem("theme-custom-logo");
-		var header = localStorage.getItem("theme-custom-header");
+		var side = readStorage("theme-custom-side");
+		var selected = readStorage("theme-custom-selected");
+		var logo = readStorage("theme-custom-logo");
+		var header = readStorage("theme-custom-header");
 		if (side) {
 			style.setProperty("--scheme-side", side);
 			style.setProperty("--scheme-side-text", isLightColor(side) ? "#000000" : "#FFFFFF");
@@ -113,7 +138,7 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 	}
 
 	function getCustomColor(name) {
-		var stored = localStorage.getItem("theme-custom-" + name);
+		var stored = readStorage("theme-custom-" + name);
 		if (stored) {
 			return stored;
 		}
@@ -138,7 +163,7 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 				color: getCustomColor(name),
 				predefine: true,
 				done: function (value) {
-					localStorage.setItem("theme-custom-" + name, value);
+					writeStorage("theme-custom-" + name, value);
 					applyCustomTheme();
 				}
 			});
@@ -172,7 +197,7 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 
 	function buildSchemeHtml() {
 		var schemes = getSchemeList();
-		var current = localStorage.getItem("theme-scheme");
+		var current = readStorage("theme-scheme");
 		var items = "";
 		$.each(schemes, function (i, scheme) {
 			var side = scheme.side || "#20222A";
@@ -211,11 +236,11 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 			var scheme = resolveScheme(option);
 			applyScheme(scheme);
 
-			var colorId = localStorage.getItem("theme-color");
+			var colorId = readStorage("theme-color");
 			var currentColor = getColorById(colorId);
-			localStorage.setItem("theme-color", currentColor.id);
-			localStorage.setItem("theme-color-color", currentColor.color);
-			localStorage.setItem("theme-color-second", currentColor.second);
+			writeStorage("theme-color", currentColor.id);
+			writeStorage("theme-color-color", currentColor.color);
+			writeStorage("theme-color-second", currentColor.second);
 
 			theme.changeTheme();
 			applyCustomTheme();
@@ -227,7 +252,7 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		 */
 		changeTheme: function () {
 			var variableKey = "--global-primary-color";
-			var variableVal = localStorage.getItem("theme-color-color");
+			var variableVal = readStorage("theme-color-color");
 			if (!variableVal) {
 				return;
 			}
@@ -262,7 +287,7 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 
 				renderCustomPickers();
 
-				var currentScheme = localStorage.getItem("theme-scheme");
+				var currentScheme = readStorage("theme-scheme");
 				$("[data-select-scheme]").removeClass("layui-this");
 				$("[data-select-scheme='" + currentScheme + "']").addClass("layui-this");
 
@@ -288,7 +313,7 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		$('[data-select-scheme]').removeClass("layui-this");
 		$(this).addClass("layui-this");
 		$.each(["side", "selected", "logo", "header"], function (i, name) {
-			localStorage.removeItem("theme-custom-" + name);
+			removeStorage("theme-custom-" + name);
 		});
 		applyScheme(scheme);
 		theme.changeTheme();
@@ -311,7 +336,7 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 			"banner",
 			"footer"
 		], function (i, key) {
-			localStorage.removeItem(key);
+			removeStorage(key);
 		});
 		window.location.reload();
 	});

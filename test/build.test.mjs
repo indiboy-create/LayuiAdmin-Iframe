@@ -1,17 +1,24 @@
-import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { stampPearBuild, stampHtmlAssets } from '../scripts/lib/build/stamp.mjs';
+import { stampPearBuild, stampHtmlAssets, stampConfiguration } from '../scripts/lib/build/stamp.mjs';
 import { stripDebugAssets } from '../scripts/lib/build/strip-debug.mjs';
 import { bundlePearCss } from '../scripts/lib/build/bundle-css.mjs';
+import { replaceDirectory } from '../scripts/lib/build/replace.mjs';
 
 async function createFixture() {
 	const dir = await mkdtemp(join(tmpdir(), 'layuiadmin-build-'));
 	await mkdir(join(dir, 'component', 'pear', 'module'), { recursive: true });
 	await mkdir(join(dir, 'component', 'pear', 'css', 'module'), { recursive: true });
 	await mkdir(join(dir, 'admin', 'js'), { recursive: true });
+	await mkdir(join(dir, 'admin', 'config'), { recursive: true });
+	await writeFile(
+		join(dir, 'admin', 'config', 'pear.config.json'),
+		JSON.stringify({ menu: { data: 'api/menu.json' } }, null, '\t'),
+		'utf8'
+	);
 
 	await writeFile(
 		join(dir, 'component', 'pear', 'pear.js'),
@@ -92,6 +99,27 @@ describe('构建子步骤', () => {
 		assert.doesNotMatch(html, /home\.html\?t=/);
 	});
 
+	it('stampConfiguration 只给本地静态菜单数据追加 ?t=', async () => {
+		fixtureDir = await createFixture();
+		const configPath = join(fixtureDir, 'admin', 'config', 'pear.config.json');
+
+		await stampConfiguration(fixtureDir, 'abc');
+		let config = JSON.parse(await readFile(configPath, 'utf8'));
+		assert.equal(config.menu.data, 'api/menu.json?t=abc');
+
+		config.menu.data = 'api/menu.json?t=abc';
+		await writeFile(configPath, JSON.stringify(config), 'utf8');
+		await stampConfiguration(fixtureDir, 'def');
+		config = JSON.parse(await readFile(configPath, 'utf8'));
+		assert.equal(config.menu.data, 'api/menu.json?t=abc', '已带戳的地址不应重复追加');
+
+		config.menu.data = 'https://example.com/menu.json';
+		await writeFile(configPath, JSON.stringify(config), 'utf8');
+		await stampConfiguration(fixtureDir, 'ghi');
+		config = JSON.parse(await readFile(configPath, 'utf8'));
+		assert.equal(config.menu.data, 'https://example.com/menu.json', '外部接口应交给服务端缓存');
+	});
+
 	it('stripDebugAssets 删除 debug.js 与引用，保留其他脚本', async () => {
 		fixtureDir = await createFixture();
 		await stripDebugAssets(fixtureDir);
@@ -120,5 +148,33 @@ describe('构建子步骤', () => {
 		const html = await readFile(join(fixtureDir, 'index.html'), 'utf8');
 		assert.match(html, /pear\.bundle\.css/);
 		assert.doesNotMatch(html, /module\/menu\.css/);
+	});
+
+	it('replaceDirectory 备份替换已有产物并清理临时目录', async () => {
+		fixtureDir = await mkdtemp(join(tmpdir(), 'layuiadmin-replace-'));
+		const staging = join(fixtureDir, 'dist.tmp');
+		const target = join(fixtureDir, 'dist');
+		await mkdir(staging, { recursive: true });
+		await writeFile(join(staging, 'new.txt'), 'new', 'utf8');
+		await mkdir(target, { recursive: true });
+		await writeFile(join(target, 'old.txt'), 'old', 'utf8');
+
+		await replaceDirectory(staging, target);
+
+		assert.equal(await readFile(join(target, 'new.txt'), 'utf8'), 'new');
+		await assert.rejects(() => readFile(join(target, 'old.txt'), 'utf8'), /ENOENT/);
+		assert.deepEqual(await readdir(fixtureDir), ['dist'], '临时目录与备份都应被清理');
+	});
+
+	it('replaceDirectory 在目标目录不存在时直接就位', async () => {
+		fixtureDir = await mkdtemp(join(tmpdir(), 'layuiadmin-replace-'));
+		const staging = join(fixtureDir, 'dist.tmp');
+		await mkdir(staging, { recursive: true });
+		await writeFile(join(staging, 'new.txt'), 'new', 'utf8');
+
+		await replaceDirectory(staging, join(fixtureDir, 'dist'));
+
+		assert.equal(await readFile(join(fixtureDir, 'dist', 'new.txt'), 'utf8'), 'new');
+		assert.deepEqual(await readdir(fixtureDir), ['dist']);
 	});
 });

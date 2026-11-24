@@ -177,18 +177,6 @@ body,
 	color: white !important;
 }
 
-@media screen and (min-width: 768px) {
-	.layui-hide-sm {
-		display: inline-block !important;
-	}
-}
-
-@media screen and (min-width: 769px) {
-	.layui-hide-sm {
-		display: none !important;
-	}
-}
-
 /** 新增兼容 */
 @media screen and (max-width: 768px) {
 	.collapse {
@@ -611,5 +599,42 @@ body,
 
 	50% {
 		transform: scale(1.2, 1);
+	}
+}
+
+/* 无障碍：跳过导航直达主内容 */
+.pear-skip-link {
+	position: absolute;
+	left: 12px;
+	top: -48px;
+	z-index: 19999999;
+	padding: 8px 14px;
+	border-radius: var(--global-border-radius, 4px);
+	background: var(--global-primary-color, #16baaa);
+	color: #fff;
+	font-size: 14px;
+	line-height: 1;
+	text-decoration: none;
+	transition: top 0.15s ease;
+}
+
+.pear-skip-link:focus,
+.pear-skip-link.is-focused {
+	top: 12px;
+	outline: 2px solid #fff;
+	outline-offset: 2px;
+}
+
+/* 键盘焦点始终可见 */
+.layui-tab-title li:focus-visible,
+.pear-menu a:focus-visible,
+#content:focus-visible {
+	outline: 2px solid var(--global-primary-color, #16baaa);
+	outline-offset: -2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.pear-skip-link {
+		transition: none;
 	}
 }

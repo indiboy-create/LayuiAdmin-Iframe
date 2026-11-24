@@ -1,11 +1,12 @@
-import { cp, rename, rm } from 'node:fs/promises';
+import { cp } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { stampPearBuild, stampHtmlAssets } from './lib/build/stamp.mjs';
+import { stampPearBuild, stampHtmlAssets, stampConfiguration } from './lib/build/stamp.mjs';
 import { bundlePearCss } from './lib/build/bundle-css.mjs';
 import { stripDebugAssets } from './lib/build/strip-debug.mjs';
 import { minify } from './lib/build/minify.mjs';
 import { setDebugConfig } from './lib/build/config.mjs';
+import { removePathWithRetry, replaceDirectory } from './lib/build/replace.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
@@ -21,7 +22,7 @@ const target = resolve(
 
 // 构建到临时目录，全部成功后再原子替换，避免中断留下半成品
 const staging = `${target}.tmp`;
-await rm(staging, { recursive: true, force: true });
+await removePathWithRetry(staging);
 await cp(src, staging, { recursive: true });
 
 try {
@@ -31,18 +32,18 @@ try {
 		await stripDebugAssets(staging);
 	}
 	await stampHtmlAssets(staging, buildStamp);
+	await stampConfiguration(staging, buildStamp);
 	// 正式构建强制关闭调试，避免调试日志进入线上产物
 	await setDebugConfig(staging, noMinify);
 	if (!noMinify) {
 		await minify(staging);
 	}
 } catch (error) {
-	await rm(staging, { recursive: true, force: true });
+	await removePathWithRetry(staging).catch(() => {});
 	throw error;
 }
 
-await rm(target, { recursive: true, force: true });
-await rename(staging, target);
+await replaceDirectory(staging, target);
 
 console.log(
 	noMinify
