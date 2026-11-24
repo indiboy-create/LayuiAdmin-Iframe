@@ -1,5 +1,5 @@
 {
-	"name": "@initearth/layuiadmin-iframe",
+	"name": "@initearth/mytsa-admin-iframe",
 	"version": "1.0.0",
 	"type": "module",
 	"description": "LayuiAdmin-Iframe - 基于 Layui 的后台管理系统前端模板",
@@ -12,13 +12,13 @@
 	],
 	"author": "initearth",
 	"license": "MIT",
-	"homepage": "https://initearth.github.io/LayuiAdmin-Iframe/",
+	"homepage": "https://initearth.github.io/mytsa-admin-iframe/",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/initearth/LayuiAdmin-Iframe.git"
+		"url": "git+https://github.com/initearth/mytsa-admin-iframe.git"
 	},
 	"bugs": {
-		"url": "https://github.com/initearth/LayuiAdmin-Iframe/issues"
+		"url": "https://github.com/initearth/mytsa-admin-iframe/issues"
 	},
 	"engines": {
 		"node": "^20.19.0 || ^22.13.0 || >=24"

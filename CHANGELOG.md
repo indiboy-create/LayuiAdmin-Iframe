@@ -19,6 +19,9 @@
 - 主题切换时同步 `<meta name="theme-color">`，移动端状态栏颜色跟随当前配色方案。
 - 水印改由父框架统一绘制（`admin/js/watermark.js`，原 `message.js` 更名），覆盖所有标签与 iframe；子页仅在直接打开时绘制，嵌入时自动跳过，避免双层水印。
 - 新增 `@media print` 打印样式：隐藏顶栏/侧栏/标签栏/水印/遮罩/loading，内容区全宽白底。
+- npm 包名迁移为 `@initearth/mytsa-admin-iframe`；Release 仅在仓库归属 `initearth` 时发 GitHub Packages，否则只发 npm 公共源（需配置具备 `@initearth` scope 权限的 `NPM_TOKEN`）。
+- Release 资产与工作流产物统一命名为 `mytsa-admin-iframe-<tag>.zip`、`mytsa-admin-iframe-<tag>-debug.zip`。
+- 仓库地址迁移至 `https://github.com/initearth/mytsa-admin-iframe`，在线预览迁移至 `https://initearth.github.io/mytsa-admin-iframe/`；`package.json` 与 `mytsa.config.json` 中的仓库/预览链接同步。
 
 ### Fixed
 
