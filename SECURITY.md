@@ -26,14 +26,14 @@
 模板本身不包含服务端，以下事项由使用方负责：
 
 - **演示口令**：`src/api/auth.json` 内置 `admin` / `admin123` 仅用于本地演示，鉴权逻辑在前端（`api/auth.json` 同样会被打进 npm 包与发布 zip）。上线前必须替换口令，最好整体替换为真实后端登录；`npm run check:release` 在检测到默认口令时只会给出提示，不阻断构建，请不要忽略。
-- **CSP 与 Referrer-Policy**：页面内已用 `<meta>` 声明策略，生产环境建议改由服务端下发同名 HTTP 头（可覆盖 `404.html` 等静态错误页，且比 `<meta>` 生效更早）。接入自有接口时记得把接口域名加入 `connect-src`。
+- **Referrer-Policy**：页面内已用 `<meta name="referrer" content="no-referrer">` 声明策略，生产环境也可改由服务端下发 `Referrer-Policy: no-referrer` 响应头。
 - **传输层**：必须通过 HTTPS 部署，避免口令与业务数据在链路上明文传输。
 - **访问控制**：静态模板无法阻止直接访问子页地址；`index.html` 之外的页面应通过服务端鉴权或网关策略保护，不要仅依赖前端跳转。
 
 ## 已内置的防护
 
 - 标签页标题、菜单标题、iframe 地址统一走 `sanitize.js` 的 `escapeHtml` / `safeUrl` / `safeHref`，拒绝 `javascript:` 等伪协议。
-- 页面不包含内联脚本，`script-src 'self'` 可直接启用；Layui 的 `href="javascript:;"` 已在捕获阶段拦截，避免 CSP 报错。
+- 页面不包含内联脚本，脚本统一外置，避免内联事件带来的注入面。
 - `_blank` 打开的链接统一带 `rel="noopener noreferrer"`；页面声明 `referrer no-referrer`。
 - 存储读写（`sessionStorage` / `localStorage`）全部包了 `try/catch`，存储不可用时降级而非抛错中断。
 - CI 执行 `npm audit --audit-level=high`，并对产物做必要文件、体积与断链校验。

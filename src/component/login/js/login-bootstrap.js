@@ -1,7 +1,7 @@
 (function () {
 	'use strict';
 
-	// 原生提交由脚本接管：页面去掉 onsubmit 内联属性后既符合 CSP，也让回车键能直接登录
+	// 原生提交由脚本接管：页面去掉 onsubmit 内联属性后，回车键也能直接登录
 	var form = document.querySelector('form.layui-form');
 	if (form) {
 		form.addEventListener('submit', function (event) {

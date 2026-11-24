@@ -52,7 +52,7 @@ const required = [
 	'dist/index.html',
 	'dist/login.html',
 	'dist/404.html',
-	'dist/admin/config/mytsa.config.json',
+	'dist/api/mytsa.config.json',
 	'dist/api/menu.json',
 ];
 for (const path of required) {

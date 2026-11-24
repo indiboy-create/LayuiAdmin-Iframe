@@ -9,7 +9,12 @@ import { walk } from '../fs-utils.mjs';
 const SKIP_PREFIXES = ['component/layui/'];
 
 // 调试分支替换范围：仅项目自有脚本
-const DEBUG_SCOPE = ['admin/js/', 'component/mytsa/module/'];
+const DEBUG_SCOPE = [
+	'theme/admin/js/',
+	'theme/login/js/',
+	'component/login/js/',
+	'component/mytsa/module/',
+];
 
 const cleanCss = new CleanCSS({ level: 2 });
 

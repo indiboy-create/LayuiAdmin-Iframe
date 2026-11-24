@@ -1,0 +1,14 @@
+:root {
+	/* 主题颜色 */
+	--global-primary-color: #16baaa;
+
+	/* 配色方案 */
+	--scheme-side: #20222a;
+	--scheme-header: #ffffff;
+	--scheme-logo: #20222a;
+	--scheme-side-text: #ffffff;
+	--scheme-header-text: #000000;
+
+	/** 圆角度数 */
+	--global-border-radius: 4px;
+}

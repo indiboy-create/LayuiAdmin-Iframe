@@ -1,7 +1,8 @@
 node_modules/
 dist/
 src/component/layui/
-src/admin/images/
+src/theme/admin/images/
+src/theme/login/images/
 src/robots.txt
 package-lock.json
 *.min.*

@@ -6,25 +6,24 @@
 		<meta name="theme-color" content="#20222A" />
 		<meta name="color-scheme" content="light" />
 		<meta name="referrer" content="no-referrer" />
-		<meta
-			http-equiv="Content-Security-Policy"
-			content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self' data:; connect-src 'self'; frame-src 'self' https:; base-uri 'self'; form-action 'self'"
-		/>
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 		<title>登录</title>
 		<link rel="stylesheet" href="component/layui/css/layui.css" />
-		<link rel="stylesheet" href="component/mytsa/css/mytsa.css" />
-		<link rel="stylesheet" href="admin/css/login.css" />
-		<link rel="stylesheet" href="admin/css/variables.css" />
-		<script src="admin/js/login-guard.js"></script>
-		<script src="admin/js/auth.js" data-guard-login></script>
+		<link rel="stylesheet" href="theme/login/css/login.css" />
+		<link rel="stylesheet" href="theme/login/css/variables.css" />
+		<script src="component/login/js/login-guard.js"></script>
+		<script src="component/login/js/auth.js" data-guard-login></script>
 	</head>
 
 	<body>
-		<div class="login-page" style="background-image: url(admin/images/background.svg)">
+		<div class="login-page" style="background-image: url(theme/login/images/background.svg)">
 			<div class="layui-row">
 				<div class="layui-col-sm6 login-bg layui-hide-xs">
-					<img class="login-bg-img" src="admin/images/banner.webp" alt="登录页插图" />
+					<img
+						class="login-bg-img"
+						src="theme/login/images/banner.webp"
+						alt="登录页插图"
+					/>
 				</div>
 				<div class="layui-col-sm6 layui-col-xs12 login-form">
 					<form class="layui-form">
@@ -33,7 +32,7 @@
 								<div class="top-log-title">
 									<img
 										class="top-log"
-										src="admin/images/logo.webp"
+										src="theme/login/images/logo.webp"
 										alt="MyTSA"
 										width="50"
 										height="50"
@@ -96,7 +95,7 @@
 											</div>
 										</div>
 										<img
-											src="admin/images/captcha.gif"
+											src="theme/login/images/captcha.gif"
 											alt="验证码"
 											class="verification-img"
 										/>
@@ -141,9 +140,8 @@
 			</div>
 		</div>
 		<!-- 资 源 引 入 -->
-		<script src="admin/js/debug.js"></script>
+		<script src="theme/login/js/debug.js"></script>
 		<script src="component/layui/layui.js"></script>
-		<script src="admin/js/csp-guard.js"></script>
-		<script src="admin/js/login-bootstrap.js"></script>
+		<script src="component/login/js/login-bootstrap.js"></script>
 	</body>
 </html>

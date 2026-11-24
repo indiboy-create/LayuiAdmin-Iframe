@@ -2,7 +2,7 @@
 
 MyTSA 是基于 [Layui](https://layui.dev/) 的经典后台管理系统前端模板，技术栈为原生 HTML + CSS + JavaScript，采用 Layui 的 AMD（`layui.define`）模块体系。
 
-**在线预览**：<https://initearth.github.io/mytsa-admin-iframe/>
+**在线预览**：<https://initearth.github.io/mytsa-admin-theme/iframe/>
 
 安全策略见 [SECURITY.md](SECURITY.md)，版本变更见 [CHANGELOG.md](CHANGELOG.md)。
 
@@ -22,20 +22,29 @@ MyTSA
 │   ├── index.html          # 后台主页入口
 │   ├── login.html          # 登录页
 │   ├── 404.html            # 静态托管错误页
-│   ├── home.html           # 首页示例页
-│   ├── workbench.html      # 工作台示例页
-│   ├── table.html          # 表格示例页
-│   ├── layui.html          # 消息中心示例页
-│   ├── admin/              # 主题资源
-│   │   ├── config/         # mytsa 主题配置（菜单/标签/主题色）
-│   │   ├── css/            # 主题样式（含 login.css）
-│   │   ├── images/         # 静态图片
-│   │   ├── js/             # 鉴权、页面引导（bootstrap/login-bootstrap）与示例页脚本
+│   ├── theme/              # 主题资源
+│   │   ├── admin/          # 后台入口资源
+│   │   │   ├── css/        # 后台样式
+│   │   │   ├── images/     # 后台静态图片
+│   │   │   └── js/         # 后台引导与鉴权脚本
+│   │   ├── login/          # 登录页资源
+│   │   │   ├── css/        # 登录样式与变量
+│   │   │   ├── images/     # 登录页图片
+│   │   │   └── js/         # 登录页调试脚本
+│   │   └── iframe/         # iframe 子页面与专属资源
+│   │       ├── css/        # iframe 独立样式
+│   │       ├── js/         # iframe 独立脚本
+│   │       ├── config/     # iframe 独立配置
+│   │       ├── home.html       # 首页示例页
+│   │       ├── workbench.html  # 工作台示例页
+│   │       ├── table.html      # 表格示例页
+│   │       └── layui.html      # 消息中心示例页
 
-│   ├── api/                # 菜单/接口数据（menu.json）
+│   ├── api/                # 配置与数据（mytsa.config.json/menu.json/auth.json）
 │   └── component/
 │       ├── layui/          # 第三方 Layui 库（构建时不压缩）
-│       └── mytsa/           # MyTSA Admin 模块（admin/menu/tabPage/theme/tools）
+│       ├── login/          # 登录页专属脚本（auth/login-guard/login-bootstrap）
+│       └── mytsa/          # MyTSA Admin 模块（admin/menu/tabPage/theme/tools）
 ├── test/
 │   ├── smoke.test.mjs      # 冒烟测试（菜单/主题/页面结构/演示凭据）
 │   ├── build.test.mjs      # 构建子步骤单测（内容哈希/样式合并/调试剥离）
@@ -139,33 +148,21 @@ npm install @initearth/mytsa-admin-iframe
 
 ## 登录与鉴权
 
-项目内置演示级前端鉴权：登录页请求 `api/auth.json` 校验账号密码，成功后写入会话（勾选“自动登录”存 `localStorage`，否则存 `sessionStorage`）；未登录直接访问 `index.html` 会被重定向回登录页，注销时清除会话并返回登录页。
+项目内置演示级前端鉴权：登录页请求 `api/auth.json` 校验账号密码，成功后写入会话（勾选“自动登录”存 `localStorage`，否则存 `sessionStorage`）；未登录直接访问 `index.html` 会被重定向回登录页，注销时清除会话并返回登录页。登录页与后台入口除 `component/layui/` 外不共用资源：登录专属样式、图片放在 `theme/login/`，脚本放在 `component/login/`；后台入口使用 `theme/admin/` 与 `component/mytsa/`。iframe 子页面同样独立：除 `component/layui/` 外只使用 `theme/iframe/` 内的样式、脚本与配置。
 
 演示账号：`admin / admin123`，明文存储，仅用于测试环境，上线前务必替换账号或移除 `api/auth.json`。`npm run check:release` 检测到产物仍在沿用默认口令时会打印提示（不阻断构建，退出码仍为 0），避免默认账号随 npm 包与 zip 悄悄外发。
 
 这条链路只用于拦住误入和直接输入后台地址的访问，不能阻止用户读取该 JSON、改写本地存储，也无法保护被直接打开的 iframe 子页面。需要真实防护时，应由后端签发凭证并在服务端拦截入口页。
 
-## 安全基线（CSP 与 Referrer-Policy）
+## Referrer-Policy
 
-全部 7 个页面（`index`、`login`、`home`、`workbench`、`table`、`layui`、`404`）都声明了同一套 CSP 与 `referrer no-referrer`。`index.html`、`login.html` 不包含任何内联脚本，引导逻辑分别外置到 `admin/js/bootstrap.js`、`admin/js/login-bootstrap.js`；鉴权入口改为在脚本标签上声明 `data-guard` / `data-guard-login`，由 `auth.js` 自行读取并执行。因此可以直接启用严格 CSP：
+全部 7 个页面（`index`、`login`、`home`、`workbench`、`table`、`layui`、`404`）都声明了 `referrer no-referrer`，避免跳转时泄露来源地址。`index.html`、`login.html` 不包含任何内联脚本，引导逻辑分别外置到 `theme/admin/js/bootstrap.js`、`component/login/js/login-bootstrap.js`；鉴权入口在脚本标签上声明 `data-guard` / `data-guard-login`，由各自的 `auth.js` 自行读取并执行。
 
 ```html
-<meta
-	http-equiv="Content-Security-Policy"
-	content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self' data:; connect-src 'self'; frame-src 'self' https:; base-uri 'self'; form-action 'self'"
-/>
 <meta name="referrer" content="no-referrer" />
 ```
 
-接入时需要注意：
-
-- `style-src` 保留了 `'unsafe-inline'`，因为 Layui 与 MyTSA 模块会在运行时写入行内样式；`script-src` 只允许同源脚本。
-- `table.html` 的表格示例使用 `laytpl` 渲染（内部通过 `new Function` 编译模板），因此该页 `script-src` 额外放行 `'unsafe-eval'`，其余页面保持 `script-src 'self'`。生产接入时建议改用 `templet` 返回函数或预渲染行数据，然后去掉 `'unsafe-eval'`。
-- `frame-src 'self' https:` 允许同源页面与外部 HTTPS 业务页被嵌入；如需嵌入 HTTP 或内网地址，按实际域名收窄或放开。
-- `connect-src 'self'` 只允许同源请求；接入自有后端时把接口域名加入该指令。
-- Layui 内部大量使用 `href="javascript:;"`（后台框架与 `workbench` 等子页都有），在严格 CSP 下会被当作内联脚本拦截；共享脚本 `admin/js/csp-guard.js` 在捕获阶段 `preventDefault()` 掉这类链接的默认行为（组件自身的点击事件不受影响），7 个页面统一引用它，避免控制台刷满 CSP 报错。
-- 子页与 `404.html` 同样带策略，被直接打开（复制 iframe 地址、静态托管兜底）时也不会裸奔；`npm run check` 与 `npm run e2e` 会逐页校验 CSP、`referrer no-referrer` 与“无内联脚本”。
-- 生产环境更推荐由服务端下发同名 HTTP 头：头部比 `<meta>` 更早生效，且能覆盖 `404.html` 等静态错误页。
+`npm run check` 与 `npm run e2e` 会逐页校验 `referrer no-referrer` 与“无内联脚本”。生产环境也可改由服务端下发 `Referrer-Policy: no-referrer` 响应头。
 
 `404.html` 为静态托管兜底页（`noindex`、无外部依赖），Pages / OSS / Nginx 均可在自定义错误页中指向它；所有页面统一声明了 `theme-color`（默认 `#20222A`）与 `color-scheme: light`，切换配色方案时 `theme.js` 会把 `theme-color` 同步为该方案的侧栏色，移动端状态栏不会与页面脱节。
 
@@ -182,7 +179,7 @@ npm install @initearth/mytsa-admin-iframe
 ## 可访问性与水印
 
 - 水印文本取自 `mytsa.config.json` 的 `other.watermark.text`（默认 `MyTSA`）。水印绘制在单独的 `.mytsa-watermark-layer` 覆盖层上（`position: fixed`、`pointer-events: none`、`z-index: 10`），不会再被卡片白色背景遮住，也不会拦截鼠标事件。
-- 水印由父框架统一绘制：`admin/js/watermark.js` 在 `index.html` 加载，覆盖所有标签页与 iframe；子页同样引入该脚本，但只有在被直接打开（`window.top === window.self`）时才绘制，嵌入时自动跳过，避免同一屏出现双层水印。
+- 水印由父框架统一绘制：`theme/admin/js/watermark.js` 在 `index.html` 加载，覆盖所有标签页与 iframe；子页同样引入该脚本，但只有在被直接打开（`window.top === window.self`）时才绘制，嵌入时自动跳过，避免同一屏出现双层水印。
 - 标签栏与菜单补齐 ARIA：标签容器 `role="tablist"`、标签项 `role="tab"` + `aria-selected` + `aria-controls`（指向对应 `tabpanel`）、内容面板 `role="tabpanel"` + `aria-labelledby`；菜单 `role="menu"`、可点击项 `role="menuitem"`、含子菜单的项带 `aria-haspopup` 与 `aria-expanded`（展开后自动同步）；每个 iframe 的 `title` 取自对应标签标题。
 - 键盘可完整操作：
     - 标签页：焦点进入标签后，`←/→`（或 `↑/↓`）切换相邻标签，`Home`/`End` 跳到首尾，`Delete` 关闭当前标签（首页等不可关闭的标签会忽略），切换后焦点跟随到新标签。
@@ -199,7 +196,7 @@ npm install @initearth/mytsa-admin-iframe
 
 ## 端到端冒烟
 
-`npm run e2e` 在构建产物 `dist/` 上起一个临时静态服务，验证 6 个页面（`index`、`login`、`home`、`workbench`、`table`、`layui`）与 `404.html`、`api/auth.json`、`api/menu.json`、`admin/config/mytsa.config.json`、`robots.txt` 的可用性与关键配置，并逐个请求这些页面引用的本地静态资源（含行内 `url(...)` 引用），确认构建后的路径没有断链。同时校验：未登录拦截声明、CSP/noindex 声明、页面无内联脚本、菜单地址带内容哈希。该检查会读取 `tab.max`（应为 10）、`menu.data` 等配置，可作为发布前的最后一道链路验证。
+`npm run e2e` 在构建产物 `dist/` 上起一个临时静态服务，验证 6 个页面（`index`、`login`、`home`、`workbench`、`table`、`layui`）与 `404.html`、`api/auth.json`、`api/menu.json`、`api/mytsa.config.json`、`robots.txt` 的可用性与关键配置，并逐个请求这些页面引用的本地静态资源（含行内 `url(...)` 引用），确认构建后的路径没有断链。同时校验：未登录拦截声明、noindex 与 referrer 声明、页面无内联脚本、登录页/后台入口/iframe 子页面三方资源隔离、菜单地址带内容哈希。该检查会读取 `tab.max`（应为 10）、`menu.data` 等配置，可作为发布前的最后一道链路验证。
 
 ## 构建说明
 
@@ -207,7 +204,7 @@ npm install @initearth/mytsa-admin-iframe
 
 1. 清空并整体拷贝 `src/` 到产物目录：压缩版 `dist/`，未压缩版 `dist-debug/`
 2. 合并样式：`mytsa.css`、`module/menu.css`、`module/tabPage.css` 合并为 `mytsa.bundle.css`，合并后删除只服务首页的两份模块样式；`mytsa.css` 仍供登录页与子页使用，必须保留。项目自有的 `admin.css`、`variables.css`、`reset.css` 合并为 `admin.bundle.css`（仅保留 `variables.css` 供登录页单用），首页样式请求由 5 个降到 3 个
-3. 正式产物移除调试能力：删除 `admin/js/debug.js` 及其 HTML 引用，并把 `window.adminDebug` 视为 `undefined` 交由 Terser 消除调试分支（`dist-debug` 完整保留）；同时写入 `debug=false`
+3. 正式产物移除调试能力：删除 `theme/admin/js/debug.js`、`theme/login/js/debug.js` 及其 HTML 引用，并把 `window.adminDebug` 视为 `undefined` 交由 Terser 消除调试分支（`dist-debug` 完整保留）；同时写入 `debug=false`
 4. 使用 Terser 压缩 `.js`、CleanCSS 压缩 `.css`、html-minifier-terser 收缩 `.html`（折叠空白、去注释，不重写内联脚本与样式）；第三方目录 `component/layui/` 原样拷贝、不压缩（通过 `SKIP_PREFIXES` 配置跳过）
 5. 注入缓存标记：按最终产物内容计算 SHA-256 前 10 位。`mytsa.js` 中 `layui.config` 的 `version` 使用 `component/mytsa` 下全部 JS 的模块指纹；HTML 中本地 `link/script/img/iframe` 按各自文件哈希追加 `?t=<hash>`；`menu.json` 中本地 `.html` 的 `href` 用页面最终哈希；`mytsa.config.json` 的 `menu.data` 用菜单文件最终哈希。外链、非 HTML 地址与已带标记的地址保持不变，外部接口继续交给服务端 ETag 控制
 6. 替换产物：旧目录先备份，新目录原子就位；失败时回滚，避免留下半成品
@@ -228,7 +225,6 @@ npm install @initearth/mytsa-admin-iframe
 - **HTML**：`Cache-Control: no-cache`（或较短的 `max-age`），保证每次拿到最新的资源哈希。
 - **带哈希的静态资源**：`Cache-Control: public, max-age=31536000, immutable`，内容变化后 URL 自然回源。
 - **压缩**：`layui.js` 约 389 KB、`layui.css` 约 129 KB，务必开启 gzip 或 Brotli（静态托管一般默认开启）。
-- **CSP**：建议在服务端下发 `Content-Security-Policy` 响应头（与页面 `<meta>` 同值），见上一节。
 
 Nginx 参考配置：
 
@@ -243,7 +239,6 @@ location ~* \.(js|css|webp|png|svg|gif|ico|woff|woff2|ttf|eot)$ {
 # HTML 每次协商
 location ~* \.html$ {
 	add_header Cache-Control "no-cache";
-	add_header Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self' data:; connect-src 'self'; frame-src 'self' https:; base-uri 'self'; form-action 'self'" always;
 }
 
 error_page 404 /404.html;
@@ -267,7 +262,7 @@ location = /404.html {
 
 质量检查按 Node 20 / 22 / 24 三版本矩阵执行，产物构建与 artifact 上传只在 Node 24 任务进行（避免同名 artifact 冲突），E2E 也只在 Node 24 任务跑。
 
-- **Deploy GitHub Pages**（`.github/workflows/deploy.yml`）：推送到 `main` 或手动触发，下载 `dist` 产物后部署到 GitHub Pages，访问地址为 <https://initearth.github.io/mytsa-admin-iframe/>。Pages 部署只从 `main` 发起，避免标签触发被环境的部署分支保护拦截；首次部署需在仓库 `Settings → Pages → Source` 中选择 **GitHub Actions**。
+- **Deploy GitHub Pages**（`.github/workflows/deploy.yml`）：推送到 `main` 或手动触发，下载 `dist` 产物后部署到 GitHub Pages，访问地址为 <https://initearth.github.io/mytsa-admin-theme/iframe/>。Pages 部署只从 `main` 发起，避免标签触发被环境的部署分支保护拦截；首次部署需在仓库 `Settings → Pages → Source` 中选择 **GitHub Actions**。
 - **Release Package**（`.github/workflows/release.yml`）：将 `dist` 与 `dist-debug` 分别打包为 `mytsa-admin-iframe-<tag>.zip`、`mytsa-admin-iframe-<tag>-debug.zip`，附加到 Release；并把质量任务产出的 `dist` 发布到 npm 公共源（`@initearth/mytsa-admin-iframe`），仓库归属 `initearth` 时同时发布到 GitHub Packages。发布使用 `npm publish --ignore-scripts`，跳过 `prepublishOnly` 的二次构建，保证 npm 包与 zip 来自同一次构建。发布前会校验标签必须等于 `v<package.json version>`，因此打标签前需先同步 `package.json` 与 `package-lock.json` 的版本号。公共源需要仓库配置 `NPM_TOKEN`（需具备 `@initearth` scope 发布权限），未配置时该步骤自动跳过；配置后使用 `--provenance` 生成来源证明。工作流文件变更只会在其合并到默认分支后生效。
 
 向默认分支提交 Pull Request 时，`.github/workflows/verify.yml` 同样调用 `ci.yml` 执行检查（传 `upload-artifact: false`，不额外上传产物）。

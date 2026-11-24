@@ -1,3 +1,10 @@
+var watermarkScriptSrc = document.currentScript && document.currentScript.src;
+var watermarkConfigPath = watermarkScriptSrc
+	? watermarkScriptSrc
+			.split(/[?#]/)[0]
+			.replace(/\/theme\/iframe\/js\/[^/]*$/, '/config/mytsa.config.json')
+	: 'config/mytsa.config.json';
+
 layui.use(['jquery'], function () {
 	'use strict';
 
@@ -65,7 +72,7 @@ layui.use(['jquery'], function () {
 		});
 	}
 
-	$.getJSON('admin/config/mytsa.config.json')
+	$.getJSON(watermarkConfigPath)
 		.done(function (config) {
 			drawWatermark((config && config.other && config.other.watermark) || {});
 		})

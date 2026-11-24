@@ -93,7 +93,9 @@ async function request(base, path) {
 	return { status: response.status, text };
 }
 
-function collectAssets(html) {
+function collectAssets(html, page = '/index.html') {
+	const pageDir = page.slice(0, page.lastIndexOf('/') + 1) || '/';
+	const resolveUrl = (url) => new URL(url, `http://e2e.local${pageDir}`).pathname;
 	const references = [...html.matchAll(/(?:href|src)="([^"]+)"/g)].map((match) => match[1]);
 	const inlineUrls = [...html.matchAll(/url\(\s*['"]?([^'")\s]+)['"]?\s*\)/g)].map(
 		(match) => match[1]
@@ -103,7 +105,7 @@ function collectAssets(html) {
 		...new Set(
 			[...references, ...inlineUrls]
 				.filter((url) => url && !/^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(url))
-				.map((url) => url.split('?')[0].split('#')[0])
+				.map((url) => resolveUrl(url.split('?')[0].split('#')[0]))
 				.filter(Boolean)
 		),
 	];
@@ -131,26 +133,22 @@ const base = `http://127.0.0.1:${server.address().port}`;
 try {
 	const index = await request(base, '/index.html');
 	ok('index.html 可访问', index.status === 200, `HTTP ${index.status}`);
-	ok('index.html 引入鉴权脚本', index.text.includes('admin/js/auth.js'));
+	ok('index.html 引入鉴权脚本', index.text.includes('theme/admin/js/auth.js'));
 	ok('index.html 首屏前拦截未登录', /data-guard\b/.test(index.text));
 	ok('index.html 声明 noindex', /<meta\s+name="robots"[^>]*noindex/i.test(index.text));
 	ok(
 		'index.html 无内联脚本',
 		!/<script(?![^>]*\bsrc=)[^>]*>/i.test(index.text),
-		'内联脚本会被严格 CSP 拦截'
-	);
-	ok(
-		'index.html 声明 CSP',
-		/http-equiv="Content-Security-Policy"/i.test(index.text) &&
-			/script-src 'self'/i.test(index.text)
+		'页面应只引用外置脚本'
 	);
 	ok(
 		'index.html 声明 referrer no-referrer',
 		/<meta\s+name="referrer"[^>]*no-referrer/i.test(index.text)
 	);
-	ok('index.html 引入水印脚本', index.text.includes('admin/js/watermark.js'));
+	ok('index.html 引入水印脚本', index.text.includes('theme/admin/js/watermark.js'));
+	ok('index.html 与登录资源隔离', !/(?:theme\/login|component\/login)\//.test(index.text));
 
-	const watermark = await request(base, '/admin/js/watermark.js');
+	const watermark = await request(base, '/theme/admin/js/watermark.js');
 	ok(
 		'watermark.js 只在顶层窗口绘制',
 		watermark.status === 200 && /window\.top\s*(?:===|!==)\s*window\.self/.test(watermark.text),
@@ -167,16 +165,12 @@ try {
 	ok('login.html 可访问', login.status === 200, `HTTP ${login.status}`);
 	ok('login.html 无内联脚本', !/<script(?![^>]*\bsrc=)[^>]*>/i.test(login.text));
 	ok(
-		'login.html 声明 CSP',
-		/http-equiv="Content-Security-Policy"/i.test(login.text) &&
-			/script-src 'self'/i.test(login.text)
-	);
-	ok(
 		'login.html 声明 referrer no-referrer',
 		/<meta\s+name="referrer"[^>]*no-referrer/i.test(login.text)
 	);
+	ok('login.html 与后台资源隔离', !/(?:theme\/admin|component\/mytsa)\//.test(login.text));
 
-	const loginBootstrap = await request(base, '/admin/js/login-bootstrap.js');
+	const loginBootstrap = await request(base, '/component/login/js/login-bootstrap.js');
 	ok(
 		'login-bootstrap.js 接管登录提交',
 		loginBootstrap.status === 200 && loginBootstrap.text.includes('Auth.login'),
@@ -228,7 +222,7 @@ try {
 		`HTTP ${robots.status}`
 	);
 
-	const config = await request(base, '/admin/config/mytsa.config.json');
+	const config = await request(base, '/api/mytsa.config.json');
 	ok('mytsa.config.json 可访问', config.status === 200, `HTTP ${config.status}`);
 	const configData = parseJson('mytsa.config.json', config.text);
 	ok(
@@ -245,12 +239,15 @@ try {
 	const pages = [
 		'/index.html',
 		'/login.html',
-		'/home.html',
-		'/workbench.html',
-		'/table.html',
-		'/layui.html',
+		'/theme/iframe/home.html',
+		'/theme/iframe/workbench.html',
+		'/theme/iframe/table.html',
+		'/theme/iframe/layui.html',
 	];
-	const pageTexts = [index.text, login.text];
+	const pageSources = [
+		{ page: '/index.html', html: index.text },
+		{ page: '/login.html', html: login.text },
+	];
 
 	for (const page of pages.slice(2)) {
 		const response = await request(base, page);
@@ -259,43 +256,28 @@ try {
 		ok(
 			`${page} 无内联脚本`,
 			!/<script(?![^>]*\bsrc=)[^>]*>/i.test(response.text),
-			'内联脚本会被严格 CSP 拦截'
-		);
-		ok(
-			`${page} 声明 CSP`,
-			/http-equiv="Content-Security-Policy"/i.test(response.text) &&
-				/script-src 'self'/i.test(response.text)
+			'页面应只引用外置脚本'
 		);
 		ok(
 			`${page} 声明 referrer no-referrer`,
 			/<meta\s+name="referrer"[^>]*no-referrer/i.test(response.text)
 		);
-		if (page === '/table.html') {
-			ok(
-				'table.html 为 laytpl 放行 unsafe-eval',
-				/script-src 'self' 'unsafe-eval'/.test(response.text),
-				'表格示例依赖 laytpl 的 new Function 编译'
-			);
-		} else {
-			ok(`${page} 未放行 unsafe-eval`, !/'unsafe-eval'/.test(response.text));
-		}
-		pageTexts.push(response.text);
+		ok(
+			`${page} 与后台/登录资源隔离`,
+			!/(?:theme\/admin|component\/mytsa|component\/login|theme\/login)\//.test(response.text)
+		);
+		pageSources.push({ page, html: response.text });
 	}
 
 	const notFound = await request(base, '/404.html');
 	ok('404.html 可访问', notFound.status === 200, `HTTP ${notFound.status}`);
 	ok(
-		'404.html 声明 CSP',
-		/http-equiv="Content-Security-Policy"/i.test(notFound.text) &&
-			/script-src 'self'/i.test(notFound.text)
-	);
-	ok(
 		'404.html 声明 referrer no-referrer',
 		/<meta\s+name="referrer"[^>]*no-referrer/i.test(notFound.text)
 	);
-	pageTexts.push(notFound.text);
+	pageSources.push({ page: '/404.html', html: notFound.text });
 
-	const assets = [...new Set(pageTexts.flatMap((html) => collectAssets(html)))];
+	const assets = [...new Set(pageSources.flatMap(({ page, html }) => collectAssets(html, page)))];
 	for (const asset of assets) {
 		const response = await request(base, asset.startsWith('/') ? asset : `/${asset}`);
 		ok(`静态资源 ${asset}`, response.status === 200, `HTTP ${response.status}`);

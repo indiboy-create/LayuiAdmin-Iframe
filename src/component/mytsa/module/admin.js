@@ -64,7 +64,7 @@ layui.define(
 		var mytsaAdmin = new (function () {
 			this.configuration = {};
 
-			this.configurationPath = 'admin/config/mytsa.config.json';
+			this.configurationPath = 'api/mytsa.config.json';
 
 			this.instances = {};
 

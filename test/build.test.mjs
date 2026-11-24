@@ -19,11 +19,11 @@ async function createFixture() {
 	const dir = await mkdtemp(join(tmpdir(), 'layuiadmin-build-'));
 	await mkdir(join(dir, 'component', 'mytsa', 'module'), { recursive: true });
 	await mkdir(join(dir, 'component', 'mytsa', 'css', 'module'), { recursive: true });
-	await mkdir(join(dir, 'admin', 'js'), { recursive: true });
-	await mkdir(join(dir, 'admin', 'css'), { recursive: true });
-	await mkdir(join(dir, 'admin', 'config'), { recursive: true });
+	await mkdir(join(dir, 'theme', 'admin', 'js'), { recursive: true });
+	await mkdir(join(dir, 'theme', 'admin', 'css'), { recursive: true });
+	await mkdir(join(dir, 'api'), { recursive: true });
 	await writeFile(
-		join(dir, 'admin', 'config', 'mytsa.config.json'),
+		join(dir, 'api', 'mytsa.config.json'),
 		JSON.stringify({ menu: { data: 'api/menu.json' } }, null, '\t'),
 		'utf8'
 	);
@@ -44,11 +44,15 @@ async function createFixture() {
 		'.tab{}\n',
 		'utf8'
 	);
-	await writeFile(join(dir, 'admin', 'js', 'debug.js'), 'window.adminDebug = {};\n', 'utf8');
-	await writeFile(join(dir, 'admin', 'js', 'app.js'), 'window.app = 1;\n', 'utf8');
-	await writeFile(join(dir, 'admin', 'css', 'admin.css'), '.admin{}\n', 'utf8');
-	await writeFile(join(dir, 'admin', 'css', 'variables.css'), ':root{}\n', 'utf8');
-	await writeFile(join(dir, 'admin', 'css', 'reset.css'), '.reset{}\n', 'utf8');
+	await writeFile(
+		join(dir, 'theme', 'admin', 'js', 'debug.js'),
+		'window.adminDebug = {};\n',
+		'utf8'
+	);
+	await writeFile(join(dir, 'theme', 'admin', 'js', 'app.js'), 'window.app = 1;\n', 'utf8');
+	await writeFile(join(dir, 'theme', 'admin', 'css', 'admin.css'), '.admin{}\n', 'utf8');
+	await writeFile(join(dir, 'theme', 'admin', 'css', 'variables.css'), ':root{}\n', 'utf8');
+	await writeFile(join(dir, 'theme', 'admin', 'css', 'reset.css'), '.reset{}\n', 'utf8');
 	await writeFile(
 		join(dir, 'index.html'),
 		[
@@ -58,14 +62,14 @@ async function createFixture() {
 			'<link rel="stylesheet" href="component/mytsa/css/mytsa.css">',
 			'<link rel="stylesheet" href="component/mytsa/css/module/menu.css">',
 			'<link rel="stylesheet" href="component/mytsa/css/module/tabPage.css">',
-			'<link rel="stylesheet" href="admin/css/admin.css">',
-			'<link rel="stylesheet" href="admin/css/variables.css">',
-			'<link rel="stylesheet" href="admin/css/reset.css">',
+			'<link rel="stylesheet" href="theme/admin/css/admin.css">',
+			'<link rel="stylesheet" href="theme/admin/css/variables.css">',
+			'<link rel="stylesheet" href="theme/admin/css/reset.css">',
 			'</head>',
 			'<body>',
-			'<script src="admin/js/debug.js"></script>',
-			'<script src="admin/js/app.js"></script>',
-			'<img src="admin/images/a.png">',
+			'<script src="theme/admin/js/debug.js"></script>',
+			'<script src="theme/admin/js/app.js"></script>',
+			'<img src="theme/admin/images/a.png">',
 			'<a href="home.html">首页</a>',
 			'</body>',
 			'</html>',
@@ -117,7 +121,7 @@ describe('构建子步骤', () => {
 		fixtureDir = await createFixture();
 		const hashes = await hashTree(fixtureDir);
 		const cssHash = hashes.get('component/mytsa/css/mytsa.css');
-		const appHash = hashes.get('admin/js/app.js');
+		const appHash = hashes.get('theme/admin/js/app.js');
 		assert.match(cssHash, /^[0-9a-f]{10}$/);
 		assert.match(appHash, /^[0-9a-f]{10}$/);
 		assert.notEqual(cssHash, appHash);
@@ -164,7 +168,7 @@ describe('构建子步骤', () => {
 
 	it('stampConfiguration 只给本地静态菜单数据追加 ?t=', async () => {
 		fixtureDir = await createFixture();
-		const configPath = join(fixtureDir, 'admin', 'config', 'mytsa.config.json');
+		const configPath = join(fixtureDir, 'api', 'mytsa.config.json');
 
 		await stampConfiguration(fixtureDir, 'abc');
 		let config = JSON.parse(await readFile(configPath, 'utf8'));
@@ -184,17 +188,26 @@ describe('构建子步骤', () => {
 	});
 
 	it('withStamp 只给本地资源加戳，外链/锚点/已带戳保持原样', () => {
-		assert.equal(withStamp('admin/js/app.js', 'abc'), 'admin/js/app.js?t=abc');
-		assert.equal(withStamp('admin/css/admin.css', 'abc'), 'admin/css/admin.css?t=abc');
-		assert.equal(withStamp('admin/a.css?theme=dark', 'abc'), 'admin/a.css?theme=dark&t=abc');
+		assert.equal(withStamp('theme/admin/js/app.js', 'abc'), 'theme/admin/js/app.js?t=abc');
+		assert.equal(
+			withStamp('theme/admin/css/admin.css', 'abc'),
+			'theme/admin/css/admin.css?t=abc'
+		);
+		assert.equal(withStamp('theme/a.css?theme=dark', 'abc'), 'theme/a.css?theme=dark&t=abc');
 		assert.equal(
 			withStamp('https://cdn.example.com/a.js', 'abc'),
 			'https://cdn.example.com/a.js'
 		);
 		assert.equal(withStamp('//cdn.example.com/a.js', 'abc'), '//cdn.example.com/a.js');
 		assert.equal(withStamp('#anchor', 'abc'), '#anchor');
-		assert.equal(withStamp('admin/js/app.js?t=old', 'abc'), 'admin/js/app.js?t=old');
-		assert.equal(withStamp('admin/js/app.js?t=old&x=1', 'abc'), 'admin/js/app.js?t=old&x=1');
+		assert.equal(
+			withStamp('theme/admin/js/app.js?t=old', 'abc'),
+			'theme/admin/js/app.js?t=old'
+		);
+		assert.equal(
+			withStamp('theme/admin/js/app.js?t=old&x=1', 'abc'),
+			'theme/admin/js/app.js?t=old&x=1'
+		);
 	});
 
 	it('stripDebugAssets 删除 debug.js 与引用，保留其他脚本', async () => {
@@ -202,7 +215,7 @@ describe('构建子步骤', () => {
 		await stripDebugAssets(fixtureDir);
 
 		await assert.rejects(
-			() => readFile(join(fixtureDir, 'admin', 'js', 'debug.js'), 'utf8'),
+			() => readFile(join(fixtureDir, 'theme', 'admin', 'js', 'debug.js'), 'utf8'),
 			/ENOENT/
 		);
 		const html = await readFile(join(fixtureDir, 'index.html'), 'utf8');
@@ -252,21 +265,30 @@ describe('构建子步骤', () => {
 		fixtureDir = await createFixture();
 		await bundleAdminCss(fixtureDir);
 
-		const bundle = await readFile(join(fixtureDir, 'admin', 'css', 'admin.bundle.css'), 'utf8');
+		const bundle = await readFile(
+			join(fixtureDir, 'theme', 'admin', 'css', 'admin.bundle.css'),
+			'utf8'
+		);
 		assert.match(bundle, /\.admin\{\}/);
 		assert.match(bundle, /:root\{\}/);
 		assert.match(bundle, /\.reset\{\}/);
 
 		const html = await readFile(join(fixtureDir, 'index.html'), 'utf8');
-		assert.match(html, /admin\/css\/admin\.bundle\.css/);
-		assert.doesNotMatch(html, /admin\/css\/admin\.css"/);
+		assert.match(html, /theme\/admin\/css\/admin\.bundle\.css/);
+		assert.doesNotMatch(html, /theme\/admin\/css\/admin\.css"/);
 		assert.doesNotMatch(html, /variables\.css/);
 		assert.doesNotMatch(html, /reset\.css/);
 
 		// variables.css 仍供登录页使用，必须保留
-		assert.ok(await readFile(join(fixtureDir, 'admin', 'css', 'variables.css'), 'utf8'));
-		await assert.rejects(() => readFile(join(fixtureDir, 'admin', 'css', 'admin.css'), 'utf8'));
-		await assert.rejects(() => readFile(join(fixtureDir, 'admin', 'css', 'reset.css'), 'utf8'));
+		assert.ok(
+			await readFile(join(fixtureDir, 'theme', 'admin', 'css', 'variables.css'), 'utf8')
+		);
+		await assert.rejects(() =>
+			readFile(join(fixtureDir, 'theme', 'admin', 'css', 'admin.css'), 'utf8')
+		);
+		await assert.rejects(() =>
+			readFile(join(fixtureDir, 'theme', 'admin', 'css', 'reset.css'), 'utf8')
+		);
 	});
 
 	it('replaceDirectory 备份替换已有产物并清理临时目录', async () => {

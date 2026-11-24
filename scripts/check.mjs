@@ -23,9 +23,15 @@ const REQUIRED_FILES = [
 	'index.html',
 	'login.html',
 	'404.html',
-	'home.html',
-	'workbench.html',
-	'table.html',
+	'theme/iframe/home.html',
+	'theme/iframe/workbench.html',
+	'theme/iframe/table.html',
+	'theme/iframe/layui.html',
+	'theme/iframe/css/mytsa.css',
+	'theme/iframe/js/watermark.js',
+	'theme/iframe/js/table.js',
+	'theme/iframe/js/workbench.js',
+	'theme/iframe/config/mytsa.config.json',
 	'component/layui/layui.js',
 	'component/mytsa/mytsa.js',
 	'component/mytsa/module/theme.js',
@@ -33,15 +39,19 @@ const REQUIRED_FILES = [
 	'component/mytsa/module/menu.js',
 	'component/mytsa/module/tabPage.js',
 	'component/mytsa/css/mytsa.css',
+	'component/login/js/auth.js',
+	'component/login/js/login-bootstrap.js',
+	'theme/login/css/login.css',
+	'theme/login/css/variables.css',
 
-	'admin/config/mytsa.config.json',
-	'admin/js/watermark.js',
+	'api/mytsa.config.json',
+	'theme/admin/js/watermark.js',
 	'api/menu.json',
 	'api/auth.json',
 	'robots.txt',
 ];
 
-const CONFIG_PATH = 'admin/config/mytsa.config.json';
+const CONFIG_PATH = 'api/mytsa.config.json';
 
 const strictDebug = process.argv.includes('--strict-debug');
 const SIZE_LIMIT = 500 * 1024;
@@ -62,7 +72,7 @@ const BUDGETS = [
 	},
 	{
 		label: '图片',
-		match: (path) => /^admin\/images\/.*\.(webp|png|jpe?g|svg|gif)$/i.test(path),
+		match: (path) => /^theme\/admin\/images\/.*\.(webp|png|jpe?g|svg|gif)$/i.test(path),
 		limit: 40 * 1024,
 	},
 	{ label: 'JSON', match: (path) => path.endsWith('.json'), limit: 12 * 1024 },
@@ -136,7 +146,10 @@ if (await exists(join(dist, MYTSA_ENTRY))) {
 	}
 }
 
-const DEBUG_ASSET = 'admin/js/debug.js';
+const DEBUG_ASSETS = {
+	'index.html': 'theme/admin/js/debug.js',
+	'login.html': 'theme/login/js/debug.js',
+};
 
 // 每个页面都应至少有一个带构建戳的本地资源引用，并声明不被搜索引擎收录
 for (const htmlFile of htmlFiles) {
@@ -146,9 +159,6 @@ for (const htmlFile of htmlFiles) {
 	}
 	if (!/<meta\s+name=["']robots["'][^>]*\bnoindex/i.test(html)) {
 		errors.push(`${pathLabel(htmlFile)} 未声明 robots noindex，后台页面可能被搜索引擎收录`);
-	}
-	if (!/<meta\s+http-equiv=["']Content-Security-Policy["']/i.test(html)) {
-		errors.push(`${pathLabel(htmlFile)} 未声明 CSP，页面可能被注入脚本`);
 	}
 	if (!/<meta\s+name=["']referrer["'][^>]*no-referrer/i.test(html)) {
 		errors.push(`${pathLabel(htmlFile)} 未声明 referrer no-referrer`);
@@ -196,13 +206,17 @@ if (config && config.menu && typeof config.menu.data === 'string') {
 }
 
 if (dirName === 'dist') {
-	if (await exists(join(dist, DEBUG_ASSET))) {
-		errors.push(`正式产物不应包含 ${DEBUG_ASSET}`);
+	for (const asset of Object.values(DEBUG_ASSETS)) {
+		if (await exists(join(dist, asset))) {
+			errors.push(`正式产物不应包含 ${asset}`);
+		}
 	}
 	for (const htmlFile of htmlFiles) {
 		const html = await readFile(htmlFile, 'utf8');
-		if (html.includes(DEBUG_ASSET)) {
-			errors.push(`${pathLabel(htmlFile)} 仍引用 ${DEBUG_ASSET}`);
+		for (const asset of Object.values(DEBUG_ASSETS)) {
+			if (html.includes(asset)) {
+				errors.push(`${pathLabel(htmlFile)} 仍引用 ${asset}`);
+			}
 		}
 	}
 	const adminPath = join(dist, 'component', 'mytsa', 'module', 'admin.js');
@@ -215,13 +229,13 @@ if (dirName === 'dist') {
 }
 
 if (dirName === 'dist-debug') {
-	if (!(await exists(join(dist, DEBUG_ASSET)))) {
-		errors.push(`未压缩产物应保留 ${DEBUG_ASSET}`);
-	}
-	for (const page of ['index.html', 'login.html']) {
+	for (const [page, asset] of Object.entries(DEBUG_ASSETS)) {
+		if (!(await exists(join(dist, asset)))) {
+			errors.push(`未压缩产物应保留 ${asset}`);
+		}
 		const content = await readFile(join(dist, page), 'utf8');
-		if (!content.includes(DEBUG_ASSET)) {
-			errors.push(`${page} 应保留 ${DEBUG_ASSET} 引用（未压缩产物）`);
+		if (!content.includes(asset)) {
+			errors.push(`${page} 应保留 ${asset} 引用（未压缩产物）`);
 		}
 	}
 }

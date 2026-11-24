@@ -12,7 +12,7 @@
 		});
 	}
 
-	// 后台主框架初始化：脚本外置，页面不再含内联脚本，便于启用严格 CSP
+	// 后台主框架初始化：脚本外置，页面不再含内联脚本
 	layui.use(['admin'], function () {
 		'use strict';
 
@@ -26,7 +26,7 @@
 			}
 		}
 
-		admin.setConfigurationPath('admin/config/mytsa.config.json');
+		admin.setConfigurationPath('api/mytsa.config.json');
 
 		admin.render();
 

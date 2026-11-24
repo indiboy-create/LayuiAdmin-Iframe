@@ -3,6 +3,14 @@ layui.use(['jquery'], function () {
 
 	var $ = layui.jquery;
 
+	// data-tab-url 以当前 iframe 页面为基准；交给父框架时换成顶层相对地址
+	function toTopUrl(url) {
+		if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|\/|theme\/iframe\/)/i.test(url)) {
+			return url;
+		}
+		return 'theme/iframe/' + url;
+	}
+
 	function openTab(id, url, title) {
 		var topWindow = window.parent;
 		var topAdmin = topWindow && topWindow.layui && topWindow.layui.admin;
@@ -10,7 +18,7 @@ layui.use(['jquery'], function () {
 		if (topAdmin && topAdmin.instances && topAdmin.instances.tabPage) {
 			topAdmin.instances.tabPage.changePage({
 				id: id,
-				url: url,
+				url: toTopUrl(url),
 				title: title,
 				close: true,
 			});

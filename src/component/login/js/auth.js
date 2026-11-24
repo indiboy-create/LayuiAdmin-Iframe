@@ -2,11 +2,8 @@
 	'use strict';
 
 	/**
-	 * 演示级前端鉴权。
-	 *
-	 * 账号密码来自 api/auth.json（明文，仅用于测试环境）。
-	 * 前端校验只能拦住误入和直接输入后台地址的普通访问，
-	 * 无法阻止用户修改本地存储或直接读取该 JSON，真实项目必须由后端签发凭证。
+	 * 登录页鉴权：仅负责读取 api/auth.json、校验账号密码并写入会话。
+	 * 账号密码明文存储，仅用于演示；真实项目必须由后端签发凭证。
 	 */
 	var AUTH_URL = 'api/auth.json';
 	var SESSION_KEY = 'mytsa-admin-session';
@@ -39,15 +36,6 @@
 		}
 	}
 
-	function clearSession() {
-		try {
-			window.sessionStorage.removeItem(SESSION_KEY);
-			window.localStorage.removeItem(SESSION_KEY);
-		} catch (error) {
-			// 忽略
-		}
-	}
-
 	function isValid(session) {
 		return !!(session && session.expiresAt && session.expiresAt > Date.now());
 	}
@@ -55,15 +43,6 @@
 	function session() {
 		var current = readSession();
 		return isValid(current) ? current : null;
-	}
-
-	function guard() {
-		if (session()) {
-			return true;
-		}
-		clearSession();
-		window.location.replace('login.html');
-		return false;
 	}
 
 	function guardLoginPage() {
@@ -125,27 +104,18 @@
 			);
 	}
 
-	function logout() {
-		clearSession();
-		window.location.replace('login.html');
-	}
-
 	window.Auth = {
 		login: login,
-		guard: guard,
 		guardLoginPage: guardLoginPage,
-		logout: logout,
 		session: session,
 	};
 
-	// 页面用 data-guard / data-guard-login 声明需要的校验，避免写内联脚本（严格 CSP 下内联脚本会被拦截）
 	var currentScript = document.currentScript;
-	if (currentScript && currentScript.hasAttribute) {
-		if (currentScript.hasAttribute('data-guard')) {
-			guard();
-		}
-		if (currentScript.hasAttribute('data-guard-login')) {
-			guardLoginPage();
-		}
+	if (
+		currentScript &&
+		currentScript.hasAttribute &&
+		currentScript.hasAttribute('data-guard-login')
+	) {
+		guardLoginPage();
 	}
 })(window);

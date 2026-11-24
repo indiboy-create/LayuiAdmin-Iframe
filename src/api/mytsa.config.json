@@ -2,7 +2,7 @@
 	"debug": true,
 	"logo": {
 		"title": "MyTSA",
-		"image": "admin/images/logo.webp"
+		"image": "theme/admin/images/logo.webp"
 	},
 	"menu": {
 		"data": "api/menu.json",
@@ -19,7 +19,7 @@
 		"index": {
 			"id": "10",
 			"type": "_iframe",
-			"href": "home.html",
+			"href": "theme/iframe/home.html",
 			"title": "首页"
 		}
 	},
@@ -198,7 +198,7 @@
 		},
 		"links": {
 			"repository": "https://github.com/initearth/mytsa-admin-iframe",
-			"preview": "https://initearth.github.io/mytsa-admin-iframe/"
+			"preview": "https://initearth.github.io/mytsa-admin-theme/iframe/"
 		}
 	}
 }

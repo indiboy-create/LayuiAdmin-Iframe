@@ -4,6 +4,19 @@
 
 ## [Unreleased]
 
+### Changed
+
+- iframe 子页面（`home.html`、`workbench.html`、`table.html`、`layui.html`）移入 `src/iframe/`；菜单、默认标签、用户菜单、工作台快捷入口与构建检查路径同步更新。
+- `src/admin/` 下的配置、样式、图片与脚本移入 `src/theme/`；页面引用、构建流程、测试与文档路径同步更新。
+- `mytsa.config.json` 从 `src/theme/config/` 移入 `src/api/`；运行时配置读取、构建打戳、校验脚本与文档路径同步更新。
+- 主题资源 `css/`、`images/`、`js/` 移入 `src/theme/admin/`；页面引用、构建脚本、校验与文档路径同步更新。
+- 登录页与后台入口资源隔离：登录样式/图片移至 `src/theme/login/`，登录脚本移至 `src/component/login/`，`auth.js` 拆为登录与后台两份；除 `component/layui/` 外不再共用资源。
+- iframe 子页面移入 `src/theme/iframe/` 并完成资源隔离：样式、脚本与配置独立到该目录，除 `component/layui/` 外不再引用后台/登录资源；E2E 增加隔离断言。
+
+### Removed
+
+- 移除页面 CSP `<meta>` 声明、`admin/js/csp-guard.js` 及其引用，并同步移除构建检查与端到端冒烟中的 CSP 断言；保留 `referrer no-referrer` 与外置脚本约定。
+
 ## [1.0.1] - 2026-11-24
 
 ### Added

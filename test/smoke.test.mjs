@@ -65,15 +65,15 @@ describe('菜单数据', () => {
 
 describe('主题配置', () => {
 	it('结构合法且主键、label 唯一', async () => {
-		const config = await readJson('admin/config/mytsa.config.json');
+		const config = await readJson('api/mytsa.config.json');
 		const errors = [];
-		validateThemeConfig(config, 'admin/config/mytsa.config.json', errors);
-		validateRuntimeConfig(config, 'admin/config/mytsa.config.json', errors);
+		validateThemeConfig(config, 'api/mytsa.config.json', errors);
+		validateRuntimeConfig(config, 'api/mytsa.config.json', errors);
 		assert.deepEqual(errors, [], errors.join('\n'));
 	});
 
 	it('配色方案使用基色精简格式', async () => {
-		const config = await readJson('admin/config/mytsa.config.json');
+		const config = await readJson('api/mytsa.config.json');
 		for (const scheme of config.theme.schemes) {
 			assert.ok(scheme.base, `${scheme.id} 缺少基色 base`);
 			assert.equal(scheme.side, undefined, `${scheme.id} 应使用 base 而非 side`);
@@ -90,7 +90,7 @@ describe('主题配置', () => {
 	});
 
 	it('首页标签指向存在的页面', async () => {
-		const config = await readJson('admin/config/mytsa.config.json');
+		const config = await readJson('api/mytsa.config.json');
 		assert.ok(
 			await exists(join(src, config.tab.index.href)),
 			`tab.index.href 不存在：${config.tab.index.href}`

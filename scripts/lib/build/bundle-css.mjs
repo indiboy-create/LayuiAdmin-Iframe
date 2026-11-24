@@ -27,7 +27,7 @@ export async function bundleMytsaCss(distDir) {
 	}
 
 	// 这两份模块样式只服务 index.html，合并后删除避免产物冗余。
-	// mytsa.css 仍被登录页与各子页直接引用，必须保留。
+	// 首页通过 mytsa.bundle.css 引用；原文件保留供独立接入使用。
 	await Promise.all([
 		rm(join(cssDir, 'module', 'menu.css'), { force: true }),
 		rm(join(cssDir, 'module', 'tabPage.css'), { force: true }),
@@ -38,7 +38,7 @@ export async function bundleMytsaCss(distDir) {
 const ADMIN_SOURCES = ['admin.css', 'variables.css', 'reset.css'];
 
 export async function bundleAdminCss(distDir) {
-	const cssDir = join(distDir, 'admin', 'css');
+	const cssDir = join(distDir, 'theme', 'admin', 'css');
 	let content = '';
 	for (const source of ADMIN_SOURCES) {
 		content += `${await readFile(join(cssDir, source), 'utf8')}\n`;
@@ -54,8 +54,14 @@ export async function bundleAdminCss(distDir) {
 	const htmlPath = join(distDir, 'index.html');
 	const html = await readFile(htmlPath, 'utf8');
 	const next = html
-		.replace(/[ \t]*<link\b[^>]*href="admin\/css\/(?:variables|reset)\.css"[^>]*>\r?\n/g, '')
-		.replace(/(<link\b[^>]*href=")admin\/css\/admin\.css(")/, '$1admin/css/admin.bundle.css$2');
+		.replace(
+			/[ \t]*<link\b[^>]*href="theme\/admin\/css\/(?:variables|reset)\.css"[^>]*>\r?\n/g,
+			''
+		)
+		.replace(
+			/(<link\b[^>]*href=")theme\/admin\/css\/admin\.css(")/,
+			'$1theme/admin/css/admin.bundle.css$2'
+		);
 	if (next !== html) {
 		await writeFile(htmlPath, next);
 	}

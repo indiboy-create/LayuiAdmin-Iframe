@@ -1,0 +1,72 @@
+*::-webkit-scrollbar {
+	width: 6px;
+	height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+	background: #e6e6e6;
+	border-radius: 4px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+	background: #e6e6e6;
+}
+
+*::-webkit-scrollbar-corner {
+	background: #f6f6f6;
+}
+
+/* 打印：隐藏框架外壳与水印，只保留内容区；子页直接打印时同样生效 */
+@media print {
+	.mytsa-admin .layui-header,
+	.mytsa-admin .layui-side,
+	.mytsa-admin .mytsa-tab-page .layui-tab-title,
+	.mytsa-admin .mytsa-tab-page .layui-tab-control,
+	.mytsa-admin .mytsa-collapsed-pe,
+	.mytsa-watermark-layer,
+	.mytsa-cover,
+	.loader-wrapper {
+		display: none !important;
+	}
+
+	.mytsa-admin .layui-body {
+		position: static !important;
+		left: 0 !important;
+		top: 0 !important;
+		width: 100% !important;
+		overflow: visible !important;
+		box-shadow: none !important;
+	}
+
+	.mytsa-admin .mytsa-tab-page,
+	.mytsa-admin .mytsa-tab-page .layui-tab-content,
+	.mytsa-admin .mytsa-tab-page .layui-tab-content > div {
+		position: static !important;
+		display: block !important;
+		width: 100% !important;
+		height: auto !important;
+		min-height: 0 !important;
+		overflow: visible !important;
+		box-shadow: none !important;
+	}
+
+	/* iframe 无法跨文档分页，打印时让它占满一页高度，避免只截出顶部一小块 */
+	.mytsa-admin .mytsa-tab-page .layui-tab-content iframe {
+		display: block !important;
+		width: 100% !important;
+		height: 100vh !important;
+		border: 0 !important;
+	}
+
+	body,
+	.mytsa-admin,
+	.mytsa-admin .layui-body {
+		background: #fff !important;
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
+	}
+}

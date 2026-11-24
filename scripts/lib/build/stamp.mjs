@@ -126,7 +126,7 @@ export async function stampHtmlAssets(distDir, stampOrMap) {
 
 // 读取配置中声明的菜单数据地址，供构建阶段决定是否需要继续处理菜单文件
 export async function getMenuDataUrl(distDir) {
-	const configPath = join(distDir, 'admin', 'config', 'mytsa.config.json');
+	const configPath = join(distDir, 'api', 'mytsa.config.json');
 	const config = JSON.parse(await readFile(configPath, 'utf8'));
 	const data = config.menu && config.menu.data;
 	return typeof data === 'string' ? data : null;
@@ -136,7 +136,7 @@ export async function getMenuDataUrl(distDir) {
 // 后端接口地址保持原样，缓存交给服务端 ETag 控制。
 // 返回原始菜单地址（未加戳），供后续处理菜单数据本身。
 export async function stampConfiguration(distDir, stampOrMap) {
-	const configPath = join(distDir, 'admin', 'config', 'mytsa.config.json');
+	const configPath = join(distDir, 'api', 'mytsa.config.json');
 	const content = await readFile(configPath, 'utf8');
 	const config = JSON.parse(content);
 	const data = config.menu && config.menu.data;

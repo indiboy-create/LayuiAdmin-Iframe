@@ -11,7 +11,7 @@
 				"icon": "layui-icon layui-icon-console",
 				"type": 1,
 				"openType": "_iframe",
-				"href": "home.html"
+				"href": "theme/iframe/home.html"
 			},
 			{
 				"id": "11",
@@ -19,7 +19,7 @@
 				"icon": "layui-icon layui-icon-console",
 				"type": 1,
 				"openType": "_iframe",
-				"href": "workbench.html"
+				"href": "theme/iframe/workbench.html"
 			}
 		]
 	},
@@ -35,7 +35,7 @@
 				"icon": "layui-icon layui-icon-face-smile",
 				"type": 1,
 				"openType": "_iframe",
-				"href": "table.html"
+				"href": "theme/iframe/table.html"
 			}
 		]
 	},
@@ -51,7 +51,7 @@
 				"icon": "layui-icon layui-icon-face-smile",
 				"type": 1,
 				"openType": "_iframe",
-				"href": "layui.html"
+				"href": "theme/iframe/layui.html"
 			},
 			{
 				"id": "23",
@@ -59,7 +59,7 @@
 				"icon": "layui-icon layui-icon-face-smile",
 				"type": 1,
 				"openType": "_iframe",
-				"href": "layui.html"
+				"href": "theme/iframe/layui.html"
 			},
 			{
 				"id": "24",
@@ -67,7 +67,7 @@
 				"icon": "layui-icon layui-icon-face-smile",
 				"type": 1,
 				"openType": "_iframe",
-				"href": "layui.html"
+				"href": "theme/iframe/layui.html"
 			},
 			{
 				"id": "25",
@@ -75,7 +75,7 @@
 				"icon": "layui-icon layui-icon-face-smile",
 				"type": 1,
 				"openType": "_iframe",
-				"href": "layui.html"
+				"href": "theme/iframe/layui.html"
 			}
 		]
 	},
@@ -84,7 +84,7 @@
 		"title": "结果页面",
 		"icon": "layui-icon layui-icon-auz",
 		"type": 0,
-		"href": "layui.html",
+		"href": "theme/iframe/layui.html",
 		"children": [
 			{
 				"id": "success",
@@ -92,7 +92,7 @@
 				"icon": "layui-icon layui-icon-face-smile",
 				"type": 1,
 				"openType": "_iframe",
-				"href": "layui.html"
+				"href": "theme/iframe/layui.html"
 			},
 			{
 				"id": "failure",
@@ -100,7 +100,7 @@
 				"icon": "layui-icon layui-icon-face-cry",
 				"type": 1,
 				"openType": "_iframe",
-				"href": "layui.html"
+				"href": "theme/iframe/layui.html"
 			}
 		]
 	},
@@ -109,7 +109,7 @@
 		"title": "异常页面",
 		"icon": "layui-icon layui-icon-auz",
 		"type": 0,
-		"href": "layui.html",
+		"href": "theme/iframe/layui.html",
 		"children": [
 			{
 				"id": "403",
@@ -117,7 +117,7 @@
 				"icon": "layui-icon layui-icon-face-smile",
 				"type": 1,
 				"openType": "_iframe",
-				"href": "layui.html"
+				"href": "theme/iframe/layui.html"
 			},
 			{
 				"id": "404",
@@ -125,7 +125,7 @@
 				"icon": "layui-icon layui-icon-face-cry",
 				"type": 1,
 				"openType": "_iframe",
-				"href": "layui.html"
+				"href": "theme/iframe/layui.html"
 			},
 			{
 				"id": "500",
@@ -133,7 +133,7 @@
 				"icon": "layui-icon layui-icon-face-cry",
 				"type": 1,
 				"openType": "_iframe",
-				"href": "layui.html"
+				"href": "theme/iframe/layui.html"
 			}
 		]
 	},
@@ -149,7 +149,7 @@
 				"icon": "layui-icon layui-icon-face-smile",
 				"type": 1,
 				"openType": "_iframe",
-				"href": "layui.html"
+				"href": "theme/iframe/layui.html"
 			},
 			{
 				"id": "b",
@@ -157,7 +157,7 @@
 				"icon": "layui-icon layui-icon-face-cry",
 				"type": 1,
 				"openType": "_iframe",
-				"href": "layui.html"
+				"href": "theme/iframe/layui.html"
 			},
 			{
 				"id": "c",
@@ -165,7 +165,7 @@
 				"icon": "layui-icon layui-icon-face-cry",
 				"type": 1,
 				"openType": "_blank",
-				"href": "layui.html"
+				"href": "theme/iframe/layui.html"
 			},
 			{
 				"id": "d",
@@ -173,7 +173,7 @@
 				"icon": "layui-icon layui-icon-face-cry",
 				"type": 1,
 				"openType": "_layer",
-				"href": "layui.html"
+				"href": "theme/iframe/layui.html"
 			}
 		]
 	},
@@ -182,7 +182,7 @@
 		"title": "深度测试",
 		"icon": "layui-icon layui-icon-auz",
 		"type": 0,
-		"href": "layui.html",
+		"href": "theme/iframe/layui.html",
 		"children": [
 			{
 				"id": "deep1-1",
@@ -190,7 +190,7 @@
 				"icon": "layui-icon layui-icon-face-smile",
 				"type": 0,
 				"openType": "_iframe",
-				"href": "layui.html",
+				"href": "theme/iframe/layui.html",
 				"children": [
 					{
 						"id": "deep1-1-1",
@@ -198,7 +198,7 @@
 						"icon": "layui-icon layui-icon-face-smile",
 						"type": 0,
 						"openType": "_iframe",
-						"href": "layui.html",
+						"href": "theme/iframe/layui.html",
 						"children": [
 							{
 								"id": "deep1-1-1-1",
@@ -206,7 +206,7 @@
 								"icon": "layui-icon layui-icon-face-smile",
 								"type": 1,
 								"openType": "_iframe",
-								"href": "layui.html"
+								"href": "theme/iframe/layui.html"
 							},
 							{
 								"id": "deep1-1-1-2",
@@ -214,7 +214,7 @@
 								"icon": "layui-icon layui-icon-face-cry",
 								"type": 1,
 								"openType": "_blank",
-								"href": "layui.html"
+								"href": "theme/iframe/layui.html"
 							}
 						]
 					},
@@ -224,7 +224,7 @@
 						"icon": "layui-icon layui-icon-face-cry",
 						"type": 0,
 						"openType": "_blank",
-						"href": "layui.html",
+						"href": "theme/iframe/layui.html",
 						"children": [
 							{
 								"id": "deep1-1-2-1",
@@ -232,7 +232,7 @@
 								"icon": "layui-icon layui-icon-face-smile",
 								"type": 1,
 								"openType": "_iframe",
-								"href": "layui.html"
+								"href": "theme/iframe/layui.html"
 							},
 							{
 								"id": "deep1-1-2-2",
@@ -240,7 +240,7 @@
 								"icon": "layui-icon layui-icon-face-cry",
 								"type": 1,
 								"openType": "_blank",
-								"href": "layui.html"
+								"href": "theme/iframe/layui.html"
 							}
 						]
 					}
@@ -252,7 +252,7 @@
 				"icon": "layui-icon layui-icon-face-cry",
 				"type": 0,
 				"openType": "_blank",
-				"href": "layui.html",
+				"href": "theme/iframe/layui.html",
 				"children": [
 					{
 						"id": "deep1-2-1",
@@ -260,7 +260,7 @@
 						"icon": "layui-icon layui-icon-face-smile",
 						"type": 0,
 						"openType": "_iframe",
-						"href": "layui.html",
+						"href": "theme/iframe/layui.html",
 						"children": [
 							{
 								"id": "deep1-2-1-1",
@@ -268,7 +268,7 @@
 								"icon": "layui-icon layui-icon-face-smile",
 								"type": 1,
 								"openType": "_iframe",
-								"href": "layui.html"
+								"href": "theme/iframe/layui.html"
 							},
 							{
 								"id": "deep1-2-1-2",
@@ -276,7 +276,7 @@
 								"icon": "layui-icon layui-icon-face-cry",
 								"type": 1,
 								"openType": "_blank",
-								"href": "layui.html"
+								"href": "theme/iframe/layui.html"
 							}
 						]
 					},
@@ -286,7 +286,7 @@
 						"icon": "layui-icon layui-icon-face-cry",
 						"type": 0,
 						"openType": "_blank",
-						"href": "layui.html",
+						"href": "theme/iframe/layui.html",
 						"children": [
 							{
 								"id": "deep1-2-2-1",
@@ -294,7 +294,7 @@
 								"icon": "layui-icon layui-icon-face-smile",
 								"type": 1,
 								"openType": "_iframe",
-								"href": "layui.html"
+								"href": "theme/iframe/layui.html"
 							},
 							{
 								"id": "deep1-2-2-2",
@@ -302,7 +302,7 @@
 								"icon": "layui-icon layui-icon-face-cry",
 								"type": 1,
 								"openType": "_blank",
-								"href": "layui.html"
+								"href": "theme/iframe/layui.html"
 							}
 						]
 					}
