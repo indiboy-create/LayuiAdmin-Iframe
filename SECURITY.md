@@ -2,7 +2,7 @@
 
 ## 支持范围
 
-本项目是纯静态的后台模板（基于 Layui 2.13.9 与 MyTSA Admin 模块），发布形式为 `dist/` 静态文件与 npm 包 `@indiboy-create/layuiadmin-iframe`。
+本项目是纯静态的后台模板（基于 Layui 2.13.9 与 MyTSA Admin 模块），发布形式为 `dist/` 静态文件与 npm 包 `@initearth/layuiadmin-iframe`。
 
 | 版本 | 是否维护 |
 | ---- | -------- |

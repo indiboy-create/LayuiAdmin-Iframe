@@ -95,7 +95,7 @@ npm run preview
 
 ```bash
 # 公共源（无需额外配置）
-npm install @indiboy-create/layuiadmin-iframe
+npm install @initearth/layuiadmin-iframe
 ```
 
 私有仓库或内网场景使用 GitHub Packages（见下节）。
@@ -104,21 +104,21 @@ npm install @indiboy-create/layuiadmin-iframe
 
 ```bash
 # 1. 配置 GitHub Packages registry（写入用户级或项目级 .npmrc）
-echo "@indiboy-create:registry=https://npm.pkg.github.com" >> .npmrc
+echo "@initearth:registry=https://npm.pkg.github.com" >> .npmrc
 
 # 2. 使用具备 read:packages 权限的 GitHub Token
 echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" >> .npmrc
 
 # 3. 安装
-npm install @indiboy-create/layuiadmin-iframe
+npm install @initearth/layuiadmin-iframe
 ```
 
 Windows（PowerShell）：
 
 ```powershell
-Add-Content .npmrc '@indiboy-create:registry=https://npm.pkg.github.com'
+Add-Content .npmrc '@initearth:registry=https://npm.pkg.github.com'
 Add-Content .npmrc "//npm.pkg.github.com/:_authToken=$env:GITHUB_TOKEN"
-npm install @indiboy-create/layuiadmin-iframe
+npm install @initearth/layuiadmin-iframe
 ```
 
 包内容为 `dist/` 下的静态资源，解压后即可作为站点部署。

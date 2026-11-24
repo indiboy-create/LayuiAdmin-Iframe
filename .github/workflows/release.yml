@@ -32,7 +32,7 @@ jobs:
                   node-version: 24
                   cache: npm
                   registry-url: https://npm.pkg.github.com/
-                  scope: '@indiboy-create'
+                  scope: '@initearth'
 
             - name: Download dist
               uses: actions/download-artifact@v4
@@ -73,7 +73,7 @@ jobs:
             - name: Publish to npm registry
               if: env.NPM_TOKEN != ''
               run: |
-                  echo "@indiboy-create:registry=https://registry.npmjs.org/" >> .npmrc
+                  echo "@initearth:registry=https://registry.npmjs.org/" >> .npmrc
                   echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" >> .npmrc
                   npm publish --ignore-scripts --registry=https://registry.npmjs.org/ --access public
               env:
