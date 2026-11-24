@@ -42,6 +42,10 @@ jobs:
               with:
                   path: dist
 
+            # 产物服务在部分事件类型下存在短暂可见性延迟，等待其完成登记再部署
+            - name: Wait for Pages artifact
+              run: sleep 10
+
             - name: Deploy to GitHub Pages
               id: deployment
               uses: actions/deploy-pages@v5
