@@ -147,13 +147,16 @@ try {
 		'index.html 声明 referrer no-referrer',
 		/<meta\s+name="referrer"[^>]*no-referrer/i.test(index.text)
 	);
-	ok('index.html 引入水印脚本', index.text.includes('theme/admin/js/watermark.js'));
+	ok('index.html 引入 mytsa 组件入口', index.text.includes('component/mytsa/mytsa.js'));
+	ok('index.html 引入 iframe 水印组件入口', index.text.includes('component/iframe/iframe.js'));
 	ok('index.html 与登录资源隔离', !/(?:theme\/login|component\/login)\//.test(index.text));
 
-	const watermark = await request(base, '/theme/admin/js/watermark.js');
+	const watermark = await request(base, '/component/iframe/module/watermark.js');
 	ok(
-		'watermark.js 只在顶层窗口绘制',
-		watermark.status === 200 && /window\.top\s*(?:===|!==)\s*window\.self/.test(watermark.text),
+		'watermark 模块导出 render 且只在顶层窗口绘制',
+		watermark.status === 200 &&
+			/window\.top\s*[!=]==?\s*window\.self/.test(watermark.text) &&
+			/render\s*:/.test(watermark.text),
 		`HTTP ${watermark.status}`
 	);
 	const printCss = await request(base, '/component/mytsa/css/mytsa.css');
@@ -236,10 +239,10 @@ try {
 	const pages = [
 		'/index.html',
 		'/login.html',
-		'/theme/iframe/home.html',
-		'/theme/iframe/workbench.html',
-		'/theme/iframe/table.html',
-		'/theme/iframe/layui.html',
+		'/iframe/home.html',
+		'/iframe/workbench.html',
+		'/iframe/table.html',
+		'/iframe/layui.html',
 	];
 	const pageSources = [
 		{ page: '/index.html', html: index.text },
@@ -250,18 +253,38 @@ try {
 		const response = await request(base, page);
 		ok(`${page} 可访问`, response.status === 200, `HTTP ${response.status}`);
 		ok(`${page} 声明 noindex`, /<meta\s+name="robots"[^>]*noindex/i.test(response.text));
-		ok(
-			`${page} 无内联脚本`,
-			!/<script(?![^>]*\bsrc=)[^>]*>/i.test(response.text),
-			'页面应只引用外置脚本'
-		);
+		ok(`${page} 不使用 data- 属性配置水印`, !/data-watermark-/i.test(response.text));
 		ok(
 			`${page} 声明 referrer no-referrer`,
 			/<meta\s+name="referrer"[^>]*no-referrer/i.test(response.text)
 		);
 		ok(
 			`${page} 与后台/登录资源隔离`,
-			!/(?:theme\/admin|component\/mytsa|component\/login|theme\/login)\//.test(response.text)
+			!/(?:theme\/admin|component\/login|theme\/login)\//.test(response.text)
+		);
+		ok(
+			`${page} 引入 iframe 水印组件入口`,
+			response.text.includes('component/iframe/iframe.js')
+		);
+		const watermarkParams = [
+			'text',
+			'fontSize',
+			'fontFamily',
+			'color',
+			'opacity',
+			'tileWidth',
+			'tileHeight',
+			'offsetX',
+			'offsetY',
+			'rotate',
+			'zIndex',
+			'target',
+		];
+		ok(
+			`${page} 通过 layui.use 回调配置完整水印参数`,
+			/layui\.use\(\['watermark'\]/.test(response.text) &&
+				/watermark\.render\(\{/.test(response.text) &&
+				watermarkParams.every((key) => new RegExp(`\\b${key}\\s*:`).test(response.text))
 		);
 		pageSources.push({ page, html: response.text });
 	}

@@ -134,22 +134,4 @@ export function validateRuntimeConfig(config, configPath, errors) {
 	) {
 		errors.push(`${configPath} 的 other.keepLoad 应为数字`);
 	}
-
-	const watermark = config.other && config.other.watermark;
-	if (watermark) {
-		if (watermark.text !== undefined && typeof watermark.text !== 'string') {
-			errors.push(`${configPath} 的 other.watermark.text 应为字符串`);
-		}
-		if (watermark.fontSize !== undefined && typeof watermark.fontSize !== 'number') {
-			errors.push(`${configPath} 的 other.watermark.fontSize 应为数字`);
-		}
-		if (
-			watermark.opacity !== undefined &&
-			(typeof watermark.opacity !== 'number' ||
-				watermark.opacity < 0 ||
-				watermark.opacity > 1)
-		) {
-			errors.push(`${configPath} 的 other.watermark.opacity 应为 0~1 的数字`);
-		}
-	}
 }

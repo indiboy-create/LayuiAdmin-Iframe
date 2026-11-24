@@ -5,10 +5,10 @@ layui.use(['jquery'], function () {
 
 	// data-tab-url 以当前 iframe 页面为基准；交给父框架时换成顶层相对地址
 	function toTopUrl(url) {
-		if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|\/|theme\/iframe\/)/i.test(url)) {
+		if (/^(?:[a-z][a-z0-9+.-]*:|\/\/|\/|iframe\/)/i.test(url)) {
 			return url;
 		}
-		return 'theme/iframe/' + url;
+		return 'iframe/' + url;
 	}
 
 	function openTab(id, url, title) {

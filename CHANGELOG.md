@@ -17,6 +17,10 @@
 - 登录提交改为直接跳转 `index.html`；前端不再校验账号或写入登录会话，账号权限与访问控制由后端服务或网关负责。
 - 登录表单不再接管回车提交，仅点击登录按钮触发跳转。
 - `login.css` 移到 `theme/login/css/`，登录跳转逻辑直接写入 `login.html`；删除 `component/login/` 目录及相关校验。
+- 四个 iframe 页面从 `src/theme/iframe/` 移回 `src/iframe/`，专属样式与脚本仍保留在 `theme/iframe/`；菜单、默认标签、用户菜单、工作台入口与校验路径同步更新。
+- 水印逻辑独立为 `component/iframe` 组件：`iframe.js` 入口（仿 `mytsa.js` 的 layui 约定）注册 `module/watermark.js` 并默认初始化；后台入口同时加载 `mytsa.js` 与 `iframe.js`，四个 iframe 页面只加载 `iframe.js`。页面通过 `layui.use(['watermark'], function () { var watermark = layui.watermark; watermark.render({...}); })` 回调配置，显式传入全部 12 个参数（`text`、`fontSize`、`fontFamily`、`color`、`opacity`、`tileWidth`、`tileHeight`、`offsetX`、`offsetY`、`rotate`、`zIndex`、`target`），模块同时导出 `defaults` 供查阅。
+- 水印新增 `target` 参数：默认 `null` 覆盖整个视口；传入 CSS 选择器或 DOM 元素时，水印层注入该容器内部并以 `absolute` 铺满，容器为 `static` 时自动补 `relative`。
+- 删除水印配置文件读取逻辑：`configPath` 参数、`theme/iframe/config/mytsa.config.json`、配置中的 `other.watermark` 字段及其校验同步移除，不再使用 `data-` 属性。
 
 ### Removed
 
@@ -25,6 +29,7 @@
 - 移除登录页 iframe 跳出模块 `loginGuard.js`；防嵌入应改由服务端响应头处理。
 - 删除 `src/api/auth.json` 及默认口令检测/提醒。
 - 删除后台 `theme/admin/js/auth.js` 与 `data-guard` / `data-guard-login` 前端守卫；注销按钮仅跳回 `login.html`。
+- 删除 `theme/admin/js/watermark.js` 与 `theme/iframe/js/watermark.js`，水印统一由 `component/iframe/module/watermark.js` 提供。
 
 ## [1.0.1] - 2026-11-24
 

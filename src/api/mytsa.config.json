@@ -18,7 +18,7 @@
 		"index": {
 			"id": "10",
 			"type": "_iframe",
-			"href": "theme/iframe/home.html",
+			"href": "iframe/home.html",
 			"title": "首页"
 		}
 	},
@@ -190,14 +190,9 @@
 	],
 	"other": {
 		"keepLoad": 3000,
-		"watermark": {
-			"text": "MyTSA",
-			"fontSize": 13,
-			"opacity": 0.2
-		},
 		"links": {
 			"repository": "https://github.com/initearth/mytsa-admin-iframe",
-			"preview": "https://initearth.github.io/mytsa-admin-theme/iframe/"
+			"preview": "https://initearth.github.io/mytsa-admin-iframe/"
 		}
 	}
 }

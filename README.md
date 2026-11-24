@@ -22,6 +22,11 @@ MyTSA
 │   ├── index.html          # 后台主页入口
 │   ├── login.html          # 登录页
 │   ├── 404.html            # 静态托管错误页
+│   ├── iframe/             # iframe 子页面
+│   │   ├── home.html       # 首页示例页
+│   │   ├── workbench.html  # 工作台示例页
+│   │   ├── table.html      # 表格示例页
+│   │   └── layui.html      # 消息中心示例页
 │   ├── theme/              # 主题资源
 │   │   ├── admin/          # 后台入口资源
 │   │   │   ├── css/        # 后台样式
@@ -30,19 +35,16 @@ MyTSA
 │   │   ├── login/          # 登录页静态资源
 │   │   │   ├── css/        # 登录样式
 │   │   │   └── images/     # 登录页图片
-│   │   └── iframe/         # iframe 子页面与专属资源
+│   │   └── iframe/         # iframe 子页面专属资源
 │   │       ├── css/        # iframe 独立样式
 │   │       ├── js/         # iframe 独立脚本
-│   │       ├── config/     # iframe 独立配置
-│   │       ├── home.html       # 首页示例页
-│   │       ├── workbench.html  # 工作台示例页
-│   │       ├── table.html      # 表格示例页
-│   │       └── layui.html      # 消息中心示例页
+│   │       └── config/     # iframe 独立配置
 
 │   ├── api/                # 配置与数据（mytsa.config.json/menu.json）
 │   └── component/
 │       ├── layui/          # 第三方 Layui 库（构建时不压缩）
-│       └── mytsa/          # MyTSA Admin 模块（admin/menu/tabPage/theme/tools）
+│       ├── mytsa/          # MyTSA Admin 模块（admin/menu/tabPage/theme/tools）
+│       └── iframe/         # 水印组件（iframe.js 入口 + module/watermark.js）
 ├── test/
 │   ├── smoke.test.mjs      # 冒烟测试（菜单/主题/页面结构）
 │   ├── build.test.mjs      # 构建子步骤单测（内容哈希/样式合并/产物替换）
@@ -142,7 +144,7 @@ npm install @initearth/mytsa-admin-iframe
 
 ## 登录与鉴权
 
-登录页只做界面与跳转：提交表单后直接进入 `index.html`，不再进行账号校验，也不写入登录会话；账号权限与访问拦截由后端服务或网关负责，注销按钮仅跳回 `login.html`。登录页与后台入口除 `component/layui/` 外不共用资源：登录样式与图片放在 `theme/login/`，登录跳转逻辑直接写在 `login.html`；后台入口使用 `theme/admin/` 与 `component/mytsa/`。iframe 子页面同样独立：除 `component/layui/` 外只使用 `theme/iframe/` 内的样式、脚本与配置。
+登录页只做界面与跳转：提交表单后直接进入 `index.html`，不再进行账号校验，也不写入登录会话；账号权限与访问拦截由后端服务或网关负责，注销按钮仅跳回 `login.html`。登录页与后台入口除 `component/layui/` 外不共用资源：登录样式与图片放在 `theme/login/`，登录跳转逻辑直接写在 `login.html`；后台入口使用 `theme/admin/` 与 `component/mytsa/`。iframe 子页面同样独立：除 `component/layui/` 与独立的 `component/iframe` 水印组件入口外，只使用 `theme/iframe/` 内的样式与脚本。
 
 前端不保存任何登录凭据或会话；`sessionStorage` / `localStorage` 仅用于恢复标签页，与账号权限无关。
 
@@ -172,8 +174,9 @@ npm install @initearth/mytsa-admin-iframe
 
 ## 可访问性与水印
 
-- 水印文本取自 `mytsa.config.json` 的 `other.watermark.text`（默认 `MyTSA`）。水印绘制在单独的 `.mytsa-watermark-layer` 覆盖层上（`position: fixed`、`pointer-events: none`、`z-index: 10`），不会再被卡片白色背景遮住，也不会拦截鼠标事件。
-- 水印由父框架统一绘制：`theme/admin/js/watermark.js` 在 `index.html` 加载，覆盖所有标签页与 iframe；子页同样引入该脚本，但只有在被直接打开（`window.top === window.self`）时才绘制，嵌入时自动跳过，避免同一屏出现双层水印。
+- 水印参数通过 `layui.use(['watermark'], function () { var watermark = layui.watermark; watermark.render({...}); })` 回调配置；模块暴露 `defaults` 供查阅，支持 `text`（`MyTSA`）、`fontSize`（13）、`fontFamily`（`'Microsoft YaHei', 'PingFang SC', sans-serif`）、`color`（`#cccccc`）、`opacity`（0.2）、`tileWidth`（220）、`tileHeight`（140）、`offsetX`（30）、`offsetY`（98）、`rotate`（-18°）、`zIndex`（10），四个 iframe 页面均显式传入全部参数，不再读取 JSON 配置。
+- `target` 指定水印覆盖的容器（CSS 选择器或 DOM 元素），默认 `null` 表示铺满整个视口（`position: fixed`）；传入元素（如 `#app`）时水印层注入该容器内部并改为 `position: absolute` 铺满容器，容器为 `static` 时模块会自动补 `relative`，不会溢出到页面其他区域。水印层带 `pointer-events: none`，不会拦截鼠标事件，也不会被卡片白色背景遮住。
+- 水印已独立为 `component/iframe` 组件：`iframe.js` 入口按 layui 约定注册 `module/watermark.js` 并默认初始化；后台入口同时加载 `mytsa.js` 与 `iframe.js`，iframe 子页面只加载 `iframe.js`。只有在顶层窗口（`window.top === window.self`）才绘制，iframe 嵌入时自动跳过，避免同一屏出现双层水印。
 - 标签栏与菜单补齐 ARIA：标签容器 `role="tablist"`、标签项 `role="tab"` + `aria-selected` + `aria-controls`（指向对应 `tabpanel`）、内容面板 `role="tabpanel"` + `aria-labelledby`；菜单 `role="menu"`、可点击项 `role="menuitem"`、含子菜单的项带 `aria-haspopup` 与 `aria-expanded`（展开后自动同步）；每个 iframe 的 `title` 取自对应标签标题。
 - 键盘可完整操作：
     - 标签页：焦点进入标签后，`←/→`（或 `↑/↓`）切换相邻标签，`Home`/`End` 跳到首尾，`Delete` 关闭当前标签（首页等不可关闭的标签会忽略），切换后焦点跟随到新标签。

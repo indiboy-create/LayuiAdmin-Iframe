@@ -20,6 +20,5 @@
 
 			tools: 'tools',
 			theme: 'theme',
-		})
-		.use([], function () {});
+		});
 })();
