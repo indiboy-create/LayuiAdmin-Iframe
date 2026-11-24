@@ -22,6 +22,7 @@
 - `bundleMytsaCss` 合并后删除无人引用的 `module/menu.css`、`module/tabPage.css`；`mytsa.css` 因登录页与子页仍在引用而保留。
 - Husky `pre-commit` 与 `commit-msg` 改为用 `node` 直调 lint-staged / commitlint，lint-staged 任务也使用显式 `node` 入口，避免 Git Bash 找不到 `npx` 或本地 `bin` 时钩子失效。
 - Release 工作流增加 `id-token: write` 与 `npm publish --provenance`，并按 job 收敛权限；npm 公共源发布仍需具备 `@initearth` scope 权限的 `NPM_TOKEN`。
+- Pages 部署改为由 `main` 分支或手动触发，避免标签触发被 `github-pages` 环境的部署分支保护拦截；Pages 相关动作同步升级到当前主版本。
 - 演示 logo 由 PNG 改为 WebP（13.9 KB → 5.5 KB），登录页与后台侧栏同步更新；两处 logo 补 `width`/`height` 与 `decoding="async"`，避免图片加载造成的布局抖动。
 - 登录页移除未使用的 `component/mytsa/mytsa.js`（登录只依赖 `form`、`layer`），少一次请求与模块映射初始化。
 - 主题切换时同步 `<meta name="theme-color">`，移动端状态栏颜色跟随当前配色方案。

@@ -263,11 +263,11 @@ location = /404.html {
 
 ## 自动部署与发布
 
-推送 `v*` 标签会同时触发两条工作流，二者复用 `.github/workflows/ci.yml` 中的质量检查（`workflow_call`，包含依赖安装、lint、测试、构建、产物校验与 E2E；发布场景会额外构建未压缩的 `dist-debug`）：
+推送到 `main` 会触发 Pages 部署，推送 `v*` 标签会触发 Release；二者复用 `.github/workflows/ci.yml` 中的质量检查（`workflow_call`，包含依赖安装、lint、测试、构建、产物校验与 E2E；发布场景会额外构建未压缩的 `dist-debug`）：
 
 质量检查按 Node 20 / 22 / 24 三版本矩阵执行，产物构建与 artifact 上传只在 Node 24 任务进行（避免同名 artifact 冲突），E2E 也只在 Node 24 任务跑。
 
-- **Deploy GitHub Pages**（`.github/workflows/deploy.yml`）：下载 `dist` 产物后部署到 GitHub Pages，访问地址为 <https://initearth.github.io/mytsa-admin-iframe/>。首次部署需在仓库 `Settings → Pages → Source` 中选择 **GitHub Actions**。
+- **Deploy GitHub Pages**（`.github/workflows/deploy.yml`）：推送到 `main` 或手动触发，下载 `dist` 产物后部署到 GitHub Pages，访问地址为 <https://initearth.github.io/mytsa-admin-iframe/>。Pages 部署只从 `main` 发起，避免标签触发被环境的部署分支保护拦截；首次部署需在仓库 `Settings → Pages → Source` 中选择 **GitHub Actions**。
 - **Release Package**（`.github/workflows/release.yml`）：将 `dist` 与 `dist-debug` 分别打包为 `mytsa-admin-iframe-<tag>.zip`、`mytsa-admin-iframe-<tag>-debug.zip`，附加到 Release；并把质量任务产出的 `dist` 发布到 npm 公共源（`@initearth/mytsa-admin-iframe`），仓库归属 `initearth` 时同时发布到 GitHub Packages。发布使用 `npm publish --ignore-scripts`，跳过 `prepublishOnly` 的二次构建，保证 npm 包与 zip 来自同一次构建。发布前会校验标签必须等于 `v<package.json version>`，因此打标签前需先同步 `package.json` 与 `package-lock.json` 的版本号。公共源需要仓库配置 `NPM_TOKEN`（需具备 `@initearth` scope 发布权限），未配置时该步骤自动跳过；配置后使用 `--provenance` 生成来源证明。工作流文件变更只会在其合并到默认分支后生效。
 
 向默认分支提交 Pull Request 时，`.github/workflows/verify.yml` 同样调用 `ci.yml` 执行检查（传 `upload-artifact: false`，不额外上传产物）。
