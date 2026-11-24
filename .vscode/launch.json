@@ -4,7 +4,7 @@
 		{
 			"type": "msedge",
 			"request": "launch",
-			"name": "调试 LayuiAdmin-Iframe (Edge)",
+			"name": "调试 MyTSA (Edge)",
 			"url": "http://localhost:5173/login.html",
 			"webRoot": "${workspaceFolder}/src",
 			"runtimeArgs": ["--remote-allow-origins=*"],
@@ -13,7 +13,7 @@
 		{
 			"type": "chrome",
 			"request": "launch",
-			"name": "调试 LayuiAdmin-Iframe (Chrome)",
+			"name": "调试 MyTSA (Chrome)",
 			"url": "http://localhost:5173/login.html",
 			"webRoot": "${workspaceFolder}/src",
 			"runtimeArgs": ["--remote-allow-origins=*"],
@@ -22,7 +22,7 @@
 		{
 			"type": "msedge",
 			"request": "launch",
-			"name": "调试 LayuiAdmin-Iframe (复用已运行的 dev server)",
+			"name": "调试 MyTSA (复用已运行的 dev server)",
 			"url": "http://localhost:5173/login.html",
 			"webRoot": "${workspaceFolder}/src",
 			"runtimeArgs": ["--remote-allow-origins=*"]

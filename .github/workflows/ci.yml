@@ -43,6 +43,10 @@ jobs:
             - name: Lint
               run: npm run lint
 
+            - name: Format check
+              if: ${{ matrix.node-version == 24 }}
+              run: npm run format:check
+
             - name: Test
               run: npm run test
 
@@ -51,6 +55,10 @@ jobs:
 
             - name: Verify site
               run: npm run check:release
+
+            - name: Verify package contents
+              if: ${{ matrix.node-version == 24 }}
+              run: npm run check:package
 
             - name: E2E smoke
               if: ${{ matrix.node-version == 24 }}

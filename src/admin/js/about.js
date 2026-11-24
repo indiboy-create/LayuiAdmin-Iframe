@@ -22,8 +22,8 @@ layui.use(['jquery', 'layer', 'admin'], function () {
 		var links = readLinks();
 		var content =
 			'<div style="padding: 20px 22px; line-height: 1.9; color: #666;">' +
-			'<h2 style="margin-bottom: 8px; color: #333;">LayuiAdmin-Iframe</h2>' +
-			'<p>基于 layui 的 iframe 版后台管理模板，支持多标签页、配色方案与自定义主题。</p>' +
+			'<h2 style="margin-bottom: 8px; color: #333;">MyTSA</h2>' +
+			'<p>MyTSA 是基于 layui 的 iframe 版后台管理模板，支持多标签页、配色方案与自定义主题。</p>' +
 			'<p>技术栈：layui 2.13、jQuery、Vite。</p>';
 
 		if (links.repository) {

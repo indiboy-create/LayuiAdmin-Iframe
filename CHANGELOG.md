@@ -11,9 +11,15 @@
 - README「部署与缓存」章节：静态托管的不可变缓存（`immutable`）与压缩配置示例。
 - `npm run check` 按类型校验产物体积：HTML ≤ 8 KB、项目脚本 ≤ 20 KB、项目 CSS ≤ 16 KB、图片 ≤ 40 KB、JSON ≤ 12 KB，另保留单文件 500 KB 兜底上限（`component/layui/` 不参与，类型预算仅对压缩产物生效）。
 - 全部 7 个页面补齐 CSP 与 `referrer no-referrer`；`javascript:` 链接兜底逻辑抽成共享脚本 `admin/js/csp-guard.js`，子页被直接打开时同样受策略保护。
+- 新增 `npm run check:package`：校验 npm 包名、版本、必需文件、禁止混入 `dist-debug/src/test` 与包体上限；CI 在 Node 24 任务中执行。
+- CI 新增 `npm run format:check`，并补充 `.gitattributes` 统一 LF，减少 Windows 下的换行噪声。
 
 ### Changed
 
+- 缓存标记由“每次构建统一时间戳”改为“按最终产物内容计算 SHA-256 前 10 位”：HTML/CSS/JS/图片各自带自己的哈希，未变化的 `layui.js`、`layui.css` 可继续命中缓存；`mytsa.js` 的 layui 模块版本改用 `component/mytsa` 全部 JS 的模块指纹，构建结果可复现。
+- `bundleMytsaCss` 合并后删除无人引用的 `module/menu.css`、`module/tabPage.css`；`mytsa.css` 因登录页与子页仍在引用而保留。
+- Husky `pre-commit` 与 `commit-msg` 改为用 `node` 直调 lint-staged / commitlint，lint-staged 任务也使用显式 `node` 入口，避免 Git Bash 找不到 `npx` 或本地 `bin` 时钩子失效。
+- Release 工作流增加 `id-token: write` 与 `npm publish --provenance`，并按 job 收敛权限；npm 公共源发布仍需具备 `@initearth` scope 权限的 `NPM_TOKEN`。
 - 演示 logo 由 PNG 改为 WebP（13.9 KB → 5.5 KB），登录页与后台侧栏同步更新；两处 logo 补 `width`/`height` 与 `decoding="async"`，避免图片加载造成的布局抖动。
 - 登录页移除未使用的 `component/mytsa/mytsa.js`（登录只依赖 `form`、`layer`），少一次请求与模块映射初始化。
 - 主题切换时同步 `<meta name="theme-color">`，移动端状态栏颜色跟随当前配色方案。
@@ -22,6 +28,7 @@
 - npm 包名迁移为 `@initearth/mytsa-admin-iframe`；Release 仅在仓库归属 `initearth` 时发 GitHub Packages，否则只发 npm 公共源（需配置具备 `@initearth` scope 权限的 `NPM_TOKEN`）。
 - Release 资产与工作流产物统一命名为 `mytsa-admin-iframe-<tag>.zip`、`mytsa-admin-iframe-<tag>-debug.zip`。
 - 仓库地址迁移至 `https://github.com/initearth/mytsa-admin-iframe`，在线预览迁移至 `https://initearth.github.io/mytsa-admin-iframe/`；`package.json` 与 `mytsa.config.json` 中的仓库/预览链接同步。
+- 产品显示名统一为 `MyTSA`：页面标题、登录页、水印、关于页、主题配置、README 与 VS Code 调试配置同步；技术标识保持小写 `mytsa`。
 
 ### Fixed
 

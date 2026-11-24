@@ -2,13 +2,14 @@
 	"name": "@initearth/mytsa-admin-iframe",
 	"version": "1.0.0",
 	"type": "module",
-	"description": "LayuiAdmin-Iframe - 基于 Layui 的后台管理系统前端模板",
+	"description": "MyTSA - 基于 Layui 的 iframe 后台管理系统前端模板",
 	"keywords": [
 		"layui",
 		"admin",
 		"iframe",
 		"template",
-		"dashboard"
+		"dashboard",
+		"mytsa"
 	],
 	"author": "initearth",
 	"license": "MIT",
@@ -38,11 +39,13 @@
 		"check": "node scripts/check.mjs",
 		"check:debug": "node scripts/check.mjs --dir=dist-debug",
 		"check:release": "node scripts/check.mjs --strict-debug",
+		"check:package": "node scripts/check-package.mjs",
 		"e2e": "node scripts/e2e.mjs",
 		"test": "node --test test/smoke.test.mjs test/build.test.mjs test/sanitize.test.mjs",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
-		"format": "prettier --write \"src/**/*\" \"scripts/**/*.mjs\" \"test/**/*.mjs\" \"*.config.js\" \".github/workflows/*.yml\"",
+		"format": "prettier --write \"src/**/*\" \"scripts/**/*.mjs\" \"test/**/*.mjs\" \"*.config.js\" \".github/workflows/*.yml\" README.md SECURITY.md CHANGELOG.md .github/PULL_REQUEST_TEMPLATE.md",
+		"format:check": "prettier --check \"src/**/*\" \"scripts/**/*.mjs\" \"test/**/*.mjs\" \"*.config.js\" \".github/workflows/*.yml\" README.md SECURITY.md CHANGELOG.md .github/PULL_REQUEST_TEMPLATE.md",
 		"prepublishOnly": "npm run build && npm run check:release",
 		"prepare": "husky || true"
 	},

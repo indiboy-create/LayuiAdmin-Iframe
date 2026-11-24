@@ -1,11 +1,14 @@
 import { cp } from 'node:fs/promises';
-import { dirname, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
 	stampMytsaBuild,
 	stampHtmlAssets,
 	stampConfiguration,
 	stampMenuData,
+	getMenuDataUrl,
+	hashTree,
+	hashFile,
 } from './lib/build/stamp.mjs';
 import { bundleMytsaCss, bundleAdminCss } from './lib/build/bundle-css.mjs';
 import { stripDebugAssets } from './lib/build/strip-debug.mjs';
@@ -31,19 +34,35 @@ await removePathWithRetry(staging);
 await cp(src, staging, { recursive: true });
 
 try {
-	const buildStamp = await stampMytsaBuild(staging);
+	await stampMytsaBuild(staging);
 	await bundleMytsaCss(staging);
 	await bundleAdminCss(staging);
 	if (!noMinify) {
 		await stripDebugAssets(staging);
 	}
-	await stampHtmlAssets(staging, buildStamp);
-	const menuDataUrl = await stampConfiguration(staging, buildStamp);
-	await stampMenuData(staging, buildStamp, menuDataUrl);
 	// 正式构建强制关闭调试，避免调试日志进入线上产物
 	await setDebugConfig(staging, noMinify);
 	if (!noMinify) {
 		await minify(staging);
+	}
+
+	// 以最终产物内容计算每文件哈希，HTML 引用的资源按各自内容加戳
+	const assetHashes = await hashTree(staging);
+	await stampHtmlAssets(staging, assetHashes);
+
+	// HTML 加戳后内容已变化，重新计算页面哈希，供菜单 href 使用
+	const pageHashes = await hashTree(staging);
+	const menuDataUrl = await getMenuDataUrl(staging);
+	const isLocalMenu =
+		typeof menuDataUrl === 'string' &&
+		/\.json(?:$|[?#])/i.test(menuDataUrl) &&
+		!/^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(menuDataUrl);
+	if (isLocalMenu) {
+		await stampMenuData(staging, pageHashes, menuDataUrl);
+		const menuKey = menuDataUrl.split(/[?#]/)[0].replace(/^\/+/, '');
+		const menuPath = join(staging, ...menuKey.split('/'));
+		pageHashes.set(menuKey, await hashFile(menuPath));
+		await stampConfiguration(staging, pageHashes);
 	}
 } catch (error) {
 	await removePathWithRetry(staging).catch(() => {});

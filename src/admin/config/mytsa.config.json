@@ -1,7 +1,7 @@
 {
 	"debug": true,
 	"logo": {
-		"title": "LayuiAdmin-Iframe",
+		"title": "MyTSA",
 		"image": "admin/images/logo.webp"
 	},
 	"menu": {
@@ -192,7 +192,7 @@
 	"other": {
 		"keepLoad": 3000,
 		"watermark": {
-			"text": "LayuiAdmin-Iframe",
+			"text": "MyTSA",
 			"fontSize": 13,
 			"opacity": 0.2
 		},

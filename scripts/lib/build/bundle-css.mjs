@@ -25,6 +25,13 @@ export async function bundleMytsaCss(distDir) {
 	if (next !== html) {
 		await writeFile(htmlPath, next);
 	}
+
+	// 这两份模块样式只服务 index.html，合并后删除避免产物冗余。
+	// mytsa.css 仍被登录页与各子页直接引用，必须保留。
+	await Promise.all([
+		rm(join(cssDir, 'module', 'menu.css'), { force: true }),
+		rm(join(cssDir, 'module', 'tabPage.css'), { force: true }),
+	]);
 }
 
 // 项目自有样式：合并 admin.css / variables.css / reset.css，首页样式请求 5 → 3

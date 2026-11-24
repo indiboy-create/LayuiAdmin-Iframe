@@ -8,6 +8,7 @@ import {
 	stampHtmlAssets,
 	stampConfiguration,
 	stampMenuData,
+	hashTree,
 	withStamp,
 } from '../scripts/lib/build/stamp.mjs';
 import { stripDebugAssets } from '../scripts/lib/build/strip-debug.mjs';
@@ -112,6 +113,21 @@ describe('构建子步骤', () => {
 		assert.doesNotMatch(html, /home\.html\?t=/);
 	});
 
+	it('hashTree 为每个文件生成独立哈希，HTML 按文件粒度加戳', async () => {
+		fixtureDir = await createFixture();
+		const hashes = await hashTree(fixtureDir);
+		const cssHash = hashes.get('component/mytsa/css/mytsa.css');
+		const appHash = hashes.get('admin/js/app.js');
+		assert.match(cssHash, /^[0-9a-f]{10}$/);
+		assert.match(appHash, /^[0-9a-f]{10}$/);
+		assert.notEqual(cssHash, appHash);
+
+		await stampHtmlAssets(fixtureDir, hashes);
+		const html = await readFile(join(fixtureDir, 'index.html'), 'utf8');
+		assert.match(html, new RegExp(`mytsa\\.css\\?t=${cssHash}`));
+		assert.match(html, new RegExp(`app\\.js\\?t=${appHash}`));
+	});
+
 	it('stampMenuData 只给菜单中本地 html 的 href 追加 ?t=', async () => {
 		fixtureDir = await createFixture();
 		await mkdir(join(fixtureDir, 'api'), { recursive: true });
@@ -209,6 +225,27 @@ describe('构建子步骤', () => {
 		const html = await readFile(join(fixtureDir, 'index.html'), 'utf8');
 		assert.match(html, /mytsa\.bundle\.css/);
 		assert.doesNotMatch(html, /module\/menu\.css/);
+
+		// 模块样式合并后删除；mytsa.css 仍供登录页与子页使用，必须保留
+		assert.ok(
+			await readFile(join(fixtureDir, 'component', 'mytsa', 'css', 'mytsa.css'), 'utf8')
+		);
+		await assert.rejects(
+			() =>
+				readFile(
+					join(fixtureDir, 'component', 'mytsa', 'css', 'module', 'menu.css'),
+					'utf8'
+				),
+			/ENOENT/
+		);
+		await assert.rejects(
+			() =>
+				readFile(
+					join(fixtureDir, 'component', 'mytsa', 'css', 'module', 'tabPage.css'),
+					'utf8'
+				),
+			/ENOENT/
+		);
 	});
 
 	it('bundleAdminCss 合并项目样式、删除冗余源文件并改写 index.html', async () => {

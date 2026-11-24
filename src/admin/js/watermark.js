@@ -10,7 +10,7 @@ layui.use(['jquery'], function () {
 	var $ = layui.jquery;
 
 	var DEFAULTS = {
-		text: 'LayuiAdmin-Iframe',
+		text: 'MyTSA',
 		fontSize: 13,
 		opacity: 0.2,
 		color: '#cccccc',
