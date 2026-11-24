@@ -40,8 +40,8 @@
 		"test": "node --test test/smoke.test.mjs test/build.test.mjs test/sanitize.test.mjs",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
-		"format": "prettier --write \"src/**/*\" \"scripts/**/*.mjs\" \"test/**/*.mjs\" \"*.config.js\" \".github/workflows/*.yml\" README.md SECURITY.md CHANGELOG.md .github/PULL_REQUEST_TEMPLATE.md",
-		"format:check": "prettier --check \"src/**/*\" \"scripts/**/*.mjs\" \"test/**/*.mjs\" \"*.config.js\" \".github/workflows/*.yml\" README.md SECURITY.md CHANGELOG.md .github/PULL_REQUEST_TEMPLATE.md",
+		"format": "prettier --write \"src/**/*\" \"scripts/**/*.mjs\" \"test/**/*.mjs\" \"*.config.js\" \".github/workflows/*.yml\" README.md .github/PULL_REQUEST_TEMPLATE.md",
+		"format:check": "prettier --check \"src/**/*\" \"scripts/**/*.mjs\" \"test/**/*.mjs\" \"*.config.js\" \".github/workflows/*.yml\" README.md .github/PULL_REQUEST_TEMPLATE.md",
 		"prepublishOnly": "npm run build && npm run check",
 		"prepare": "husky || true"
 	},

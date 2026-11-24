@@ -4,8 +4,6 @@ MyTSA 是基于 [Layui](https://layui.dev/) 的经典后台管理系统前端模
 
 **在线预览**：<https://initearth.github.io/mytsa-admin-theme/iframe/>
 
-安全策略见 [SECURITY.md](SECURITY.md)，版本变更见 [CHANGELOG.md](CHANGELOG.md)。
-
 ## 技术栈
 
 - **Layui**：UI 组件与模块加载
