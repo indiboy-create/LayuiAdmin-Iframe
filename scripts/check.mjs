@@ -7,8 +7,6 @@ import {
 	findMissingReferences,
 	validateThemeConfig,
 	validateRuntimeConfig,
-	DEFAULT_CREDENTIALS,
-	detectDefaultCredentials,
 } from './lib/validate.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -36,17 +34,11 @@ const REQUIRED_FILES = [
 	'component/mytsa/module/menu.js',
 	'component/mytsa/module/tabPage.js',
 	'component/mytsa/css/mytsa.css',
-	'component/login/login.js',
-	'component/login/css/login.css',
-	'component/login/css/variables.css',
-	'component/login/module/auth.js',
-	'component/login/module/loginGuard.js',
-	'component/login/module/loginBootstrap.js',
+	'theme/login/css/login.css',
 
 	'api/mytsa.config.json',
 	'theme/admin/js/watermark.js',
 	'api/menu.json',
-	'api/auth.json',
 	'robots.txt',
 ];
 
@@ -77,7 +69,6 @@ const BUDGETS = [
 ];
 
 const errors = [];
-const warnings = [];
 
 if (!(await exists(dist))) {
 	console.error('::error::未找到构建产物 dist/，请先执行 npm run build');
@@ -114,22 +105,6 @@ for (const jsonFile of jsonFiles) {
 if (config) {
 	validateThemeConfig(config, CONFIG_PATH, errors);
 	validateRuntimeConfig(config, CONFIG_PATH, errors);
-}
-
-// 演示凭据提醒：默认口令会随产物发布，仅提示不阻断构建
-const AUTH_PATH = 'api/auth.json';
-if (await exists(join(dist, AUTH_PATH))) {
-	try {
-		const auth = JSON.parse(await readFile(join(dist, AUTH_PATH), 'utf8'));
-		const defaults = detectDefaultCredentials(auth);
-		if (defaults.length) {
-			warnings.push(
-				`${AUTH_PATH} 仍包含默认演示口令 ${DEFAULT_CREDENTIALS.username}/${DEFAULT_CREDENTIALS.password}（${defaults.join('、')}），该文件会随 npm 包与 zip 一起发布，上线前请替换成自己的账号`
-			);
-		}
-	} catch {
-		// 解析失败已在 JSON 通用校验中记录
-	}
 }
 
 const MYTSA_ENTRY = 'component/mytsa/mytsa.js';
@@ -217,12 +192,6 @@ if (errors.length) {
 		console.error(`::error::${message}`);
 	}
 	process.exit(1);
-}
-
-if (warnings.length) {
-	for (const message of warnings) {
-		console.warn(`提示：${message}`);
-	}
 }
 
 console.log(

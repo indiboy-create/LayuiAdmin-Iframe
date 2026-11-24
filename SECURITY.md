@@ -25,15 +25,15 @@
 
 模板本身不包含服务端，以下事项由使用方负责：
 
-- **演示口令**：`src/api/auth.json` 内置 `admin` / `admin123` 仅用于本地演示，鉴权逻辑在前端（`api/auth.json` 同样会被打进 npm 包与发布 zip）。上线前必须替换口令，最好整体替换为真实后端登录；`npm run check` 在检测到默认口令时只会给出提示，不阻断构建，请不要忽略。
+- **登录与权限**：前端不校验账号密码、不写入登录会话；登录提交仅跳转到 `index.html`。账号认证、权限校验与访问控制必须由后端服务或网关实现。
 - **Referrer-Policy**：页面内已用 `<meta name="referrer" content="no-referrer">` 声明策略，生产环境也可改由服务端下发 `Referrer-Policy: no-referrer` 响应头。
 - **传输层**：必须通过 HTTPS 部署，避免口令与业务数据在链路上明文传输。
-- **访问控制**：静态模板无法阻止直接访问子页地址；`index.html` 之外的页面应通过服务端鉴权或网关策略保护，不要仅依赖前端跳转。
+- **访问控制**：静态模板无法阻止直接访问页面地址；`index.html`、登录页与各 iframe 子页都应通过服务端鉴权或网关策略保护，不要依赖前端跳转。
 
 ## 已内置的防护
 
 - 标签页标题、菜单标题、iframe 地址统一走 `sanitize.js` 的 `escapeHtml` / `safeUrl` / `safeHref`，拒绝 `javascript:` 等伪协议。
-- 页面不包含内联脚本，脚本统一外置，避免内联事件带来的注入面。
+- 除 `login.html` 按模板需求内联登录跳转外，其他页面脚本统一外置，避免内联事件带来的注入面。
 - `_blank` 打开的链接统一带 `rel="noopener noreferrer"`；页面声明 `referrer no-referrer`。
 - 存储读写（`sessionStorage` / `localStorage`）全部包了 `try/catch`，存储不可用时降级而非抛错中断。
 - CI 执行 `npm audit --audit-level=high`，并对产物做必要文件、体积与断链校验。

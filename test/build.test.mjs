@@ -259,7 +259,7 @@ describe('构建子步骤', () => {
 		assert.doesNotMatch(html, /variables\.css/);
 		assert.doesNotMatch(html, /reset\.css/);
 
-		// variables.css 仍供登录页使用，必须保留
+		// variables.css 保留作为合并源
 		assert.ok(
 			await readFile(join(fixtureDir, 'theme', 'admin', 'css', 'variables.css'), 'utf8')
 		);

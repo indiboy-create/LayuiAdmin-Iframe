@@ -26,8 +26,9 @@ MyTSA
 │   │   ├── admin/          # 后台入口资源
 │   │   │   ├── css/        # 后台样式
 │   │   │   ├── images/     # 后台静态图片
-│   │   │   └── js/         # 后台引导与鉴权脚本
+│   │   │   └── js/         # 后台引导脚本
 │   │   ├── login/          # 登录页静态资源
+│   │   │   ├── css/        # 登录样式
 │   │   │   └── images/     # 登录页图片
 │   │   └── iframe/         # iframe 子页面与专属资源
 │   │       ├── css/        # iframe 独立样式
@@ -38,13 +39,12 @@ MyTSA
 │   │       ├── table.html      # 表格示例页
 │   │       └── layui.html      # 消息中心示例页
 
-│   ├── api/                # 配置与数据（mytsa.config.json/menu.json/auth.json）
+│   ├── api/                # 配置与数据（mytsa.config.json/menu.json）
 │   └── component/
 │       ├── layui/          # 第三方 Layui 库（构建时不压缩）
-│       ├── login/          # 登录组件（入口 login.js、css、module）
 │       └── mytsa/          # MyTSA Admin 模块（admin/menu/tabPage/theme/tools）
 ├── test/
-│   ├── smoke.test.mjs      # 冒烟测试（菜单/主题/页面结构/演示凭据）
+│   ├── smoke.test.mjs      # 冒烟测试（菜单/主题/页面结构）
 │   ├── build.test.mjs      # 构建子步骤单测（内容哈希/样式合并/产物替换）
 │   └── sanitize.test.mjs   # 转义与地址清洗纯函数单测
 ├── scripts/
@@ -142,23 +142,23 @@ npm install @initearth/mytsa-admin-iframe
 
 ## 登录与鉴权
 
-项目内置演示级前端鉴权：登录页请求 `api/auth.json` 校验账号密码，成功后写入会话（勾选“自动登录”存 `localStorage`，否则存 `sessionStorage`）；未登录直接访问 `index.html` 会被重定向回登录页，注销时清除会话并返回登录页。登录页与后台入口除 `component/layui/` 外不共用资源：登录专属样式与模块放在 `component/login/`（`login.js`、`css/`、`module/`），图片放在 `theme/login/`；后台入口使用 `theme/admin/` 与 `component/mytsa/`。iframe 子页面同样独立：除 `component/layui/` 外只使用 `theme/iframe/` 内的样式、脚本与配置。
+登录页只做界面与跳转：提交表单后直接进入 `index.html`，不再进行账号校验，也不写入登录会话；账号权限与访问拦截由后端服务或网关负责，注销按钮仅跳回 `login.html`。登录页与后台入口除 `component/layui/` 外不共用资源：登录样式与图片放在 `theme/login/`，登录跳转逻辑直接写在 `login.html`；后台入口使用 `theme/admin/` 与 `component/mytsa/`。iframe 子页面同样独立：除 `component/layui/` 外只使用 `theme/iframe/` 内的样式、脚本与配置。
 
-演示账号：`admin / admin123`，明文存储，仅用于测试环境，上线前务必替换账号或移除 `api/auth.json`。`npm run check` 检测到产物仍在沿用默认口令时会打印提示（不阻断构建，退出码仍为 0），避免默认账号随 npm 包与 zip 悄悄外发。
+前端不保存任何登录凭据或会话；`sessionStorage` / `localStorage` 仅用于恢复标签页，与账号权限无关。
 
 这条链路只用于拦住误入和直接输入后台地址的访问，不能阻止用户读取该 JSON、改写本地存储，也无法保护被直接打开的 iframe 子页面。需要真实防护时，应由后端签发凭证并在服务端拦截入口页。
 
 ## Referrer-Policy
 
-全部 7 个页面（`index`、`login`、`home`、`workbench`、`table`、`layui`、`404`）都声明了 `referrer no-referrer`，避免跳转时泄露来源地址。`index.html`、`login.html` 不包含任何内联脚本，引导逻辑分别外置到 `theme/admin/js/bootstrap.js`、`component/login/login.js`；鉴权入口在脚本标签上声明 `data-guard` / `data-guard-login`，由后台 `auth.js` 与登录组件的 `auth` 模块读取执行。
+全部 7 个页面（`index`、`login`、`home`、`workbench`、`table`、`layui`、`404`）都声明了 `referrer no-referrer`，避免跳转时泄露来源地址。`index.html` 不包含内联脚本，引导逻辑外置到 `theme/admin/js/bootstrap.js`；`login.html` 的登录跳转逻辑按需求内联，页面不再包含前端鉴权守卫，访问控制应交给后端或网关。
 
 ```html
 <meta name="referrer" content="no-referrer" />
 ```
 
-`npm run check` 与 `npm run e2e` 会逐页校验 `referrer no-referrer` 与“无内联脚本”。生产环境也可改由服务端下发 `Referrer-Policy: no-referrer` 响应头。
+`npm run check` 与 `npm run e2e` 会逐页校验 `referrer no-referrer`，并保持 `index.html` 与 iframe 子页面无内联脚本；`login.html` 按需求保留内联登录跳转。生产环境也可改由服务端下发 `Referrer-Policy: no-referrer` 响应头。
 
-`404.html` 为静态托管兜底页（`noindex`、无外部依赖），Pages / OSS / Nginx 均可在自定义错误页中指向它；所有页面统一声明了 `theme-color`（默认 `#20222A`）与 `color-scheme: light`，切换配色方案时 `theme.js` 会把 `theme-color` 同步为该方案的侧栏色，移动端状态栏不会与页面脱节。
+`404.html` 为静态托管兜底页（`noindex`、无外部依赖），Pages / OSS / Nginx 均可在自定义错误页中指向它；除登录页外，页面统一声明了 `theme-color`（默认 `#20222A`）与 `color-scheme: light`，切换配色方案时 `theme.js` 会把 `theme-color` 同步为该方案的侧栏色，移动端状态栏不会与页面脱节；登录页只声明 `color-scheme: light`。
 
 ## 标签页与懒加载
 
@@ -190,7 +190,7 @@ npm install @initearth/mytsa-admin-iframe
 
 ## 端到端冒烟
 
-`npm run e2e` 在构建产物 `dist/` 上起一个临时静态服务，验证 6 个页面（`index`、`login`、`home`、`workbench`、`table`、`layui`）与 `404.html`、`api/auth.json`、`api/menu.json`、`api/mytsa.config.json`、`robots.txt` 的可用性与关键配置，并逐个请求这些页面引用的本地静态资源（含行内 `url(...)` 引用），确认构建后的路径没有断链。同时校验：未登录拦截声明、noindex 与 referrer 声明、页面无内联脚本、登录页/后台入口/iframe 子页面三方资源隔离、菜单地址带内容哈希。该检查会读取 `tab.max`（应为 10）、`menu.data` 等配置，可作为发布前的最后一道链路验证。
+`npm run e2e` 在构建产物 `dist/` 上起一个临时静态服务，验证 6 个页面（`index`、`login`、`home`、`workbench`、`table`、`layui`）与 `404.html`、`api/menu.json`、`api/mytsa.config.json`、`robots.txt` 的可用性与关键配置，并逐个请求这些页面引用的本地静态资源（含行内 `url(...)` 引用），确认构建后的路径没有断链。同时校验：noindex 与 referrer 声明、index/iframe 页面无内联脚本、login.html 内联登录跳转且无前端会话代码、前端不依赖会话守卫、登录页/后台入口/iframe 子页面三方资源隔离、菜单地址带内容哈希。该检查会读取 `tab.max`（应为 10）、`menu.data` 等配置，可作为发布前的最后一道链路验证。
 
 ## 构建说明
 

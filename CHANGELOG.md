@@ -10,14 +10,21 @@
 - `src/admin/` 下的配置、样式、图片与脚本移入 `src/theme/`；页面引用、构建流程、测试与文档路径同步更新。
 - `mytsa.config.json` 从 `src/theme/config/` 移入 `src/api/`；运行时配置读取、构建打戳、校验脚本与文档路径同步更新。
 - 主题资源 `css/`、`images/`、`js/` 移入 `src/theme/admin/`；页面引用、构建脚本、校验与文档路径同步更新。
-- 登录页与后台入口资源隔离：登录样式/图片移至 `src/theme/login/`，登录脚本移至 `src/component/login/`，`auth.js` 拆为登录与后台两份；除 `component/layui/` 外不再共用资源。
+- 登录页与后台入口资源隔离：登录样式/图片放在 `src/theme/login/`，登录跳转逻辑内联到 `login.html`；除 `component/layui/` 外不再共用资源。
 - iframe 子页面移入 `src/theme/iframe/` 并完成资源隔离：样式、脚本与配置独立到该目录，除 `component/layui/` 外不再引用后台/登录资源；E2E 增加隔离断言。
-- `component/login` 按 `component/mytsa` 的组件方式重写：新增 `login.js` 入口，`auth`、`loginGuard`、`loginBootstrap` 改为 `module/` 下的 layui 模块，样式移入 `component/login/css/`；校验与 E2E 同步更新。
+- 登录页移除 `theme-color` 声明，仅保留 `color-scheme: light`；后台与 iframe 页面仍同步主题色。
+- `component/login/css/variables.css` 删除，登录主色直接写成 `#16baaa`，登录页减少一个样式请求和一个根变量。
+- 登录提交改为直接跳转 `index.html`；前端不再校验账号或写入登录会话，账号权限与访问控制由后端服务或网关负责。
+- 登录表单不再接管回车提交，仅点击登录按钮触发跳转。
+- `login.css` 移到 `theme/login/css/`，登录跳转逻辑直接写入 `login.html`；删除 `component/login/` 目录及相关校验。
 
 ### Removed
 
 - 移除页面 CSP `<meta>` 声明、`admin/js/csp-guard.js` 及其引用，并同步移除构建检查与端到端冒烟中的 CSP 断言；保留 `referrer no-referrer` 与外置脚本约定。
 - 移除整套 debug 功能：`debug.js`、`adminDebug`、URL/存储/配置开关、`strip-debug`/`config` 构建步骤、`dist-debug` 与 `build:debug`/`check:debug`/`check:release` 命令及相关 CI/文档；发布产物只保留压缩版 `dist/`。
+- 移除登录页 iframe 跳出模块 `loginGuard.js`；防嵌入应改由服务端响应头处理。
+- 删除 `src/api/auth.json` 及默认口令检测/提醒。
+- 删除后台 `theme/admin/js/auth.js` 与 `data-guard` / `data-guard-login` 前端守卫；注销按钮仅跳回 `login.html`。
 
 ## [1.0.1] - 2026-11-24
 

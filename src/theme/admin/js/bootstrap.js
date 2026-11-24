@@ -17,24 +17,13 @@
 		'use strict';
 
 		var admin = layui.admin;
-		var current = window.Auth ? window.Auth.session() : null;
-
-		if (current) {
-			var nameEl = document.querySelector('.layui-header .layui-nav-right .user cite');
-			if (nameEl) {
-				nameEl.textContent = current.name;
-			}
-		}
 
 		admin.setConfigurationPath('api/mytsa.config.json');
 
 		admin.render();
 
 		admin.logout(function () {
-			return new Promise(function (resolve) {
-				window.Auth.logout();
-				resolve(true);
-			});
+			window.location.href = 'login.html';
 		});
 	});
 })();

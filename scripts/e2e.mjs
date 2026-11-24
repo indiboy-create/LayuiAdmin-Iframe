@@ -133,8 +133,10 @@ const base = `http://127.0.0.1:${server.address().port}`;
 try {
 	const index = await request(base, '/index.html');
 	ok('index.html 可访问', index.status === 200, `HTTP ${index.status}`);
-	ok('index.html 引入鉴权脚本', index.text.includes('theme/admin/js/auth.js'));
-	ok('index.html 首屏前拦截未登录', /data-guard\b/.test(index.text));
+	ok(
+		'index.html 不依赖前端会话守卫',
+		!index.text.includes('theme/admin/js/auth.js') && !/data-guard\b/.test(index.text)
+	);
 	ok('index.html 声明 noindex', /<meta\s+name="robots"[^>]*noindex/i.test(index.text));
 	ok(
 		'index.html 无内联脚本',
@@ -163,31 +165,22 @@ try {
 
 	const login = await request(base, '/login.html');
 	ok('login.html 可访问', login.status === 200, `HTTP ${login.status}`);
-	ok('login.html 无内联脚本', !/<script(?![^>]*\bsrc=)[^>]*>/i.test(login.text));
+	ok(
+		'login.html 内联登录跳转',
+		/<script>[\s\S]*submit\(login\)[\s\S]*index\.html[\s\S]*<\/script>/.test(login.text)
+	);
 	ok(
 		'login.html 声明 referrer no-referrer',
 		/<meta\s+name="referrer"[^>]*no-referrer/i.test(login.text)
 	);
-	ok('login.html 与后台资源隔离', !/(?:theme\/admin|component\/mytsa)\//.test(login.text));
-
-	ok('login.html 引入登录模块入口', login.text.includes('component/login/login.js'));
-
-	const loginBootstrap = await request(base, '/component/login/module/loginBootstrap.js');
 	ok(
-		'loginBootstrap 模块接管登录提交',
-		loginBootstrap.status === 200 &&
-			/submit\(login\)/.test(loginBootstrap.text) &&
-			/\.login\(/.test(loginBootstrap.text),
-		`HTTP ${loginBootstrap.status}`
+		'login.html 与后台资源隔离',
+		!/(?:theme\/admin|component\/mytsa|component\/login)\//.test(login.text)
 	);
-
-	const auth = await request(base, '/api/auth.json');
-	ok('api/auth.json 可访问', auth.status === 200, `HTTP ${auth.status}`);
-	const authData = parseJson('api/auth.json', auth.text);
+	ok('login.html 不声明 theme-color', !/<meta\s+name="theme-color"/i.test(login.text));
 	ok(
-		'api/auth.json 含可用账号',
-		Boolean(authData && Array.isArray(authData.users) && authData.users.length > 0),
-		'users 必须是非空数组'
+		'login.html 无前端会话代码',
+		!/sessionStorage|localStorage|data-guard-login/.test(login.text)
 	);
 
 	const menu = await request(base, '/api/menu.json');
