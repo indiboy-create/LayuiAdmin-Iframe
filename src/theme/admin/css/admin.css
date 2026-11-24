@@ -618,8 +618,7 @@ body,
 	transition: top 0.15s ease;
 }
 
-.mytsa-skip-link:focus,
-.mytsa-skip-link.is-focused {
+.mytsa-skip-link:focus {
 	top: 12px;
 	outline: 2px solid #fff;
 	outline-offset: 2px;

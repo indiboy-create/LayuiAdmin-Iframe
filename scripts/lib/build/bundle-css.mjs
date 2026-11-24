@@ -11,22 +11,18 @@ export async function bundleMytsaCss(distDir) {
 	}
 	await writeFile(join(cssDir, 'mytsa.bundle.css'), content);
 
-	const htmlPath = join(distDir, 'index.html');
-	const html = await readFile(htmlPath, 'utf8');
-	const next = html
-		.replace(
-			/[ \t]*<link\b[^>]*href="component\/mytsa\/css\/module\/(?:menu|tabPage)\.css"[^>]*>\r?\n/g,
-			''
-		)
-		.replace(
-			/(<link\b[^>]*href=")component\/mytsa\/css\/mytsa\.css(")/,
-			'$1component/mytsa/css/mytsa.bundle.css$2'
-		);
-	if (next !== html) {
-		await writeFile(htmlPath, next);
+	// 样式由 mytsa.js 通过 layui.link 注入，改写入口指向合并后的 bundle
+	const jsPath = join(distDir, 'component', 'mytsa', 'mytsa.js');
+	const js = await readFile(jsPath, 'utf8');
+	const next = js.replace(
+		/layui\.link\(\[\s*rootPath \+ 'css\/mytsa\.css',\s*rootPath \+ 'css\/module\/menu\.css',\s*rootPath \+ 'css\/module\/tabPage\.css',\s*\]\)/,
+		"layui.link(rootPath + 'css/mytsa.bundle.css')"
+	);
+	if (next !== js) {
+		await writeFile(jsPath, next);
 	}
 
-	// 这两份模块样式只服务 index.html，合并后删除避免产物冗余。
+	// 这两份模块样式只服务入口注入，合并后删除避免产物冗余。
 	// 首页通过 mytsa.bundle.css 引用；原文件保留供独立接入使用。
 	await Promise.all([
 		rm(join(cssDir, 'module', 'menu.css'), { force: true }),

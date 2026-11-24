@@ -29,7 +29,7 @@ async function createFixture() {
 
 	await writeFile(
 		join(dir, 'component', 'mytsa', 'mytsa.js'),
-		'(function () {\n\tlayui.config({\n\t\tbase: "",\n\t\tversion: ""\n\t});\n})();\n',
+		"(function () {\n\tlayui.link([\n\t\trootPath + 'css/mytsa.css',\n\t\trootPath + 'css/module/menu.css',\n\t\trootPath + 'css/module/tabPage.css',\n\t]);\n\tlayui.config({\n\t\tbase: \"\",\n\t\tversion: \"\"\n\t});\n})();\n",
 		'utf8'
 	);
 	await writeFile(join(dir, 'component', 'mytsa', 'css', 'mytsa.css'), '.mytsa{}\n', 'utf8');
@@ -53,9 +53,6 @@ async function createFixture() {
 			'<!doctype html>',
 			'<html>',
 			'<head>',
-			'<link rel="stylesheet" href="component/mytsa/css/mytsa.css">',
-			'<link rel="stylesheet" href="component/mytsa/css/module/menu.css">',
-			'<link rel="stylesheet" href="component/mytsa/css/module/tabPage.css">',
 			'<link rel="stylesheet" href="theme/admin/css/admin.css">',
 			'<link rel="stylesheet" href="theme/admin/css/variables.css">',
 			'<link rel="stylesheet" href="theme/admin/css/reset.css">',
@@ -104,7 +101,7 @@ describe('构建子步骤', () => {
 		await stampHtmlAssets(fixtureDir, 'abc');
 		const html = await readFile(join(fixtureDir, 'index.html'), 'utf8');
 
-		assert.match(html, /mytsa\.css\?t=abc/);
+		assert.match(html, /admin\.css\?t=abc/);
 		assert.match(html, /app\.js\?t=abc/);
 		assert.match(html, /a\.png\?t=abc/);
 		assert.doesNotMatch(html, /home\.html\?t=/);
@@ -121,7 +118,6 @@ describe('构建子步骤', () => {
 
 		await stampHtmlAssets(fixtureDir, hashes);
 		const html = await readFile(join(fixtureDir, 'index.html'), 'utf8');
-		assert.match(html, new RegExp(`mytsa\\.css\\?t=${cssHash}`));
 		assert.match(html, new RegExp(`app\\.js\\?t=${appHash}`));
 	});
 
@@ -203,7 +199,7 @@ describe('构建子步骤', () => {
 		);
 	});
 
-	it('bundleMytsaCss 合并样式并改写 index.html', async () => {
+	it('bundleMytsaCss 合并样式并改写入口 layui.link', async () => {
 		fixtureDir = await createFixture();
 		await bundleMytsaCss(fixtureDir);
 
@@ -215,11 +211,11 @@ describe('构建子步骤', () => {
 		assert.match(bundle, /\.tab\{\}/);
 		assert.match(bundle, /\.mytsa\{\}/);
 
-		const html = await readFile(join(fixtureDir, 'index.html'), 'utf8');
-		assert.match(html, /mytsa\.bundle\.css/);
-		assert.doesNotMatch(html, /module\/menu\.css/);
+		const js = await readFile(join(fixtureDir, 'component', 'mytsa', 'mytsa.js'), 'utf8');
+		assert.match(js, /layui\.link\(rootPath \+ 'css\/mytsa\.bundle\.css'\)/);
+		assert.doesNotMatch(js, /css\/module\/menu\.css/);
 
-		// 模块样式合并后删除；mytsa.css 仍供登录页与子页使用，必须保留
+		// 模块样式合并后删除；mytsa.css 仍供独立接入使用，必须保留
 		assert.ok(
 			await readFile(join(fixtureDir, 'component', 'mytsa', 'css', 'mytsa.css'), 'utf8')
 		);

@@ -150,13 +150,13 @@ npm install @initearth/mytsa-admin-iframe
 
 ## Referrer-Policy
 
-全部 7 个页面（`index`、`login`、`home`、`workbench`、`table`、`layui`、`404`）都声明了 `referrer no-referrer`，避免跳转时泄露来源地址。`index.html` 不包含内联脚本，引导逻辑外置到 `theme/admin/js/bootstrap.js`；`login.html` 的登录跳转逻辑按需求内联，页面不再包含前端鉴权守卫，访问控制应交给后端或网关。
+全部 7 个页面（`index`、`login`、`home`、`workbench`、`table`、`layui`、`404`）都声明了 `referrer no-referrer`，避免跳转时泄露来源地址。`index.html` 内联后台引导逻辑（跳过导航链接、初始化后台、处理注销跳转），不再引用 `theme/admin/js/bootstrap.js`；`login.html` 的登录跳转逻辑按需求内联，页面不再包含前端鉴权守卫，访问控制应交给后端或网关。
 
 ```html
 <meta name="referrer" content="no-referrer" />
 ```
 
-`npm run check` 与 `npm run e2e` 会逐页校验 `referrer no-referrer`，并保持 `index.html` 与 iframe 子页面无内联脚本；`login.html` 按需求保留内联登录跳转。生产环境也可改由服务端下发 `Referrer-Policy: no-referrer` 响应头。
+`npm run check` 与 `npm run e2e` 会逐页校验 `referrer no-referrer`，并保持 iframe 子页面无内联脚本；`index.html` 按需求内联后台引导逻辑，`login.html` 按需求保留内联登录跳转。生产环境也可改由服务端下发 `Referrer-Policy: no-referrer` 响应头。
 
 `404.html` 为静态托管兜底页（`noindex`、无外部依赖），Pages / OSS / Nginx 均可在自定义错误页中指向它；除登录页外，页面统一声明了 `theme-color`（默认 `#20222A`）与 `color-scheme: light`，切换配色方案时 `theme.js` 会把 `theme-color` 同步为该方案的侧栏色，移动端状态栏不会与页面脱节；登录页只声明 `color-scheme: light`。
 
@@ -191,14 +191,14 @@ npm install @initearth/mytsa-admin-iframe
 
 ## 端到端冒烟
 
-`npm run e2e` 在构建产物 `dist/` 上起一个临时静态服务，验证 6 个页面（`index`、`login`、`home`、`workbench`、`table`、`layui`）与 `404.html`、`api/menu.json`、`api/mytsa.config.json`、`robots.txt` 的可用性与关键配置，并逐个请求这些页面引用的本地静态资源（含行内 `url(...)` 引用），确认构建后的路径没有断链。同时校验：noindex 与 referrer 声明、index/iframe 页面无内联脚本、login.html 内联登录跳转且无前端会话代码、前端不依赖会话守卫、登录页/后台入口/iframe 子页面三方资源隔离、菜单地址带内容哈希。该检查会读取 `tab.max`（应为 10）、`menu.data` 等配置，可作为发布前的最后一道链路验证。
+`npm run e2e` 在构建产物 `dist/` 上起一个临时静态服务，验证 6 个页面（`index`、`login`、`home`、`workbench`、`table`、`layui`）与 `404.html`、`api/menu.json`、`api/mytsa.config.json`、`robots.txt` 的可用性与关键配置，并逐个请求这些页面引用的本地静态资源（含行内 `url(...)` 引用），确认构建后的路径没有断链。同时校验：noindex 与 referrer 声明、index.html 内联后台引导逻辑、iframe 页面无内联脚本、login.html 内联登录跳转且无前端会话代码、前端不依赖会话守卫、登录页/后台入口/iframe 子页面三方资源隔离、菜单地址带内容哈希。该检查会读取 `tab.max`（应为 10）、`menu.data` 等配置，可作为发布前的最后一道链路验证。
 
 ## 构建说明
 
 由于 Layui 模块加载依赖 `document.currentScript` 与 `layui.config({ base: ... })`，不能使用 Vite 打包（会破坏模块加载）。因此构建采用静态拷贝脚本 [scripts/build.mjs](scripts/build.mjs)：
 
 1. 清空并整体拷贝 `src/` 到 `dist/`
-2. 合并样式：`mytsa.css`、`module/menu.css`、`module/tabPage.css` 合并为 `mytsa.bundle.css`，合并后删除只服务首页的两份模块样式；`mytsa.css` 保留供独立接入使用。项目自有的 `admin.css`、`variables.css`、`reset.css` 合并为 `admin.bundle.css`（仅保留 `variables.css` 作为合并源），首页样式请求由 5 个降到 3 个
+2. 合并样式：`mytsa.css`、`module/menu.css`、`module/tabPage.css` 由 `mytsa.js` 入口通过 `layui.link` 模块化注入（页面不直接引入），构建时合并为 `mytsa.bundle.css` 并改写入口指向该文件，合并后删除只服务首页的两份模块样式；`mytsa.css` 保留供独立接入使用。项目自有的 `admin.css`、`variables.css`、`reset.css` 合并为 `admin.bundle.css`（仅保留 `variables.css` 作为合并源），首页样式请求由 5 个降到 3 个
 3. 使用 Terser 压缩 `.js`、CleanCSS 压缩 `.css`、html-minifier-terser 收缩 `.html`（折叠空白、去注释，不重写内联脚本与样式）；第三方目录 `component/layui/` 原样拷贝、不压缩（通过 `SKIP_PREFIXES` 配置跳过）
 4. 注入缓存标记：按最终产物内容计算 SHA-256 前 10 位。`mytsa.js` 中 `layui.config` 的 `version` 使用 `component/mytsa` 下全部 JS 的模块指纹；HTML 中本地 `link/script/img/iframe` 按各自文件哈希追加 `?t=<hash>`；`menu.json` 中本地 `.html` 的 `href` 用页面最终哈希；`mytsa.config.json` 的 `menu.data` 用菜单文件最终哈希。外链、非 HTML 地址与已带标记的地址保持不变，外部接口继续交给服务端 ETag 控制
 5. 替换产物：旧目录先备份，新目录原子就位；失败时回滚，避免留下半成品

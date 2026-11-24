@@ -139,16 +139,18 @@ try {
 	);
 	ok('index.html 声明 noindex', /<meta\s+name="robots"[^>]*noindex/i.test(index.text));
 	ok(
-		'index.html 无内联脚本',
-		!/<script(?![^>]*\bsrc=)[^>]*>/i.test(index.text),
-		'页面应只引用外置脚本'
+		'index.html 内联后台引导逻辑',
+		/<script(?![^>]*\bsrc=)[^>]*>/i.test(index.text) &&
+			index.text.includes('admin.setConfigurationPath') &&
+			index.text.includes('admin.render()') &&
+			!index.text.includes('theme/admin/js/bootstrap.js')
 	);
 	ok(
 		'index.html 声明 referrer no-referrer',
 		/<meta\s+name="referrer"[^>]*no-referrer/i.test(index.text)
 	);
-	ok('index.html 引入 mytsa 组件入口', index.text.includes('component/mytsa/mytsa.js'));
-	ok('index.html 引入 iframe 水印组件入口', index.text.includes('component/iframe/iframe.js'));
+	ok('index.html 引入 mytsa 组件入口', /component\/mytsa\/mytsa\.js/.test(index.text));
+	ok('index.html 引入 iframe 水印组件入口', /component\/iframe\/iframe\.js/.test(index.text));
 	ok('index.html 与登录资源隔离', !/(?:theme\/login|component\/login)\//.test(index.text));
 
 	const watermark = await request(base, '/component/iframe/module/watermark.js');
@@ -262,10 +264,7 @@ try {
 			`${page} 与后台/登录资源隔离`,
 			!/(?:theme\/admin|component\/login|theme\/login)\//.test(response.text)
 		);
-		ok(
-			`${page} 引入 iframe 水印组件入口`,
-			response.text.includes('component/iframe/iframe.js')
-		);
+		ok(`${page} 引入 iframe 水印组件入口`, /component\/iframe\/iframe\.js/.test(response.text));
 		const watermarkParams = [
 			'text',
 			'fontSize',
@@ -296,6 +295,16 @@ try {
 		/<meta\s+name="referrer"[^>]*no-referrer/i.test(notFound.text)
 	);
 	pageSources.push({ page: '/404.html', html: notFound.text });
+
+	const mytsaEntry = await request(base, '/component/mytsa/mytsa.js');
+	ok(
+		'mytsa.js 通过 layui.link 模块化加载样式',
+		mytsaEntry.status === 200 &&
+			/layui\.link\(/.test(mytsaEntry.text) &&
+			/mytsa\.bundle\.css/.test(mytsaEntry.text)
+	);
+	const mytsaBundle = await request(base, '/component/mytsa/css/mytsa.bundle.css');
+	ok('mytsa 合并样式可访问', mytsaBundle.status === 200, `HTTP ${mytsaBundle.status}`);
 
 	const assets = [...new Set(pageSources.flatMap(({ page, html }) => collectAssets(html, page)))];
 	for (const asset of assets) {
