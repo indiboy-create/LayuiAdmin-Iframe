@@ -94,10 +94,14 @@ async function request(base, path) {
 }
 
 function collectAssets(html) {
+	const references = [...html.matchAll(/(?:href|src)="([^"]+)"/g)].map((match) => match[1]);
+	const inlineUrls = [...html.matchAll(/url\(\s*['"]?([^'")\s]+)['"]?\s*\)/g)].map(
+		(match) => match[1]
+	);
+
 	return [
 		...new Set(
-			[...html.matchAll(/(?:href|src)="([^"]+)"/g)]
-				.map((match) => match[1])
+			[...references, ...inlineUrls]
 				.filter((url) => url && !/^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i.test(url))
 				.map((url) => url.split('?')[0].split('#')[0])
 				.filter(Boolean)
@@ -128,11 +132,56 @@ try {
 	const index = await request(base, '/index.html');
 	ok('index.html 可访问', index.status === 200, `HTTP ${index.status}`);
 	ok('index.html 引入鉴权脚本', index.text.includes('admin/js/auth.js'));
-	ok('index.html 首屏前拦截未登录', index.text.includes('Auth.guard()'));
+	ok('index.html 首屏前拦截未登录', /data-guard\b/.test(index.text));
+	ok('index.html 声明 noindex', /<meta\s+name="robots"[^>]*noindex/i.test(index.text));
+	ok(
+		'index.html 无内联脚本',
+		!/<script(?![^>]*\bsrc=)[^>]*>/i.test(index.text),
+		'内联脚本会被严格 CSP 拦截'
+	);
+	ok(
+		'index.html 声明 CSP',
+		/http-equiv="Content-Security-Policy"/i.test(index.text) &&
+			/script-src 'self'/i.test(index.text)
+	);
+	ok(
+		'index.html 声明 referrer no-referrer',
+		/<meta\s+name="referrer"[^>]*no-referrer/i.test(index.text)
+	);
+	ok('index.html 引入水印脚本', index.text.includes('admin/js/watermark.js'));
+
+	const watermark = await request(base, '/admin/js/watermark.js');
+	ok(
+		'watermark.js 只在顶层窗口绘制',
+		watermark.status === 200 && /window\.top\s*(?:===|!==)\s*window\.self/.test(watermark.text),
+		`HTTP ${watermark.status}`
+	);
+	const printCss = await request(base, '/component/mytsa/css/mytsa.css');
+	ok(
+		'mytsa.css 含打印样式',
+		printCss.status === 200 && /@media print/.test(printCss.text),
+		`HTTP ${printCss.status}`
+	);
 
 	const login = await request(base, '/login.html');
 	ok('login.html 可访问', login.status === 200, `HTTP ${login.status}`);
-	ok('login.html 调用 Auth.login', login.text.includes('Auth.login'));
+	ok('login.html 无内联脚本', !/<script(?![^>]*\bsrc=)[^>]*>/i.test(login.text));
+	ok(
+		'login.html 声明 CSP',
+		/http-equiv="Content-Security-Policy"/i.test(login.text) &&
+			/script-src 'self'/i.test(login.text)
+	);
+	ok(
+		'login.html 声明 referrer no-referrer',
+		/<meta\s+name="referrer"[^>]*no-referrer/i.test(login.text)
+	);
+
+	const loginBootstrap = await request(base, '/admin/js/login-bootstrap.js');
+	ok(
+		'login-bootstrap.js 接管登录提交',
+		loginBootstrap.status === 200 && loginBootstrap.text.includes('Auth.login'),
+		`HTTP ${loginBootstrap.status}`
+	);
 
 	const auth = await request(base, '/api/auth.json');
 	ok('api/auth.json 可访问', auth.status === 200, `HTTP ${auth.status}`);
@@ -148,9 +197,40 @@ try {
 	const menuData = parseJson('api/menu.json', menu.text);
 	ok('api/menu.json 是非空数组', Boolean(Array.isArray(menuData) && menuData.length > 0));
 
-	const config = await request(base, '/admin/config/pear.config.json');
-	ok('pear.config.json 可访问', config.status === 200, `HTTP ${config.status}`);
-	const configData = parseJson('pear.config.json', config.text);
+	const unstampedPages = [];
+	(function walkMenu(node) {
+		if (!node || typeof node !== 'object') {
+			return;
+		}
+		if (Array.isArray(node)) {
+			for (const item of node) {
+				walkMenu(item);
+			}
+			return;
+		}
+		if (
+			typeof node.href === 'string' &&
+			/\.html(?:$|[?#])/i.test(node.href) &&
+			!/[?&]t=/.test(node.href)
+		) {
+			unstampedPages.push(node.href);
+		}
+		if (node.children) {
+			walkMenu(node.children);
+		}
+	})(menuData);
+	ok('api/menu.json 的页面地址带构建戳', unstampedPages.length === 0, unstampedPages.join('、'));
+
+	const robots = await request(base, '/robots.txt');
+	ok(
+		'robots.txt 禁止抓取',
+		robots.status === 200 && /Disallow:\s*\//i.test(robots.text),
+		`HTTP ${robots.status}`
+	);
+
+	const config = await request(base, '/admin/config/mytsa.config.json');
+	ok('mytsa.config.json 可访问', config.status === 200, `HTTP ${config.status}`);
+	const configData = parseJson('mytsa.config.json', config.text);
 	ok(
 		'菜单配置指向数据文件',
 		Boolean(configData && configData.menu && typeof configData.menu.data === 'string'),
@@ -162,7 +242,60 @@ try {
 		`tab.max=${configData && configData.tab && configData.tab.max}`
 	);
 
-	const assets = [...new Set([...collectAssets(index.text), ...collectAssets(login.text)])];
+	const pages = [
+		'/index.html',
+		'/login.html',
+		'/home.html',
+		'/workbench.html',
+		'/table.html',
+		'/layui.html',
+	];
+	const pageTexts = [index.text, login.text];
+
+	for (const page of pages.slice(2)) {
+		const response = await request(base, page);
+		ok(`${page} 可访问`, response.status === 200, `HTTP ${response.status}`);
+		ok(`${page} 声明 noindex`, /<meta\s+name="robots"[^>]*noindex/i.test(response.text));
+		ok(
+			`${page} 无内联脚本`,
+			!/<script(?![^>]*\bsrc=)[^>]*>/i.test(response.text),
+			'内联脚本会被严格 CSP 拦截'
+		);
+		ok(
+			`${page} 声明 CSP`,
+			/http-equiv="Content-Security-Policy"/i.test(response.text) &&
+				/script-src 'self'/i.test(response.text)
+		);
+		ok(
+			`${page} 声明 referrer no-referrer`,
+			/<meta\s+name="referrer"[^>]*no-referrer/i.test(response.text)
+		);
+		if (page === '/table.html') {
+			ok(
+				'table.html 为 laytpl 放行 unsafe-eval',
+				/script-src 'self' 'unsafe-eval'/.test(response.text),
+				'表格示例依赖 laytpl 的 new Function 编译'
+			);
+		} else {
+			ok(`${page} 未放行 unsafe-eval`, !/'unsafe-eval'/.test(response.text));
+		}
+		pageTexts.push(response.text);
+	}
+
+	const notFound = await request(base, '/404.html');
+	ok('404.html 可访问', notFound.status === 200, `HTTP ${notFound.status}`);
+	ok(
+		'404.html 声明 CSP',
+		/http-equiv="Content-Security-Policy"/i.test(notFound.text) &&
+			/script-src 'self'/i.test(notFound.text)
+	);
+	ok(
+		'404.html 声明 referrer no-referrer',
+		/<meta\s+name="referrer"[^>]*no-referrer/i.test(notFound.text)
+	);
+	pageTexts.push(notFound.text);
+
+	const assets = [...new Set(pageTexts.flatMap((html) => collectAssets(html)))];
 	for (const asset of assets) {
 		const response = await request(base, asset.startsWith('/') ? asset : `/${asset}`);
 		ok(`静态资源 ${asset}`, response.status === 200, `HTTP ${response.status}`);

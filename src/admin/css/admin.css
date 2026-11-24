@@ -4,23 +4,23 @@ body,
 	height: 100%;
 }
 
-.pear-admin .layui-body,
-.pear-admin .layui-logo,
-.pear-admin .layui-side,
-.pear-admin .layui-header,
-.pear-admin .layui-header .layui-layout-left {
+.mytsa-admin .layui-body,
+.mytsa-admin .layui-logo,
+.mytsa-admin .layui-side,
+.mytsa-admin .layui-header,
+.mytsa-admin .layui-header .layui-layout-left {
 	transition: all 0.3s;
 }
 
-.pear-admin .layui-header .layui-logo {
+.mytsa-admin .layui-header .layui-logo {
 	display: none;
 }
 
-.pear-admin .layui-logo .title {
+.mytsa-admin .layui-logo .title {
 	font-size: 20px;
 }
 
-.pear-admin .layui-layout-right .layui-nav-child {
+.mytsa-admin .layui-layout-right .layui-nav-child {
 	border: 1px solid whitesmoke;
 	border-radius: 4px;
 	width: auto;
@@ -28,13 +28,13 @@ body,
 	right: -23px;
 }
 
-.pear-admin .layui-header {
+.mytsa-admin .layui-header {
 	left: 230px;
 	width: calc(100% - 230px);
 	background-color: var(--scheme-header);
 }
 
-.pear-admin .layui-logo {
+.mytsa-admin .layui-logo {
 	height: 60px;
 	line-height: 60px;
 	border-bottom: 1px solid rgba(0, 0, 0, 0.12);
@@ -44,12 +44,12 @@ body,
 	width: 230px;
 }
 
-.pear-admin .layui-logo img {
+.mytsa-admin .layui-logo img {
 	width: 34px;
 	height: 34px;
 }
 
-.pear-admin .layui-logo .title {
+.mytsa-admin .layui-logo .title {
 	font-size: 21px;
 	font-weight: 550;
 	color: var(--scheme-side-text);
@@ -57,11 +57,11 @@ body,
 	margin-left: 5px;
 }
 
-.pear-admin .layui-logo .logo {
+.mytsa-admin .layui-logo .logo {
 	display: none;
 }
 
-.pear-admin .layui-side {
+.mytsa-admin .layui-side {
 	top: 0px;
 	width: 230px;
 	box-shadow: 2px 0 6px rgba(0, 21, 41, 0.2);
@@ -69,31 +69,31 @@ body,
 	background-color: var(--scheme-side) !important;
 }
 
-.pear-admin .layui-side .pear-nav-tree {
+.mytsa-admin .layui-side .mytsa-nav-tree {
 	background-color: transparent !important;
 }
 
-.pear-admin .layui-side-scroll::-webkit-scrollbar {
+.mytsa-admin .layui-side-scroll::-webkit-scrollbar {
 	width: 0px;
 	height: 0px;
 }
 
-.pear-admin .layui-side-scroll {
+.mytsa-admin .layui-side-scroll {
 	height: calc(100% - 60px) !important;
 	background-color: var(--scheme-side);
 	width: 247px;
 }
 
-.pear-admin .layui-side .layui-nav-tree .layui-nav-item a {
+.mytsa-admin .layui-side .layui-nav-tree .layui-nav-item a {
 	color: var(--scheme-side-text) !important;
 }
 
-.pear-admin .layui-header .layui-nav .layui-nav-item > a {
+.mytsa-admin .layui-header .layui-nav .layui-nav-item > a {
 	color: var(--scheme-header-text) !important;
 	font-size: 15px;
 }
 
-.pear-admin .layui-body {
+.mytsa-admin .layui-body {
 	bottom: 0px;
 	padding-bottom: 0px;
 	background-color: whitesmoke;
@@ -102,63 +102,63 @@ body,
 	left: 230px;
 }
 
-.pear-admin .layui-body > div {
+.mytsa-admin .layui-body > div {
 	height: 100%;
 }
 
-.pear-admin .layui-layout-left {
+.mytsa-admin .layui-layout-left {
 	left: 0px;
 }
 
 /** 收缩布局 */
-.pear-mini .layui-side .layui-logo .title {
+.mytsa-mini .layui-side .layui-logo .title {
 	display: none;
 }
 
-.pear-mini .layui-side .layui-logo .logo {
+.mytsa-mini .layui-side .layui-logo .logo {
 	display: inline-block;
 }
 
-.pear-mini .layui-side {
+.mytsa-mini .layui-side {
 	width: 60px;
 }
 
-.pear-mini .layui-header {
+.mytsa-mini .layui-header {
 	left: 60px;
 	width: calc(100% - 60px);
 }
 
-.pear-mini .layui-body {
+.mytsa-mini .layui-body {
 	left: 60px;
 }
 
-.pear-mini .layui-side .layui-logo {
+.mytsa-mini .layui-side .layui-logo {
 	width: 60px;
 }
 
-.pear-mini .layui-nav-tree .layui-nav-item span {
+.mytsa-mini .layui-nav-tree .layui-nav-item span {
 	display: none;
 }
 
-.pear-mini .layui-side-scroll {
+.mytsa-mini .layui-side-scroll {
 	height: calc(100% - 60px);
 }
 
-.pear-admin .layui-header .layui-nav .layui-nav-bar {
+.mytsa-admin .layui-header .layui-nav .layui-nav-bar {
 	top: 0px !important;
 	background-color: var(--global-primary-color);
 	height: 2px !important;
 }
 
-.pear-admin .layui-header .layui-nav .layui-this:after {
+.mytsa-admin .layui-header .layui-nav .layui-this:after {
 	display: none;
 }
 
-.pear-admin .layui-header .layui-nav-more {
+.mytsa-admin .layui-header .layui-nav-more {
 	display: none;
 }
 
-.pear-collapsed-pe {
+.mytsa-collapsed-pe {
 	right: 30px;
 	bottom: 30px;
 	z-index: 400000;
@@ -173,7 +173,7 @@ body,
 	width: 50px;
 }
 
-.pear-collapsed-pe a {
+.mytsa-collapsed-pe a {
 	color: white !important;
 }
 
@@ -183,7 +183,7 @@ body,
 		display: none !important;
 	}
 
-	.pear-collapsed-pe {
+	.mytsa-collapsed-pe {
 		display: inline-block !important;
 	}
 
@@ -192,58 +192,58 @@ body,
 		padding-right: 10px;
 	}
 
-	.pear-mini .layui-side-scroll {
+	.mytsa-mini .layui-side-scroll {
 		height: calc(100% - 62px);
 	}
 
-	.pear-mini .layui-side {
+	.mytsa-mini .layui-side {
 		width: 0px;
 	}
 
-	.pear-mini .layui-header {
+	.mytsa-mini .layui-header {
 		left: 0px;
 		width: 100%;
 	}
 
-	.pear-mini .layui-body {
+	.mytsa-mini .layui-body {
 		left: 0px;
 	}
 
-	.pear-mini .layui-logo {
+	.mytsa-mini .layui-logo {
 		width: 0px;
 	}
 
-	.pear-admin .layui-side .layui-logo .logo {
+	.mytsa-admin .layui-side .layui-logo .logo {
 		display: inline-block;
 		vertical-align: middle;
 	}
 
-	.pear-admin .layui-body {
+	.mytsa-admin .layui-body {
 		left: 0px;
 	}
 
-	.pear-admin .layui-header {
+	.mytsa-admin .layui-header {
 		left: 0px;
 		width: 100%;
 	}
 
-	.pear-admin .layui-header .layui-logo {
+	.mytsa-admin .layui-header .layui-logo {
 		display: inline-block;
 		width: 60px;
 	}
 
-	.pear-admin .layui-header .layui-logo .logo {
+	.mytsa-admin .layui-header .layui-logo .logo {
 		display: inline-block;
 		width: 34px;
 		height: 34px;
 		vertical-align: middle;
 	}
 
-	.pear-admin .layui-header .layui-logo .title {
+	.mytsa-admin .layui-header .layui-logo .title {
 		display: none;
 	}
 
-	.pear-admin .pear-cover {
+	.mytsa-admin .mytsa-cover {
 		width: 100%;
 		height: 100%;
 		background-color: #1e1e1e;
@@ -254,7 +254,7 @@ body,
 		margin-top: -60px;
 	}
 
-	.pear-mini .pear-cover {
+	.mytsa-mini .mytsa-cover {
 		display: none;
 	}
 }
@@ -431,26 +431,26 @@ body,
 	text-align: center;
 }
 
-.pearone-color .set-text {
+.mytsaone-color .set-text {
 	height: 42px;
 	line-height: 42px;
 }
 
-.pearone-color .color-title {
+.mytsaone-color .color-title {
 	padding: 15px 0 0px 20px;
 	margin-bottom: 4px;
 }
 
-.pearone-color .color-content {
+.mytsaone-color .color-content {
 	padding: 15px 10px 0 20px;
 }
 
-.pearone-color .color-content ul {
+.mytsaone-color .color-content ul {
 	list-style: none;
 	padding: 0px;
 }
 
-.pearone-color .color-content ul li {
+.mytsaone-color .color-content ul li {
 	position: relative;
 	display: inline-block;
 	vertical-align: top;
@@ -464,8 +464,8 @@ body,
 	color: #666;
 }
 
-.pearone-color .color-content li.layui-this:after,
-.pearone-color .color-content li:hover:after {
+.mytsaone-color .color-content li.layui-this:after,
+.mytsaone-color .color-content li:hover:after {
 	width: 100%;
 	height: 100%;
 	padding: 4px;
@@ -476,7 +476,7 @@ body,
 	border-radius: 4px;
 }
 
-.pearone-color .color-content li:after {
+.mytsaone-color .color-content li:after {
 	content: '';
 	position: absolute;
 	z-index: 20;
@@ -603,7 +603,7 @@ body,
 }
 
 /* 无障碍：跳过导航直达主内容 */
-.pear-skip-link {
+.mytsa-skip-link {
 	position: absolute;
 	left: 12px;
 	top: -48px;
@@ -618,8 +618,8 @@ body,
 	transition: top 0.15s ease;
 }
 
-.pear-skip-link:focus,
-.pear-skip-link.is-focused {
+.mytsa-skip-link:focus,
+.mytsa-skip-link.is-focused {
 	top: 12px;
 	outline: 2px solid #fff;
 	outline-offset: 2px;
@@ -627,14 +627,14 @@ body,
 
 /* 键盘焦点始终可见 */
 .layui-tab-title li:focus-visible,
-.pear-menu a:focus-visible,
+.mytsa-menu a:focus-visible,
 #content:focus-visible {
 	outline: 2px solid var(--global-primary-color, #16baaa);
 	outline-offset: -2px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.pear-skip-link {
+	.mytsa-skip-link {
 		transition: none;
 	}
 }

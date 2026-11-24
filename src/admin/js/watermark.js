@@ -1,6 +1,12 @@
 layui.use(['jquery'], function () {
 	'use strict';
 
+	// 只在顶层窗口绘制：iframe 子页由父框架统一覆盖，避免同一屏出现两层水印；
+	// 子页被直接打开（复制地址）时 window.top === window.self，仍会正常绘制
+	if (window.top !== window.self) {
+		return;
+	}
+
 	var $ = layui.jquery;
 
 	var DEFAULTS = {
@@ -40,9 +46,9 @@ layui.use(['jquery'], function () {
 		var background = 'url(' + canvas.toDataURL('image/png') + ')';
 
 		// 水印单独放到覆盖层：直接画在 .watermark 容器上会被卡片白色底遮住
-		var $layer = $('.pear-watermark-layer');
+		var $layer = $('.mytsa-watermark-layer');
 		if (!$layer.length) {
-			$layer = $('<div class="pear-watermark-layer" aria-hidden="true"></div>').appendTo(
+			$layer = $('<div class="mytsa-watermark-layer" aria-hidden="true"></div>').appendTo(
 				'body'
 			);
 		}
@@ -59,7 +65,7 @@ layui.use(['jquery'], function () {
 		});
 	}
 
-	$.getJSON('admin/config/pear.config.json')
+	$.getJSON('admin/config/mytsa.config.json')
 		.done(function (config) {
 			drawWatermark((config && config.other && config.other.watermark) || {});
 		})

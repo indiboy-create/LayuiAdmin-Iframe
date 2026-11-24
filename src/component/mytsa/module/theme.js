@@ -1,5 +1,5 @@
 layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
-	"use strict";
+	'use strict';
 
 	var MOD_NAME = 'theme';
 
@@ -47,8 +47,8 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		return result;
 	}
 
-	var DEFAULT_SIDE = "#20222A";
-	var DEFAULT_HEADER = "#FFFFFF";
+	var DEFAULT_SIDE = '#20222A';
+	var DEFAULT_HEADER = '#FFFFFF';
 
 	function normalizeScheme(scheme) {
 		var base = scheme.base || scheme.side || DEFAULT_SIDE;
@@ -57,7 +57,7 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 			label: scheme.label,
 			side: base,
 			header: scheme.header || DEFAULT_HEADER,
-			logo: scheme.logo || base
+			logo: scheme.logo || base,
 		};
 	}
 
@@ -65,7 +65,7 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		var list = config && config.theme && config.theme.schemes;
 		return list && list.length
 			? list.map(normalizeScheme)
-			: [normalizeScheme({ id: "default", label: "default" })];
+			: [normalizeScheme({ id: 'default', label: 'default' })];
 	}
 
 	function resolveScheme(option) {
@@ -74,7 +74,7 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		if (option.theme.allowCustom === false) {
 			return fallback;
 		}
-		return getItemById(schemes, readStorage("theme-scheme")) || fallback;
+		return getItemById(schemes, readStorage('theme-scheme')) || fallback;
 	}
 
 	function getColorById(id) {
@@ -87,11 +87,14 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 	}
 
 	function isLightColor(color) {
-		var hex = String(color || "").replace("#", "");
+		var hex = String(color || '').replace('#', '');
 		if (hex.length === 3) {
-			hex = hex.split("").map(function (value) {
-				return value + value;
-			}).join("");
+			hex = hex
+				.split('')
+				.map(function (value) {
+					return value + value;
+				})
+				.join('');
 		}
 		if (hex.length !== 6) {
 			return false;
@@ -102,76 +105,87 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		return r * 0.299 + g * 0.587 + b * 0.114 > 160;
 	}
 
+	// 主题色同步到 theme-color，移动端状态栏颜色跟随当前方案
+	function syncThemeColor(color) {
+		var meta = document.querySelector('meta[name="theme-color"]');
+		if (meta && color) {
+			meta.setAttribute('content', color);
+		}
+	}
+
 	function applyScheme(scheme) {
 		var side = scheme.side || DEFAULT_SIDE;
 		var header = scheme.header || DEFAULT_HEADER;
 		var logo = scheme.logo || side;
 		var style = document.documentElement.style;
-		style.setProperty("--scheme-side", side);
-		style.setProperty("--scheme-header", header);
-		style.setProperty("--scheme-logo", logo);
-		style.setProperty("--scheme-side-text", isLightColor(side) ? "#000000" : "#FFFFFF");
-		style.setProperty("--scheme-header-text", isLightColor(header) ? "#000000" : "#FFFFFF");
-		writeStorage("theme-scheme", scheme.id);
+		style.setProperty('--scheme-side', side);
+		style.setProperty('--scheme-header', header);
+		style.setProperty('--scheme-logo', logo);
+		style.setProperty('--scheme-side-text', isLightColor(side) ? '#000000' : '#FFFFFF');
+		style.setProperty('--scheme-header-text', isLightColor(header) ? '#000000' : '#FFFFFF');
+		syncThemeColor(logo);
+		writeStorage('theme-scheme', scheme.id);
 	}
 
 	function applyCustomTheme() {
 		var style = document.documentElement.style;
-		var side = readStorage("theme-custom-side");
-		var selected = readStorage("theme-custom-selected");
-		var logo = readStorage("theme-custom-logo");
-		var header = readStorage("theme-custom-header");
+		var side = readStorage('theme-custom-side');
+		var selected = readStorage('theme-custom-selected');
+		var logo = readStorage('theme-custom-logo');
+		var header = readStorage('theme-custom-header');
 		if (side) {
-			style.setProperty("--scheme-side", side);
-			style.setProperty("--scheme-side-text", isLightColor(side) ? "#000000" : "#FFFFFF");
+			style.setProperty('--scheme-side', side);
+			style.setProperty('--scheme-side-text', isLightColor(side) ? '#000000' : '#FFFFFF');
 		}
 		if (selected) {
-			style.setProperty("--global-primary-color", selected);
+			style.setProperty('--global-primary-color', selected);
 		}
 		if (logo) {
-			style.setProperty("--scheme-logo", logo);
+			style.setProperty('--scheme-logo', logo);
 		}
 		if (header) {
-			style.setProperty("--scheme-header", header);
-			style.setProperty("--scheme-header-text", isLightColor(header) ? "#000000" : "#FFFFFF");
+			style.setProperty('--scheme-header', header);
+			style.setProperty('--scheme-header-text', isLightColor(header) ? '#000000' : '#FFFFFF');
 		}
+		syncThemeColor(logo || side);
 	}
 
 	function getCustomColor(name) {
-		var stored = readStorage("theme-custom-" + name);
+		var stored = readStorage('theme-custom-' + name);
 		if (stored) {
 			return stored;
 		}
 		var style = document.documentElement.style;
 		var key = {
-			side: "--scheme-side",
-			selected: "--global-primary-color",
-			logo: "--scheme-logo",
-			header: "--scheme-header"
+			side: '--scheme-side',
+			selected: '--global-primary-color',
+			logo: '--scheme-logo',
+			header: '--scheme-header',
 		}[name];
-		var value = key ? style.getPropertyValue(key).trim() : "";
-		return value || "#FFFFFF";
+		var value = key ? style.getPropertyValue(key).trim() : '';
+		return value || '#FFFFFF';
 	}
 
 	function renderCustomPickers() {
-		$.each($(".scheme-custom .set-custom-theme"), function () {
+		$.each($('.scheme-custom .set-custom-theme'), function () {
 			var elem = $(this);
-			var name = elem.attr("data-name");
-			elem.empty().removeClass("layui-inline").removeAttr("lay-colorpicker-id");
+			var name = elem.attr('data-name');
+			elem.empty().removeClass('layui-inline').removeAttr('lay-colorpicker-id');
 			colorpicker.render({
 				elem: elem[0],
 				color: getCustomColor(name),
 				predefine: true,
 				done: function (value) {
-					writeStorage("theme-custom-" + name, value);
+					writeStorage('theme-custom-' + name, value);
 					applyCustomTheme();
-				}
+				},
 			});
 		});
 	}
 
 	function buildCustomHtml() {
-		return '<div class="pearone-color">\n' +
+		return (
+			'<div class="mytsaone-color">\n' +
 			'<div class="color-title">自定义配色</div>\n' +
 			'<div class="scheme-custom">\n' +
 			'<ul>\n' +
@@ -181,86 +195,104 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 			'<li><span>头部栏背景色</span><div class="set-custom-theme" data-name="header"></div></li>\n' +
 			'</ul>\n' +
 			'</div>\n' +
-			'</div>';
+			'</div>'
+		);
 	}
 
 	function buildResetHtml() {
-		return '<div class="pearone-color">\n' +
+		return (
+			'<div class="mytsaone-color">\n' +
 			'<div class="color-title">恢复默认</div>\n' +
 			'<div class="scheme-custom">\n' +
 			'<ul>\n' +
 			'<li>恢复默认主题 <div class="set-default-theme"><button type="button" class="layui-btn layui-btn-primary reset-theme"><i class="layui-icon layui-icon-refresh-1"></i></button></div></li>\n' +
 			'</ul>\n' +
 			'</div>\n' +
-			'</div>';
+			'</div>'
+		);
 	}
 
 	function buildSchemeHtml() {
 		var schemes = getSchemeList();
-		var current = readStorage("theme-scheme");
-		var items = "";
+		var current = readStorage('theme-scheme');
+		var items = '';
 		$.each(schemes, function (i, scheme) {
-			var side = scheme.side || "#20222A";
-			var header = scheme.header || "#FFFFFF";
+			var side = scheme.side || '#20222A';
+			var header = scheme.header || '#FFFFFF';
 			var logo = scheme.logo || side;
 			items +=
-				'<li' + (String(scheme.id) === String(current) ? ' class="layui-this"' : '') + ' data-select-scheme="' + scheme.id + '" title="' + scheme.label + '">' +
+				'<li' +
+				(String(scheme.id) === String(current) ? ' class="layui-this"' : '') +
+				' data-select-scheme="' +
+				scheme.id +
+				'" title="' +
+				scheme.label +
+				'">' +
 				'<div class="scheme-preview">' +
-				'<span class="scheme-preview-header" style="background: ' + header + ';"></span>' +
-				'<span class="scheme-preview-side" style="background: ' + side + ';"></span>' +
-				'<span class="scheme-preview-logo" style="background: ' + logo + ';"></span>' +
+				'<span class="scheme-preview-header" style="background: ' +
+				header +
+				';"></span>' +
+				'<span class="scheme-preview-side" style="background: ' +
+				side +
+				';"></span>' +
+				'<span class="scheme-preview-logo" style="background: ' +
+				logo +
+				';"></span>' +
 				'</div>' +
 				'</li>';
 		});
-		return '<div class="pearone-color">\n' +
+		return (
+			'<div class="mytsaone-color">\n' +
 			'<div class="color-title">配色方案</div>\n' +
 			'<div class="scheme-content">\n' +
-			'<ul>\n' + items + '</ul>\n' +
+			'<ul>\n' +
+			items +
+			'</ul>\n' +
 			'</div>\n' +
-			'</div>';
+			'</div>'
+		);
 	}
 
 	var theme = {
 		/**
 		 * 主题初始化：配色方案 + 主题色 + 自定义配色 + 自动顶栏
 		 *
-		 * @param {*} option pear.config 配置
+		 * @param {*} option mytsa.config 配置
 		 */
 		render: function (option) {
 			config = option;
 
 			if (option.theme.allowCustom === false) {
-				$(".setting").remove();
+				$('.setting').remove();
 			}
 
 			var scheme = resolveScheme(option);
 			applyScheme(scheme);
 
-			var colorId = readStorage("theme-color");
+			var colorId = readStorage('theme-color');
 			var currentColor = getColorById(colorId);
-			writeStorage("theme-color", currentColor.id);
-			writeStorage("theme-color-color", currentColor.color);
-			writeStorage("theme-color-second", currentColor.second);
+			writeStorage('theme-color', currentColor.id);
+			writeStorage('theme-color-color', currentColor.color);
+			writeStorage('theme-color-second', currentColor.second);
 
 			theme.changeTheme();
 			applyCustomTheme();
-
 		},
 
 		/**
 		 * 切换主题色
 		 */
 		changeTheme: function () {
-			var variableKey = "--global-primary-color";
-			var variableVal = readStorage("theme-color-color");
+			var variableKey = '--global-primary-color';
+			var variableVal = readStorage('theme-color-color');
 			if (!variableVal) {
 				return;
 			}
 			document.documentElement.style.setProperty(variableKey, variableVal);
-		}
+		},
 	};
 
-	body.on("click", ".setting", function () {
+	body.on('click', '.setting', function () {
 		var schemeHtml = buildSchemeHtml();
 		var customHtml = buildCustomHtml();
 		var resetHtml = buildResetHtml();
@@ -278,30 +310,34 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 			move: false,
 			content: schemeHtml + customHtml + resetHtml,
 			success: function (layero, index) {
-				layero.find(".layui-layer-content").css({
-					height: "100%",
-					overflowY: "auto"
+				layero.find('.layui-layer-content').css({
+					height: '100%',
+					overflowY: 'auto',
 				});
 
 				form.render();
 
 				renderCustomPickers();
 
-				var currentScheme = readStorage("theme-scheme");
-				$("[data-select-scheme]").removeClass("layui-this");
-				$("[data-select-scheme='" + currentScheme + "']").addClass("layui-this");
+				var currentScheme = readStorage('theme-scheme');
+				$('[data-select-scheme]').removeClass('layui-this');
+				$("[data-select-scheme='" + currentScheme + "']").addClass('layui-this');
 
 				$('#layui-layer-shade' + index).click(function () {
 					var $layero = $('#layui-layer' + index);
-					$layero.animate({
-						left: $layero.offset().left + $layero.width()
-					}, 200, function () {
-						layer.close(index);
-					});
+					$layero.animate(
+						{
+							left: $layero.offset().left + $layero.width(),
+						},
+						200,
+						function () {
+							layer.close(index);
+						}
+					);
 				});
 
 				form.render('checkbox');
-			}
+			},
 		});
 	});
 
@@ -310,10 +346,10 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		if (!scheme) {
 			return;
 		}
-		$('[data-select-scheme]').removeClass("layui-this");
-		$(this).addClass("layui-this");
-		$.each(["side", "selected", "logo", "header"], function (i, name) {
-			removeStorage("theme-custom-" + name);
+		$('[data-select-scheme]').removeClass('layui-this');
+		$(this).addClass('layui-this');
+		$.each(['side', 'selected', 'logo', 'header'], function (i, name) {
+			removeStorage('theme-custom-' + name);
 		});
 		applyScheme(scheme);
 		theme.changeTheme();
@@ -321,26 +357,28 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 	});
 
 	body.on('click', '.reset-theme', function () {
-		$.each([
-			"theme-scheme",
-			"theme-color",
-			"theme-color-color",
-			"theme-color-second",
-			"theme-custom-side",
-			"theme-custom-selected",
-			"theme-custom-logo",
-			"theme-custom-header",
-			"theme-menu",
-			"theme-header",
-			"auto-head",
-			"banner",
-			"footer"
-		], function (i, key) {
-			removeStorage(key);
-		});
+		$.each(
+			[
+				'theme-scheme',
+				'theme-color',
+				'theme-color-color',
+				'theme-color-second',
+				'theme-custom-side',
+				'theme-custom-selected',
+				'theme-custom-logo',
+				'theme-custom-header',
+				'theme-menu',
+				'theme-header',
+				'auto-head',
+				'banner',
+				'footer',
+			],
+			function (i, key) {
+				removeStorage(key);
+			}
+		);
 		window.location.reload();
 	});
-
 
 	exports(MOD_NAME, theme);
 });

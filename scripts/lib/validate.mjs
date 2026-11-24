@@ -50,6 +50,24 @@ export async function findMissingReferences({ rootDir, files, kind }) {
 	return errors;
 }
 
+// 模板自带的演示账号：会随 npm 包与 zip 一起发布，正式上线前必须替换
+export const DEFAULT_CREDENTIALS = { username: 'admin', password: 'admin123' };
+
+// 返回仍在使用默认演示口令的用户名列表（空数组表示已替换）
+export function detectDefaultCredentials(auth) {
+	if (!auth || typeof auth !== 'object' || !Array.isArray(auth.users)) {
+		return [];
+	}
+	return auth.users
+		.filter(
+			(user) =>
+				user &&
+				user.username === DEFAULT_CREDENTIALS.username &&
+				user.password === DEFAULT_CREDENTIALS.password
+		)
+		.map((user) => user.username);
+}
+
 export function collectLeafMenus(items, leaves = []) {
 	for (const item of items) {
 		if (item.type === 1) {

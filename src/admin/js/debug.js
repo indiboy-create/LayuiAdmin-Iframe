@@ -1,7 +1,7 @@
 /**
  * 统一调试开关
  *
- * 优先级：adminDebug.enable/disable > ?debug=1/0 > localStorage.adminDebug > pear.config.json 的 debug
+ * 优先级：adminDebug.enable/disable > ?debug=1/0 > localStorage.adminDebug > mytsa.config.json 的 debug
  * 用法：
  *   adminDebug.log(...)、adminDebug.table(...)、adminDebug.time(...)
  *   控制台临时切换：adminDebug.enable() / adminDebug.disable()
@@ -121,6 +121,6 @@
 	window.adminDebug = api;
 
 	if (isEnabled()) {
-		api.info('调试模式已开启（?debug=1 > localStorage.adminDebug > pear.config.json.debug）');
+		api.info('调试模式已开启（?debug=1 > localStorage.adminDebug > mytsa.config.json.debug）');
 	}
 })(window);

@@ -1,27 +1,54 @@
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
-// 合并 Pear 样式为单文件，减少首页样式请求
-export async function bundlePearCss(distDir) {
-	const cssDir = join(distDir, 'component', 'pear', 'css');
-	const sources = ['module/menu.css', 'module/tabPage.css', 'pear.css'];
+// 合并 MyTSA 样式为单文件，减少首页样式请求
+export async function bundleMytsaCss(distDir) {
+	const cssDir = join(distDir, 'component', 'mytsa', 'css');
+	const sources = ['module/menu.css', 'module/tabPage.css', 'mytsa.css'];
 	let content = '';
 	for (const source of sources) {
 		content += `${await readFile(join(cssDir, source), 'utf8')}\n`;
 	}
-	await writeFile(join(cssDir, 'pear.bundle.css'), content);
+	await writeFile(join(cssDir, 'mytsa.bundle.css'), content);
 
 	const htmlPath = join(distDir, 'index.html');
 	const html = await readFile(htmlPath, 'utf8');
 	const next = html
 		.replace(
-			/[ \t]*<link\b[^>]*href="component\/pear\/css\/module\/(?:menu|tabPage)\.css"[^>]*>\r?\n/g,
+			/[ \t]*<link\b[^>]*href="component\/mytsa\/css\/module\/(?:menu|tabPage)\.css"[^>]*>\r?\n/g,
 			''
 		)
 		.replace(
-			/(<link\b[^>]*href=")component\/pear\/css\/pear\.css(")/,
-			'$1component/pear/css/pear.bundle.css$2'
+			/(<link\b[^>]*href=")component\/mytsa\/css\/mytsa\.css(")/,
+			'$1component/mytsa/css/mytsa.bundle.css$2'
 		);
+	if (next !== html) {
+		await writeFile(htmlPath, next);
+	}
+}
+
+// 项目自有样式：合并 admin.css / variables.css / reset.css，首页样式请求 5 → 3
+const ADMIN_SOURCES = ['admin.css', 'variables.css', 'reset.css'];
+
+export async function bundleAdminCss(distDir) {
+	const cssDir = join(distDir, 'admin', 'css');
+	let content = '';
+	for (const source of ADMIN_SOURCES) {
+		content += `${await readFile(join(cssDir, source), 'utf8')}\n`;
+	}
+	await writeFile(join(cssDir, 'admin.bundle.css'), content);
+
+	// 合并后这两份只被 index.html 引用，删除避免产物冗余；variables.css 仍被登录页使用
+	await Promise.all([
+		rm(join(cssDir, 'admin.css'), { force: true }),
+		rm(join(cssDir, 'reset.css'), { force: true }),
+	]);
+
+	const htmlPath = join(distDir, 'index.html');
+	const html = await readFile(htmlPath, 'utf8');
+	const next = html
+		.replace(/[ \t]*<link\b[^>]*href="admin\/css\/(?:variables|reset)\.css"[^>]*>\r?\n/g, '')
+		.replace(/(<link\b[^>]*href=")admin\/css\/admin\.css(")/, '$1admin/css/admin.bundle.css$2');
 	if (next !== html) {
 		await writeFile(htmlPath, next);
 	}

@@ -10,6 +10,8 @@ import {
 	validateThemeConfig,
 	validateRuntimeConfig,
 	collectLeafMenus,
+	DEFAULT_CREDENTIALS,
+	detectDefaultCredentials,
 } from '../scripts/lib/validate.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -63,15 +65,15 @@ describe('菜单数据', () => {
 
 describe('主题配置', () => {
 	it('结构合法且主键、label 唯一', async () => {
-		const config = await readJson('admin/config/pear.config.json');
+		const config = await readJson('admin/config/mytsa.config.json');
 		const errors = [];
-		validateThemeConfig(config, 'admin/config/pear.config.json', errors);
-		validateRuntimeConfig(config, 'admin/config/pear.config.json', errors);
+		validateThemeConfig(config, 'admin/config/mytsa.config.json', errors);
+		validateRuntimeConfig(config, 'admin/config/mytsa.config.json', errors);
 		assert.deepEqual(errors, [], errors.join('\n'));
 	});
 
 	it('配色方案使用基色精简格式', async () => {
-		const config = await readJson('admin/config/pear.config.json');
+		const config = await readJson('admin/config/mytsa.config.json');
 		for (const scheme of config.theme.schemes) {
 			assert.ok(scheme.base, `${scheme.id} 缺少基色 base`);
 			assert.equal(scheme.side, undefined, `${scheme.id} 应使用 base 而非 side`);
@@ -88,11 +90,46 @@ describe('主题配置', () => {
 	});
 
 	it('首页标签指向存在的页面', async () => {
-		const config = await readJson('admin/config/pear.config.json');
+		const config = await readJson('admin/config/mytsa.config.json');
 		assert.ok(
 			await exists(join(src, config.tab.index.href)),
 			`tab.index.href 不存在：${config.tab.index.href}`
 		);
+	});
+});
+
+describe('演示凭据', () => {
+	it('识别仍在使用的默认演示口令', () => {
+		assert.deepEqual(
+			detectDefaultCredentials({ users: [{ username: 'admin', password: 'admin123' }] }),
+			['admin']
+		);
+		assert.deepEqual(
+			detectDefaultCredentials({
+				users: [
+					{ username: 'admin', password: 'admin123' },
+					{ username: 'ops', password: 'x' },
+				],
+			}),
+			['admin']
+		);
+		assert.equal(detectDefaultCredentials(null).length, 0);
+		assert.equal(detectDefaultCredentials({ users: 'x' }).length, 0);
+		assert.equal(
+			detectDefaultCredentials({ users: [{ username: 'admin', password: 'replaced' }] })
+				.length,
+			0
+		);
+		assert.equal(
+			detectDefaultCredentials({ users: [{ username: 'ops', password: 'admin123' }] }).length,
+			0
+		);
+	});
+
+	it('默认口令常量与 src/api/auth.json 保持一致', async () => {
+		const auth = await readJson('api/auth.json');
+		const hit = detectDefaultCredentials(auth);
+		assert.ok(hit.includes(DEFAULT_CREDENTIALS.username), '演示账号应使用默认口令');
 	});
 });
 

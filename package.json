@@ -24,7 +24,7 @@
 		"node": "^20.19.0 || ^22.13.0 || >=24"
 	},
 	"publishConfig": {
-		"registry": "https://npm.pkg.github.com/"
+		"access": "public"
 	},
 	"files": [
 		"dist"
@@ -39,7 +39,7 @@
 		"check:debug": "node scripts/check.mjs --dir=dist-debug",
 		"check:release": "node scripts/check.mjs --strict-debug",
 		"e2e": "node scripts/e2e.mjs",
-		"test": "node --test test/smoke.test.mjs test/build.test.mjs",
+		"test": "node --test test/smoke.test.mjs test/build.test.mjs test/sanitize.test.mjs",
 		"lint": "eslint .",
 		"lint:fix": "eslint . --fix",
 		"format": "prettier --write \"src/**/*\" \"scripts/**/*.mjs\" \"test/**/*.mjs\" \"*.config.js\" \".github/workflows/*.yml\"",
@@ -53,6 +53,7 @@
 		"clean-css": "^5.3.3",
 		"eslint": "^10.14.0",
 		"globals": "^17.14.0",
+		"html-minifier-terser": "^7.2.0",
 		"husky": "^9.1.7",
 		"lint-staged": "^17.6.0",
 		"prettier": "^3.9.10",

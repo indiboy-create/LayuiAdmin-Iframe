@@ -1,8 +1,13 @@
 import { cp } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { stampPearBuild, stampHtmlAssets, stampConfiguration } from './lib/build/stamp.mjs';
-import { bundlePearCss } from './lib/build/bundle-css.mjs';
+import {
+	stampMytsaBuild,
+	stampHtmlAssets,
+	stampConfiguration,
+	stampMenuData,
+} from './lib/build/stamp.mjs';
+import { bundleMytsaCss, bundleAdminCss } from './lib/build/bundle-css.mjs';
 import { stripDebugAssets } from './lib/build/strip-debug.mjs';
 import { minify } from './lib/build/minify.mjs';
 import { setDebugConfig } from './lib/build/config.mjs';
@@ -26,13 +31,15 @@ await removePathWithRetry(staging);
 await cp(src, staging, { recursive: true });
 
 try {
-	const buildStamp = await stampPearBuild(staging);
-	await bundlePearCss(staging);
+	const buildStamp = await stampMytsaBuild(staging);
+	await bundleMytsaCss(staging);
+	await bundleAdminCss(staging);
 	if (!noMinify) {
 		await stripDebugAssets(staging);
 	}
 	await stampHtmlAssets(staging, buildStamp);
-	await stampConfiguration(staging, buildStamp);
+	const menuDataUrl = await stampConfiguration(staging, buildStamp);
+	await stampMenuData(staging, buildStamp, menuDataUrl);
 	// 正式构建强制关闭调试，避免调试日志进入线上产物
 	await setDebugConfig(staging, noMinify);
 	if (!noMinify) {

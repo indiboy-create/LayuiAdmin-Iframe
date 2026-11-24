@@ -1,43 +1,43 @@
-.pear-nav-tree {
+.mytsa-nav-tree {
 	width: 230px !important;
 	border-radius: 0px;
-	background-color: #28333E;
+	background-color: #28333e;
 }
 
-.pear-nav-tree .layui-nav-item>a {
+.mytsa-nav-tree .layui-nav-item > a {
 	height: 56px;
 	line-height: 56px;
 	padding-top: 0px;
 	padding-bottom: 0px;
 }
 
-.pear-nav-tree .layui-nav-item dd a {
+.mytsa-nav-tree .layui-nav-item dd a {
 	height: 48px;
 	line-height: 48px;
 }
 
-.pear-nav-tree .layui-nav-item>a .layui-nav-more {
+.mytsa-nav-tree .layui-nav-item > a .layui-nav-more {
 	padding: 0px;
 }
 
-.pear-side-scroll::-webkit-scrollbar {
+.mytsa-side-scroll::-webkit-scrollbar {
 	width: 0px;
 	height: 0px;
 }
 
-.pear-side-scroll {
+.mytsa-side-scroll {
 	width: 230px;
 }
 
-.pear-nav-tree .layui-nav-child dd.layui-this,
+.mytsa-nav-tree .layui-nav-child dd.layui-this,
 .layui-nav-tree .layui-nav-child dd.layui-this a,
 .layui-nav-tree .layui-this,
-.layui-nav-tree .layui-this>a,
-.layui-nav-tree .layui-this>a:hover {
+.layui-nav-tree .layui-this > a,
+.layui-nav-tree .layui-this > a:hover {
 	background-color: var(--global-primary-color);
 }
 
-.pear-nav-tree .toast {
+.mytsa-nav-tree .toast {
 	font-size: 14px;
 	margin: 5px;
 	margin-right: 8px;
@@ -47,58 +47,56 @@
 	color: lightgray;
 }
 
-
-.pear-nav-tree .layui-nav-item a i {
+.mytsa-nav-tree .layui-nav-item a i {
 	margin-right: 12px;
 }
 
-.pear-nav-tree .layui-nav-item a span {
+.mytsa-nav-tree .layui-nav-item a span {
 	letter-spacing: 2px;
 	font-size: 13.5px;
 }
 
-.pear-nav-tree .layui-nav-item a:hover {
+.mytsa-nav-tree .layui-nav-item a:hover {
 	background-color: transparent;
 }
 
-.pear-nav-tree .layui-nav-more {
+.mytsa-nav-tree .layui-nav-more {
 	margin-right: 5px;
 }
 
-.pear-nav-tree .layui-nav-bar {
+.mytsa-nav-tree .layui-nav-bar {
 	display: none;
 }
 
-.pear-nav-tree .layui-nav-item a .layui-badge-dot {
+.mytsa-nav-tree .layui-nav-item a .layui-badge-dot {
 	float: right;
 	right: 13px;
 }
 
-.pear-nav-tree .layui-nav-item a .layui-badge {
+.mytsa-nav-tree .layui-nav-item a .layui-badge {
 	float: right;
 	right: 10px;
 }
 
 /** 实 现 菜 单 隐 藏 */
-.pear-nav-mini {
+.mytsa-nav-mini {
 	overflow: hidden;
 }
 
-.pear-nav-mini .layui-nav-item a span {
+.mytsa-nav-mini .layui-nav-item a span {
 	display: none;
 }
 
-.pear-nav-mini .layui-nav-child {
+.mytsa-nav-mini .layui-nav-child {
 	display: none;
 }
 
-.pear-nav-mini .layui-nav-more {
+.mytsa-nav-mini .layui-nav-more {
 	display: none !important;
 }
 
-
 /** 隐 藏 后 子 级 悬 浮 菜 单 */
-.pear-nav-tree .layui-nav-hover {
+.mytsa-nav-tree .layui-nav-hover {
 	position: fixed;
 	min-width: 130px;
 	padding: 4px;
@@ -106,7 +104,7 @@
 	background: transparent !important;
 }
 
-.pear-nav-tree .layui-nav-hover:before {
+.mytsa-nav-tree .layui-nav-hover:before {
 	content: '';
 	position: absolute;
 	right: 4px;
@@ -115,81 +113,78 @@
 	top: 0;
 	border-radius: 4px;
 	overflow: hidden;
-	background-color: #28333E;
+	background-color: #28333e;
 	display: block;
 	box-shadow: 0px 0px 3px lightgray;
 }
 
-.pear-nav-tree .layui-nav-hover a span {
+.mytsa-nav-tree .layui-nav-hover a span {
 	display: inline-block !important;
 }
 
-.pear-nav-tree .layui-nav-hover a i {
+.mytsa-nav-tree .layui-nav-hover a i {
 	display: none;
 }
 
-.pear-nav-tree .layui-nav-child dd a span {
+.mytsa-nav-tree .layui-nav-child dd a span {
 	margin-left: 26px !important;
 }
 
-.pear-nav-tree .layui-nav-child dd a i {
+.mytsa-nav-tree .layui-nav-child dd a i {
 	display: none;
 }
 
-.pear-nav-tree .layui-nav-hover dd a span {
+.mytsa-nav-tree .layui-nav-hover dd a span {
 	margin-left: 0px !important;
 }
 
-.pear-nav-tree dl {
+.mytsa-nav-tree dl {
 	padding-top: 0;
 	padding-bottom: 0;
 }
 
 /** 亮 样 式*/
 .dark-theme .layui-nav-tree {
-	background-color: #28333E !important;
+	background-color: #28333e !important;
 }
 
 .light-theme {
 	background-color: white !important;
 }
 
-.light-theme .pear-nav-tree,
-.light-theme .pear-nav-tree .layui-nav-hover:before,
-.light-theme .pear-nav-tree .layui-nav-child {
+.light-theme .mytsa-nav-tree,
+.light-theme .mytsa-nav-tree .layui-nav-hover:before,
+.light-theme .mytsa-nav-tree .layui-nav-child {
 	background-color: white !important;
 }
 
-.light-theme .pear-nav-tree a,
-.light-theme .pear-nav-tree .layui-nav-more {
+.light-theme .mytsa-nav-tree a,
+.light-theme .mytsa-nav-tree .layui-nav-more {
 	color: dimgray !important;
 	border-top-color: dimgray;
 }
 
-.light-theme .pear-nav-tree .layui-nav-itemed>a>.layui-nav-more {
+.light-theme .mytsa-nav-tree .layui-nav-itemed > a > .layui-nav-more {
 	border-top-color: white !important;
 	border-bottom-color: dimgray !important;
 }
 
-.light-theme .pear-nav-tree .layui-this a,
-.light-theme .pear-nav-tree .layui-this {
+.light-theme .mytsa-nav-tree .layui-this a,
+.light-theme .mytsa-nav-tree .layui-this {
 	color: white !important;
 	background-color: var(--global-primary-color) !important;
-
 }
 
-.light-theme .pear-nav-tree .layui-this a:hover {
+.light-theme .mytsa-nav-tree .layui-this a:hover {
 	background-color: var(--global-primary-color) !important;
-
 }
 
-.light-theme .pear-nav-tree .layui-nav-bar {
+.light-theme .mytsa-nav-tree .layui-nav-bar {
 	display: none;
-
 }
 
 /** 下 拉 图 标 */
-.pear-nav-tree.arrow .layui-nav-more {
+.mytsa-nav-tree.arrow .layui-nav-more {
 	font-family: layui-icon !important;
 	font-size: 10px;
 	font-style: normal;
@@ -205,19 +200,19 @@
 	margin: 0;
 	padding: 0;
 	display: inline-block;
-	transition: all .2s;
-	-webkit-transition: all .2s;
+	transition: all 0.2s;
+	-webkit-transition: all 0.2s;
 }
 
-.pear-nav-tree.arrow .layui-nav-child .layui-nav-more {
+.mytsa-nav-tree.arrow .layui-nav-child .layui-nav-more {
 	top: 17px;
 }
 
-.pear-nav-tree.arrow .layui-nav-more:before {
-	content: "\e61a";
+.mytsa-nav-tree.arrow .layui-nav-more:before {
+	content: '\e61a';
 }
 
-.pear-nav-tree.arrow .layui-nav-itemed>a>.layui-nav-more {
+.mytsa-nav-tree.arrow .layui-nav-itemed > a > .layui-nav-more {
 	transform: rotate(180deg);
 	-ms-transform: rotate(180deg);
 	-moz-transform: rotate(180deg);
@@ -227,7 +222,7 @@
 	text-align: center;
 }
 
-.pear-nav-tree.arrow .layui-nav-child.layui-nav-hover>dd>a>.layui-nav-more {
+.mytsa-nav-tree.arrow .layui-nav-child.layui-nav-hover > dd > a > .layui-nav-more {
 	display: inline-block !important;
 	transform: rotate(270deg);
 	-ms-transform: rotate(270deg);
@@ -239,8 +234,8 @@
 	background-color: transparent !important;
 }
 
-.pear-nav-tree.arrow .layui-nav-child.layui-nav-hover>a>.layui-nav-more:before,
-.pear-nav-tree.arrow .layui-nav-itemed>a>.layui-nav-more:before {
+.mytsa-nav-tree.arrow .layui-nav-child.layui-nav-hover > a > .layui-nav-more:before,
+.mytsa-nav-tree.arrow .layui-nav-itemed > a > .layui-nav-more:before {
 	content: '\e61a';
 	display: inline-block;
 	vertical-align: middle;

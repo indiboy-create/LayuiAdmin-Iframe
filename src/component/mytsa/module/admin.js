@@ -1,18 +1,16 @@
-layui.define(['jquery', 'tools', 'element', 'layer', 'tabPage', 'menu', 'theme'],
+layui.define(
+	['jquery', 'tools', 'element', 'layer', 'tabPage', 'menu', 'theme'],
 	function (exports) {
-		"use strict";
+		'use strict';
 
 		var $ = layui.jquery,
 			layer = layui.layer,
-
 			menu = layui.menu,
 			tabPage = layui.tabPage,
-
 			theme = layui.theme,
 			tools = layui.tools;
 
-
-		var logout = function () { };
+		var logout = function () {};
 
 		var body = $('body');
 
@@ -23,6 +21,16 @@ layui.define(['jquery', 'tools', 'element', 'layer', 'tabPage', 'menu', 'theme']
 				.replace(/>/g, '&gt;')
 				.replace(/"/g, '&quot;')
 				.replace(/'/g, '&#39;');
+		}
+
+		// 浏览器标签标题跟随当前激活的标签页，多开时便于区分
+		var baseTitle = document.title;
+
+		function updateDocumentTitle() {
+			// 关闭标签的瞬间 layui-this 可能短暂同时挂在两个 li 上，取最后一个
+			var $active = $('.layui-tab-title li.layui-this').last().find('span.title');
+			var title = $active.length ? $active.first().text().trim() : '';
+			document.title = title ? title + ' - ' + baseTitle : baseTitle;
 		}
 
 		function logError(title, error) {
@@ -37,7 +45,7 @@ layui.define(['jquery', 'tools', 'element', 'layer', 'tabPage', 'menu', 'theme']
 
 		function isFrameLoaded(frame) {
 			try {
-				return frame.contentDocument && frame.contentDocument.readyState === "complete";
+				return frame.contentDocument && frame.contentDocument.readyState === 'complete';
 			} catch (error) {
 				return false;
 			}
@@ -49,15 +57,14 @@ layui.define(['jquery', 'tools', 'element', 'layer', 'tabPage', 'menu', 'theme']
 					resolve();
 					return;
 				}
-				frame.addEventListener("load", resolve, { once: true });
+				frame.addEventListener('load', resolve, { once: true });
 			});
 		}
 
-		var pearAdmin = new function () {
-
+		var mytsaAdmin = new (function () {
 			this.configuration = {};
 
-			this.configurationPath = "admin/config/pear.config.json";
+			this.configurationPath = 'admin/config/mytsa.config.json';
 
 			this.instances = {};
 
@@ -83,7 +90,7 @@ layui.define(['jquery', 'tools', 'element', 'layer', 'tabPage', 'menu', 'theme']
 				if (loader.length) {
 					loader.fadeOut(200);
 				}
-			}
+			};
 
 			/**
 			 * 初始化阶段的致命错误：结束 loading 并给出可重试的提示
@@ -94,17 +101,17 @@ layui.define(['jquery', 'tools', 'element', 'layer', 'tabPage', 'menu', 'theme']
 			this.reportError = function (title, error) {
 				var detail = error && error.message ? error.message : String(error || '未知错误');
 				detail = String(detail).replace(/\s+/g, ' ').slice(0, 200);
-				pearAdmin.hideLoader();
+				mytsaAdmin.hideLoader();
 				logError(title, error);
 
-				if (pearAdmin.errorVisible) {
+				if (mytsaAdmin.errorVisible) {
 					return;
 				}
 				if (!layer || typeof layer.open !== 'function') {
 					window.alert(title + '：' + detail);
 					return;
 				}
-				pearAdmin.errorVisible = true;
+				mytsaAdmin.errorVisible = true;
 				layer.open({
 					type: 1,
 					title: escapeHtml(title),
@@ -112,7 +119,9 @@ layui.define(['jquery', 'tools', 'element', 'layer', 'tabPage', 'menu', 'theme']
 					shade: 0.3,
 					content:
 						'<div style="padding:18px 20px;line-height:1.8;">' +
-						'<p style="color:#666;">' + escapeHtml(detail) + '</p>' +
+						'<p style="color:#666;">' +
+						escapeHtml(detail) +
+						'</p>' +
 						'<p style="color:#999;font-size:12px;">请检查配置文件与接口是否可访问，或点击下方按钮重试。</p>' +
 						'</div>',
 					btn: ['重新加载'],
@@ -121,10 +130,10 @@ layui.define(['jquery', 'tools', 'element', 'layer', 'tabPage', 'menu', 'theme']
 						window.location.reload();
 					},
 					end: function () {
-						pearAdmin.errorVisible = false;
-					}
+						mytsaAdmin.errorVisible = false;
+					},
 				});
-			}
+			};
 
 			/**
 			 * 菜单请求失败时的侧栏占位，提供重试入口
@@ -135,13 +144,15 @@ layui.define(['jquery', 'tools', 'element', 'layer', 'tabPage', 'menu', 'theme']
 				var detail = error && error.message ? error.message : '菜单加载失败';
 				detail = String(detail).replace(/\s+/g, ' ').slice(0, 200);
 				$('#side').html(
-					'<div class="pear-menu-error" style="padding:18px 16px;line-height:1.9;font-size:13px;">' +
-					'<p style="color:#e6a23c;">菜单加载失败</p>' +
-					'<p style="color:#9a9a9a;font-size:12px;">' + escapeHtml(detail) + '</p>' +
-					'<a href="javascript:;" class="pear-menu-retry" style="color:var(--global-primary-color);font-size:12px;">重新加载</a>' +
-					'</div>'
+					'<div class="mytsa-menu-error" style="padding:18px 16px;line-height:1.9;font-size:13px;">' +
+						'<p style="color:#e6a23c;">菜单加载失败</p>' +
+						'<p style="color:#9a9a9a;font-size:12px;">' +
+						escapeHtml(detail) +
+						'</p>' +
+						'<a href="javascript:;" class="mytsa-menu-retry" style="color:var(--global-primary-color);font-size:12px;">重新加载</a>' +
+						'</div>'
 				);
-			}
+			};
 
 			/**
 			 * 兜底：初始化流程异常或请求悬挂时，强制结束 loading
@@ -149,23 +160,26 @@ layui.define(['jquery', 'tools', 'element', 'layer', 'tabPage', 'menu', 'theme']
 			 * @param ms 等待时长，默认 10 秒
 			 */
 			this.startLoaderGuard = function (ms) {
-				if (pearAdmin.loaderGuard) {
-					clearTimeout(pearAdmin.loaderGuard);
+				if (mytsaAdmin.loaderGuard) {
+					clearTimeout(mytsaAdmin.loaderGuard);
 				}
 				var wait = typeof ms === 'number' && ms > 0 ? ms : 10000;
-				pearAdmin.loaderGuard = setTimeout(function () {
+				mytsaAdmin.loaderGuard = setTimeout(function () {
 					var loader = $('.loader-wrapper');
 					if (loader.length && loader.is(':visible')) {
-						logError('首屏加载超时', '超过 ' + wait + 'ms 仍未完成初始化，已强制结束 loading');
+						logError(
+							'首屏加载超时',
+							'超过 ' + wait + 'ms 仍未完成初始化，已强制结束 loading'
+						);
 						loader.fadeOut(200);
 					}
 				}, wait);
-			}
+			};
 
 			/**
-			 * @since Pear Admin 4.0
-			 * 
-			 * 获取 pear.config 实现 [ default ] 
+			 * @since MyTSA Admin 4.0
+			 *
+			 * 获取 mytsa.config 实现 [ default ]
 			 */
 			this.configurationProvider = () => {
 				return new Promise((resolve, reject) => {
@@ -187,77 +201,76 @@ layui.define(['jquery', 'tools', 'element', 'layer', 'tabPage', 'menu', 'theme']
 							} else {
 								reject(new Error('配置文件加载失败（HTTP ' + xhr.status + '）'));
 							}
-						}
+						},
 					});
-				})
-			}
+				});
+			};
 
 			/**
-			 * @since Pear Admin 4.0 
-			 * 
-			 * 配置 pear.config 路径
+			 * @since MyTSA Admin 4.0
+			 *
+			 * 配置 mytsa.config 路径
 			 */
 			this.setConfigurationPath = (path) => {
 				this.configurationPath = path;
-			}
+			};
 
 			/**
-			 * @since Pear Admin 4.0
-			 * 
-			 * 获取 pear.config 实现 [ implement ] 
+			 * @since MyTSA Admin 4.0
+			 *
+			 * 获取 mytsa.config 实现 [ implement ]
 			 */
 			this.setConfigurationProvider = (provider) => {
 				this.configurationProvider = provider;
-			}
+			};
 
 			/**
-			 * @since Pear Admin 4.0
-			 * 
-			 * 获取 pear.config 配置
+			 * @since MyTSA Admin 4.0
+			 *
+			 * 获取 mytsa.config 配置
 			 */
 			this.getConfiguration = () => {
 				return this.configuration;
-			}
+			};
 
 			/**
-			 * @since Pear Admin 4.0
-			 * 
+			 * @since MyTSA Admin 4.0
+			 *
 			 * Core Function.
-			 * 
-			 * @param {*} options 
+			 *
+			 * @param {*} options
 			 */
 			this.render = (options) => {
-				pearAdmin.startLoaderGuard();
+				mytsaAdmin.startLoaderGuard();
 
 				if (options !== undefined) {
-					pearAdmin.apply(options);
+					mytsaAdmin.apply(options);
 					return Promise.resolve(options);
 				}
 				return this.configurationProvider()
 					.then((result) => {
-						pearAdmin.apply(result);
+						mytsaAdmin.apply(result);
 						return result;
 					})
 					.catch((error) => {
-						pearAdmin.reportError('配置加载失败', error);
+						mytsaAdmin.reportError('配置加载失败', error);
 						return null;
-					})
-			}
+					});
+			};
 
 			/**
-			 * @since Pear Admin 4.0 
-			 * 
+			 * @since MyTSA Admin 4.0
+			 *
 			 * 启动构建
 			 */
 			this.apply = function (configuration) {
-
 				if (window.adminDebug) {
 					window.adminDebug.setConfig(configuration && configuration.debug === true);
 				}
 
 				if (!configuration || typeof configuration !== 'object') {
-					pearAdmin.reportError('配置加载失败', '配置文件内容为空或格式错误');
-					pearAdmin.keepLoad(null);
+					mytsaAdmin.reportError('配置加载失败', '配置文件内容为空或格式错误');
+					mytsaAdmin.keepLoad(null);
 					return;
 				}
 
@@ -268,45 +281,48 @@ layui.define(['jquery', 'tools', 'element', 'layer', 'tabPage', 'menu', 'theme']
 					}
 				});
 				if (missing.length) {
-					pearAdmin.reportError('配置加载失败', 'pear.config.json 缺少字段：' + missing.join('、'));
-					pearAdmin.keepLoad(configuration);
+					mytsaAdmin.reportError(
+						'配置加载失败',
+						'mytsa.config.json 缺少字段：' + missing.join('、')
+					);
+					mytsaAdmin.keepLoad(configuration);
 					return;
 				}
 
 				var kept = false;
 				try {
-					pearAdmin.logoRender(configuration);
-					pearAdmin.menuRender(configuration);
-					pearAdmin.bodyRender(configuration);
+					mytsaAdmin.logoRender(configuration);
+					mytsaAdmin.menuRender(configuration);
+					mytsaAdmin.bodyRender(configuration);
 					try {
-						pearAdmin.themeRender(configuration);
+						mytsaAdmin.themeRender(configuration);
 					} catch (themeError) {
 						logError('主题初始化失败', themeError);
 					}
-					pearAdmin.keepLoad(configuration);
+					mytsaAdmin.keepLoad(configuration);
 					kept = true;
-					window.PearAdmin = pearAdmin;
+					window.MytsaAdmin = mytsaAdmin;
 				} catch (error) {
-					pearAdmin.reportError('初始化失败', error);
+					mytsaAdmin.reportError('初始化失败', error);
 				} finally {
 					if (!kept) {
-						pearAdmin.keepLoad(configuration);
+						mytsaAdmin.keepLoad(configuration);
 					}
 				}
-			}
+			};
 
 			this.logoRender = function (param) {
-				$(".layui-logo .logo").attr("src", param.logo.image);
-				$(".layui-logo .title").html(param.logo.title);
-			}
+				$('.layui-logo .logo').attr('src', param.logo.image);
+				$('.layui-logo .title').html(param.logo.title);
+			};
 
 			/**
-			 * @since Pear Admin 4.0
-			 * 
+			 * @since MyTSA Admin 4.0
+			 *
 			 * 侧边菜单
 			 */
 			this.menuRender = function (param) {
-				pearAdmin.menuReady = new Promise(function (resolve) {
+				mytsaAdmin.menuReady = new Promise(function (resolve) {
 					var settled = false;
 
 					function finish() {
@@ -317,7 +333,7 @@ layui.define(['jquery', 'tools', 'element', 'layer', 'tabPage', 'menu', 'theme']
 						resolve();
 					}
 
-					pearAdmin.instances.menu = menu.render({
+					mytsaAdmin.instances.menu = menu.render({
 						elem: 'side',
 						async: param.menu.async,
 						method: param.menu.method,
@@ -332,95 +348,109 @@ layui.define(['jquery', 'tools', 'element', 'layer', 'tabPage', 'menu', 'theme']
 						},
 						error: function (error) {
 							logError('菜单加载失败', error);
-							pearAdmin.renderMenuError(error);
+							mytsaAdmin.renderMenuError(error);
 							finish();
 						},
 						done: function () {
 							finish();
-							pearAdmin.instances.menu.isCollapse = param.menu.collapse;
-							pearAdmin.instances.menu.selectItem(param.menu.select);
+							mytsaAdmin.instances.menu.isCollapse = param.menu.collapse;
+							mytsaAdmin.instances.menu.selectItem(param.menu.select);
 							if (param.menu.collapse) {
 								if ($(window).width() >= 768) {
-									collapse()
+									collapse();
 								}
 							}
-						}
+						},
 					});
 				});
-			}
+			};
 
 			/**
-			 * @since Pear Admin 4.0
-			 * 
+			 * @since MyTSA Admin 4.0
+			 *
 			 * 视图容器
 			 */
 			this.bodyRender = function (param) {
+				body.on('click', '.refresh', function () {
+					mytsaAdmin.refresh();
+				});
 
-				body.on("click", ".refresh", function () {
-					pearAdmin.refresh();
-				})
-
-				pearAdmin.instances.tabPage = tabPage.render({
+				mytsaAdmin.instances.tabPage = tabPage.render({
 					elem: 'content',
 					session: param.tab.session,
 					index: 0,
 					tabMax: param.tab.max,
 					closeEvent: function (id) {
-						pearAdmin.instances.menu.selectItem(id);
+						mytsaAdmin.instances.menu.selectItem(id);
+						// layui 关闭标签后才会切换 layui-this，等一帧再同步标题
+						setTimeout(updateDocumentTitle, 200);
 					},
-					data: [{
-						id: param.tab.index.id,
-						url: param.tab.index.href,
-						title: param.tab.index.title,
-						type: param.tab.index.type,
-						close: false
-					}],
+					data: [
+						{
+							id: param.tab.index.id,
+							url: param.tab.index.href,
+							title: param.tab.index.title,
+							type: param.tab.index.type,
+							close: false,
+						},
+					],
 					success: function (id) {
 						if (param.tab.session) {
 							setTimeout(function () {
-								pearAdmin.instances.menu.selectItem(id);
-								pearAdmin.instances.tabPage.positionTab();
-							}, 500)
+								mytsaAdmin.instances.menu.selectItem(id);
+								mytsaAdmin.instances.tabPage.positionTab();
+								updateDocumentTitle();
+							}, 500);
 						}
-					}
+					},
 				});
 
-				pearAdmin.instances.tabPage.click(function (id) {
+				mytsaAdmin.instances.tabPage.click(function (id) {
 					if (!param.tab.keepState) {
-						pearAdmin.instances.tabPage.refresh(false);
+						mytsaAdmin.instances.tabPage.refresh(false);
 					}
-					pearAdmin.instances.tabPage.positionTab();
-					pearAdmin.instances.menu.selectItem(id);
-				})
+					mytsaAdmin.instances.tabPage.positionTab();
+					mytsaAdmin.instances.menu.selectItem(id);
+					updateDocumentTitle();
+				});
 
-				pearAdmin.instances.menu.click(function (dom, data) {
-					if (data.menuOpenType === "_layer") {
-						layer.open({ type: 2, title: escapeHtml(data.menuTitle), content: data.menuUrl, area: ['80%', '80%'], maxmin: true })
+				mytsaAdmin.instances.menu.click(function (dom, data) {
+					if (data.menuOpenType === '_layer') {
+						layer.open({
+							type: 2,
+							title: escapeHtml(data.menuTitle),
+							content: data.menuUrl,
+							area: ['80%', '80%'],
+							maxmin: true,
+						});
 					} else {
-						pearAdmin.instances.tabPage.changePage({
+						mytsaAdmin.instances.tabPage.changePage({
 							id: data.menuId,
 							title: data.menuTitle,
 							type: data.menuOpenType,
 							url: data.menuUrl,
-							close: true
+							close: true,
 						});
 					}
 					compatible();
-				})
+				});
 
-				var $active = $("#content .layui-tab-content .layui-show");
-				var frame = $active.find("iframe").get(0);
+				var $active = $('#content .layui-tab-content .layui-show');
+				var frame = $active.find('iframe').get(0);
 				if (!$active.length) {
-					frame = $("#content iframe").get(0);
+					frame = $('#content iframe').get(0);
 				}
-				pearAdmin.frameReady = waitFrameLoad(frame);
-			}
+				mytsaAdmin.frameReady = waitFrameLoad(frame);
+			};
 
 			this.keepLoad = function (param) {
 				compatible();
 
 				var other = (param && param.other) || {};
-				var maxWait = typeof other.keepLoad === "number" && other.keepLoad > 0 ? other.keepLoad : 3000;
+				var maxWait =
+					typeof other.keepLoad === 'number' && other.keepLoad > 0
+						? other.keepLoad
+						: 3000;
 				var timer = null;
 
 				var timeout = new Promise(function (resolve) {
@@ -431,162 +461,177 @@ layui.define(['jquery', 'tools', 'element', 'layer', 'tabPage', 'menu', 'theme']
 					if (timer) {
 						clearTimeout(timer);
 					}
-					if (pearAdmin.loaderGuard) {
-						clearTimeout(pearAdmin.loaderGuard);
-						pearAdmin.loaderGuard = null;
+					if (mytsaAdmin.loaderGuard) {
+						clearTimeout(mytsaAdmin.loaderGuard);
+						mytsaAdmin.loaderGuard = null;
 					}
-					pearAdmin.hideLoader();
+					mytsaAdmin.hideLoader();
 				}
 
 				Promise.race([
-					Promise.all([pearAdmin.menuReady, pearAdmin.frameReady]),
-					timeout
+					Promise.all([mytsaAdmin.menuReady, mytsaAdmin.frameReady]),
+					timeout,
 				]).then(done, done);
-			}
+			};
 
 			/***
-			 * @since Pear Admin 4.0
+			 * @since MyTSA Admin 4.0
 			 *
 			 * 切换主题色
 			 */
 			this.changeTheme = function () {
 				theme.changeTheme();
-			}
+			};
 
 			/**
-			 * @since Pear Admin 4.0
-			 * 
+			 * @since MyTSA Admin 4.0
+			 *
 			 * 主题配置
 			 */
 			this.themeRender = function (option) {
 				theme.render(option);
-			}
+			};
 
 			/**
 			 * 设置注销逻辑
-			 * 
+			 *
 			 * @param callback 实现
 			 */
 			this.logout = function (callback) {
 				if (callback != undefined) {
 					logout = callback;
 				}
-			}
+			};
 
 			/**
-			 * @since Pear Admin 4.0.3
-			 * 
+			 * @since MyTSA Admin 4.0.3
+			 *
 			 * 刷新当前页面
 			 */
 			this.refresh = function () {
-				var refreshBtn = $(".refresh a");
-				refreshBtn.addClass("layui-anim layui-anim-rotate layui-anim-loop layui-icon-loading");
-				refreshBtn.removeClass("layui-icon-refresh-1");
-				pearAdmin.instances.tabPage.refresh(true);
+				var refreshBtn = $('.refresh a');
+				refreshBtn.addClass(
+					'layui-anim layui-anim-rotate layui-anim-loop layui-icon-loading'
+				);
+				refreshBtn.removeClass('layui-icon-refresh-1');
+				mytsaAdmin.instances.tabPage.refresh(true);
 				setTimeout(function () {
-					refreshBtn.removeClass("layui-anim layui-anim-rotate layui-anim-loop layui-icon-loading");
-					refreshBtn.addClass("layui-icon-refresh-1");
-				}, 600)
-			}
+					refreshBtn.removeClass(
+						'layui-anim layui-anim-rotate layui-anim-loop layui-icon-loading'
+					);
+					refreshBtn.addClass('layui-icon-refresh-1');
+				}, 600);
+			};
 
 			/**
-			 * @since Pear Admin 4.0.3 
-			 * 
+			 * @since MyTSA Admin 4.0.3
+			 *
 			 * 切换内容页面
-			 * 
+			 *
 			 * PS: tabPages 模式下，如果页面不存在则新增，反则仅做切换。
 			 */
 			this.changePage = function (data) {
-				pearAdmin.instances.tabPage.changePage({ id: data.id, title: data.title, url: data.url, type: data.type, close: true });
-			}
-
-		};
+				mytsaAdmin.instances.tabPage.changePage({
+					id: data.id,
+					title: data.title,
+					url: data.url,
+					type: data.type,
+					close: true,
+				});
+			};
+		})();
 
 		/**
-		 * @since Pear Admin 4.0
-		 * 
+		 * @since MyTSA Admin 4.0
+		 *
 		 * 菜单折叠
 		 */
 		function collapse() {
-			if (!pearAdmin.instances.menu) {
+			if (!mytsaAdmin.instances.menu) {
 				return;
 			}
-			pearAdmin.instances.menu.collapse();
-			var admin = $(".pear-admin");
-			var left = $(".layui-icon-spread-left")
-			var right = $(".layui-icon-shrink-right")
-			if (admin.is(".pear-mini")) {
-				left.addClass("layui-icon-shrink-right")
-				left.removeClass("layui-icon-spread-left")
-				admin.removeClass("pear-mini");
-				pearAdmin.instances.menu.isCollapse = false;
+			mytsaAdmin.instances.menu.collapse();
+			var admin = $('.mytsa-admin');
+			var left = $('.layui-icon-spread-left');
+			var right = $('.layui-icon-shrink-right');
+			if (admin.is('.mytsa-mini')) {
+				left.addClass('layui-icon-shrink-right');
+				left.removeClass('layui-icon-spread-left');
+				admin.removeClass('mytsa-mini');
+				mytsaAdmin.instances.menu.isCollapse = false;
 			} else {
-				right.addClass("layui-icon-spread-left")
-				right.removeClass("layui-icon-shrink-right")
-				admin.addClass("pear-mini");
-				pearAdmin.instances.menu.isCollapse = true;
+				right.addClass('layui-icon-spread-left');
+				right.removeClass('layui-icon-shrink-right');
+				admin.addClass('mytsa-mini');
+				mytsaAdmin.instances.menu.isCollapse = true;
 			}
 		}
 
 		/**
-		 * @since Pear Admin 4.0
-		 * 
-		 * 使用 admin.logout(Function) 实现注销 
-		 * 
-		 * Promise<boolean> 作为返回值类型时，泛型内容为 true 时视为注销成功，则清除 pearAdmin.instances.tabPage 缓存
-		 * 
+		 * @since MyTSA Admin 4.0
+		 *
+		 * 使用 admin.logout(Function) 实现注销
+		 *
+		 * Promise<boolean> 作为返回值类型时，泛型内容为 true 时视为注销成功，则清除 mytsaAdmin.instances.tabPage 缓存
+		 *
 		 * 否则视为注销失败，不做任何处置。
 		 */
-		body.on("click", ".logout", function () {
+		body.on('click', '.logout', function () {
 			var promise = logout();
 			if (promise != undefined) {
 				promise.then((asyncResult) => {
 					if (asyncResult) {
-						if (pearAdmin.instances.tabPage != undefined) {
-							pearAdmin.instances.tabPage.clear();
+						if (mytsaAdmin.instances.tabPage != undefined) {
+							mytsaAdmin.instances.tabPage.clear();
 						}
 					}
-				})
+				});
 			} else {
-				if (pearAdmin.instances.tabPage != undefined) {
-					pearAdmin.instances.tabPage.clear();
+				if (mytsaAdmin.instances.tabPage != undefined) {
+					mytsaAdmin.instances.tabPage.clear();
 				}
 			}
-		})
+		});
 
-		body.on("click", ".collapse,.pear-cover", function () {
+		body.on('click', '.collapse,.mytsa-cover', function () {
 			collapse();
 		});
 
-		body.on("click", ".pear-menu-retry", function () {
+		body.on('click', '.mytsa-menu-retry', function () {
 			window.location.reload();
 		});
 
-
-		body.on("click", '[user-menu-id]', function () {
-			pearAdmin.instances.tabPage.changePage({
-				id: $(this).attr("user-menu-id"),
-				title: $(this).attr("user-menu-title"),
-				url: $(this).attr("user-menu-url"),
-				close: true
-			}, 300);
+		body.on('click', '[user-menu-id]', function () {
+			mytsaAdmin.instances.tabPage.changePage(
+				{
+					id: $(this).attr('user-menu-id'),
+					title: $(this).attr('user-menu-title'),
+					url: $(this).attr('user-menu-url'),
+					close: true,
+				},
+				300
+			);
 		});
-
 
 		function compatible() {
 			if ($(window).width() <= 768) {
-				collapse()
+				collapse();
 			}
 		}
 
+		$(window).on(
+			'resize',
+			tools.debounce(function () {
+				if (
+					mytsaAdmin.instances.menu &&
+					!mytsaAdmin.instances.menu.isCollapse &&
+					$(window).width() <= 768
+				) {
+					collapse();
+				}
+			}, 50)
+		);
 
-		
-
-		$(window).on('resize', tools.debounce(function () {
-			if (pearAdmin.instances.menu && !pearAdmin.instances.menu.isCollapse && $(window).width() <= 768) {
-				collapse();
-			}
-		}, 50));
-
-		exports('admin', pearAdmin);
-	})
+		exports('admin', mytsaAdmin);
+	}
+);

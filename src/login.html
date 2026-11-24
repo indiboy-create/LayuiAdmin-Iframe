@@ -2,17 +2,22 @@
 <html lang="zh-CN">
 	<head>
 		<meta charset="utf-8" />
+		<meta name="robots" content="noindex,nofollow" />
+		<meta name="theme-color" content="#20222A" />
+		<meta name="color-scheme" content="light" />
+		<meta name="referrer" content="no-referrer" />
+		<meta
+			http-equiv="Content-Security-Policy"
+			content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self' data:; connect-src 'self'; frame-src 'self' https:; base-uri 'self'; form-action 'self'"
+		/>
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 		<title>登录</title>
 		<link rel="stylesheet" href="component/layui/css/layui.css" />
-		<link rel="stylesheet" href="component/pear/css/pear.css" />
+		<link rel="stylesheet" href="component/mytsa/css/mytsa.css" />
 		<link rel="stylesheet" href="admin/css/login.css" />
 		<link rel="stylesheet" href="admin/css/variables.css" />
 		<script src="admin/js/login-guard.js"></script>
-		<script src="admin/js/auth.js"></script>
-		<script>
-			Auth.guardLoginPage();
-		</script>
+		<script src="admin/js/auth.js" data-guard-login></script>
 	</head>
 
 	<body>
@@ -22,14 +27,17 @@
 					<img class="login-bg-img" src="admin/images/banner.webp" alt="登录页插图" />
 				</div>
 				<div class="layui-col-sm6 layui-col-xs12 login-form">
-					<form class="layui-form" onsubmit="return false;">
+					<form class="layui-form">
 						<div class="form-center">
 							<div class="form-center-box">
 								<div class="top-log-title">
 									<img
 										class="top-log"
-										src="admin/images/logo.png"
+										src="admin/images/logo.webp"
 										alt="LayuiAdmin-Iframe"
+										width="50"
+										height="50"
+										decoding="async"
 									/>
 									<span>LayuiAdmin-Iframe</span>
 								</div>
@@ -135,55 +143,7 @@
 		<!-- 资 源 引 入 -->
 		<script src="admin/js/debug.js"></script>
 		<script src="component/layui/layui.js"></script>
-		<script src="component/pear/pear.js"></script>
-		<script>
-			layui.use(['form', 'layer'], function () {
-				'use strict';
-
-				var form = layui.form;
-				var layer = layui.layer;
-
-				form.on('submit(login)', function (data) {
-					var field = data.field || {};
-					var button = data.elem;
-
-					if (button) {
-						button.disabled = true;
-					}
-
-					Auth.login(field.username, field.password, !!field['like1[write]'])
-						.then(function () {
-							window.location.href = 'index.html';
-						})
-						.catch(function (error) {
-							if (button) {
-								button.disabled = false;
-							}
-
-							var message = error && error.message ? error.message : '登录失败';
-							var alert = document.getElementById('login-alert');
-							if (alert) {
-								alert.textContent = message;
-							}
-
-							var username = document.querySelector('input[name="username"]');
-							var password = document.querySelector('input[name="password"]');
-							if (username) {
-								username.setAttribute('aria-invalid', 'true');
-							}
-							if (password) {
-								password.setAttribute('aria-invalid', 'true');
-							}
-
-							layer.msg(message, {
-								icon: 2,
-								time: 2000,
-							});
-						});
-
-					return false;
-				});
-			});
-		</script>
+		<script src="admin/js/csp-guard.js"></script>
+		<script src="admin/js/login-bootstrap.js"></script>
 	</body>
 </html>

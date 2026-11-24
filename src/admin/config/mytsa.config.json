@@ -2,7 +2,7 @@
 	"debug": true,
 	"logo": {
 		"title": "LayuiAdmin-Iframe",
-		"image": "admin/images/logo.png"
+		"image": "admin/images/logo.webp"
 	},
 	"menu": {
 		"data": "api/menu.json",

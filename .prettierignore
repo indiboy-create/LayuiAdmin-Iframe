@@ -1,7 +1,8 @@
 node_modules/
 dist/
-src/component/
+src/component/layui/
 src/admin/images/
+src/robots.txt
 package-lock.json
 *.min.*
 favicon.ico

@@ -3,27 +3,32 @@
 	<head>
 		<title>LayuiAdmin-Iframe</title>
 		<meta charset="utf-8" />
+		<meta name="robots" content="noindex,nofollow" />
+		<meta name="theme-color" content="#20222A" />
+		<meta name="color-scheme" content="light" />
 		<meta name="renderer" content="webkit" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="description" content="基于 layui 的 iframe 版后台管理模板" />
+		<meta name="referrer" content="no-referrer" />
+		<meta
+			http-equiv="Content-Security-Policy"
+			content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; font-src 'self' data:; connect-src 'self'; frame-src 'self' https:; base-uri 'self'; form-action 'self'"
+		/>
 		<link rel="icon" href="favicon.ico" />
 		<link rel="stylesheet" href="component/layui/css/layui.css" />
-		<link rel="stylesheet" href="component/pear/css/pear.css" />
-		<link rel="stylesheet" href="component/pear/css/module/menu.css" />
-		<link rel="stylesheet" href="component/pear/css/module/tabPage.css" />
+		<link rel="stylesheet" href="component/mytsa/css/mytsa.css" />
+		<link rel="stylesheet" href="component/mytsa/css/module/menu.css" />
+		<link rel="stylesheet" href="component/mytsa/css/module/tabPage.css" />
 		<link rel="stylesheet" href="admin/css/admin.css" />
 		<link rel="stylesheet" href="admin/css/variables.css" />
 		<link rel="stylesheet" href="admin/css/reset.css" />
-		<script src="admin/js/auth.js"></script>
-		<script>
-			Auth.guard();
-		</script>
+		<script src="admin/js/auth.js" data-guard></script>
 	</head>
 	<!-- 结 构 代 码 -->
 
-	<body class="layui-layout-body pear-admin">
-		<a class="pear-skip-link" href="#content">跳到主内容</a>
+	<body class="layui-layout-body mytsa-admin">
+		<a class="mytsa-skip-link" href="#content">跳到主内容</a>
 		<!-- 布 局 框 架 -->
 		<div class="layui-layout layui-layout-admin">
 			<!-- 顶 部 样 式 -->
@@ -31,7 +36,13 @@
 				<!-- 菜 单 顶 部 -->
 				<div class="layui-logo">
 					<!-- 图 标 -->
-					<img class="logo" alt="LayuiAdmin-Iframe" />
+					<img
+						class="logo"
+						alt="LayuiAdmin-Iframe"
+						width="34"
+						height="34"
+						decoding="async"
+					/>
 					<!-- 标 题 -->
 					<span class="title"></span>
 				</div>
@@ -120,7 +131,13 @@
 					style="cursor: pointer"
 				>
 					<!-- 图 标 -->
-					<img class="logo" alt="LayuiAdmin-Iframe" />
+					<img
+						class="logo"
+						alt="LayuiAdmin-Iframe"
+						width="34"
+						height="34"
+						decoding="async"
+					/>
 					<!-- 标 题 -->
 					<span class="title"></span>
 				</div>
@@ -136,7 +153,7 @@
 			</div>
 
 			<!-- 遮 盖 层 -->
-			<div class="pear-cover"></div>
+			<div class="mytsa-cover"></div>
 			<!-- 加 载 动 画 -->
 			<div class="loader-wrapper">
 				<!-- 动 画 对 象 -->
@@ -144,7 +161,7 @@
 			</div>
 		</div>
 		<!-- 移 动 端 便 捷 操 作 -->
-		<div class="pear-collapsed-pe collapse">
+		<div class="mytsa-collapsed-pe collapse">
 			<a
 				href="javascript:;"
 				class="layui-icon layui-icon-shrink-right"
@@ -154,48 +171,10 @@
 		<!-- 依 赖 脚 本 -->
 		<script src="admin/js/debug.js"></script>
 		<script src="component/layui/layui.js"></script>
-		<script src="component/pear/pear.js"></script>
+		<script src="component/mytsa/mytsa.js"></script>
 		<script src="admin/js/about.js"></script>
-		<script>
-			layui.use(['admin'], function () {
-				'use strict';
-
-				var admin = layui.admin;
-				var current = Auth.session();
-
-				if (current) {
-					var nameEl = document.querySelector(
-						'.layui-header .layui-nav-right .user cite'
-					);
-					if (nameEl) {
-						nameEl.textContent = current.name;
-					}
-				}
-
-				admin.setConfigurationPath('admin/config/pear.config.json');
-
-				admin.render();
-
-				admin.logout(function () {
-					return new Promise((resolve) => {
-						Auth.logout();
-						resolve(true);
-					});
-				});
-			});
-			// 跳过导航链接：聚焦时显形（:focus 在窗口失焦场景不一定匹配，补一个类兜底）
-			(function () {
-				var skipLink = document.querySelector('.pear-skip-link');
-				if (!skipLink) {
-					return;
-				}
-				skipLink.addEventListener('focus', function () {
-					skipLink.classList.add('is-focused');
-				});
-				skipLink.addEventListener('blur', function () {
-					skipLink.classList.remove('is-focused');
-				});
-			})();
-		</script>
+		<script src="admin/js/csp-guard.js"></script>
+		<script src="admin/js/bootstrap.js"></script>
+		<script src="admin/js/watermark.js"></script>
 	</body>
 </html>

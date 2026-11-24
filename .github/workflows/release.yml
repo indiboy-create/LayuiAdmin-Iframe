@@ -8,7 +8,6 @@ on:
 permissions:
     contents: write
     packages: write
-
 jobs:
     quality:
         name: Lint, build and verify
@@ -20,6 +19,9 @@ jobs:
         name: Publish dist
         needs: quality
         runs-on: ubuntu-latest
+        env:
+            # 用于判断公共 npm 源是否配置了发布令牌
+            NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         steps:
             - name: Checkout
               uses: actions/checkout@v4
@@ -58,10 +60,24 @@ jobs:
                   path: layuiadmin-iframe-*.zip
                   if-no-files-found: error
 
+            # 直接用质量任务产出的 dist 发布，--ignore-scripts 跳过 prepublishOnly 的二次构建，
+            # 避免 npm 包与 zip 来自两次不同构建（构建戳不一致）
             - name: Publish to GitHub Packages
-              run: npm publish
+              run: |
+                  echo "//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}" >> .npmrc
+                  npm publish --ignore-scripts --registry=https://npm.pkg.github.com/
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+            # 未配置 NPM_TOKEN 时跳过公共源发布，只保留 GitHub Packages
+            - name: Publish to npm registry
+              if: env.NPM_TOKEN != ''
+              run: |
+                  echo "@indiboy-create:registry=https://registry.npmjs.org/" >> .npmrc
+                  echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" >> .npmrc
+                  npm publish --ignore-scripts --registry=https://registry.npmjs.org/ --access public
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
             - name: Publish GitHub Release
               env:
