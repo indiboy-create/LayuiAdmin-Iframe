@@ -12,13 +12,13 @@
 	],
 	"author": "indiboy-create",
 	"license": "MIT",
-	"homepage": "https://indiboy-create.github.io/LayuiAdmin-Iframe/",
+	"homepage": "https://initearth.github.io/LayuiAdmin-Iframe/",
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/indiboy-create/LayuiAdmin-Iframe.git"
+		"url": "git+https://github.com/initearth/LayuiAdmin-Iframe.git"
 	},
 	"bugs": {
-		"url": "https://github.com/indiboy-create/LayuiAdmin-Iframe/issues"
+		"url": "https://github.com/initearth/LayuiAdmin-Iframe/issues"
 	},
 	"engines": {
 		"node": "^20.19.0 || ^22.13.0 || >=24"
