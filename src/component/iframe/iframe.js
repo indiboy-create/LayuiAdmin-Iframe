@@ -68,11 +68,10 @@
 
 	layui
 		.config({
-			base: rootPath + 'module/',
 			version: '',
 		})
 		.extend({
-			watermark: 'watermark',
+			watermark: '{/}' + rootPath + 'module/watermark',
 		})
 		.use(['watermark'], function () {
 			layui.watermark.render();

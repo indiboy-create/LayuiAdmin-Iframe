@@ -137,8 +137,9 @@
 		</div>
 		<!-- 资 源 引 入 -->
 		<script src="component/layui/layui.js"></script>
+		<script src="component/request/request.js"></script>
 		<script>
-			layui.use(['form'], function () {
+			layui.use(['form', 'http'], function () {
 				var form = layui.form;
 
 				form.on('submit(login)', function () {

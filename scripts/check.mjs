@@ -33,6 +33,8 @@ const REQUIRED_FILES = [
 	'component/mytsa/module/tabPage.js',
 	'component/iframe/iframe.js',
 	'component/iframe/module/watermark.js',
+	'component/request/request.js',
+	'component/request/module/http.js',
 	'component/mytsa/css/mytsa.css',
 	'theme/login/css/login.css',
 

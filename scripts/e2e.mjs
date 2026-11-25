@@ -191,6 +191,11 @@ try {
 		/<script>[\s\S]*submit\(login\)[\s\S]*index\.html[\s\S]*<\/script>/.test(login.text)
 	);
 	ok(
+		'login.html 引入请求模块入口',
+		/component\/request\/request\.js/.test(login.text) &&
+			/layui\.use\(\[['"]form['"],\s*['"]http['"]\]/.test(login.text)
+	);
+	ok(
 		'login.html 声明 referrer no-referrer',
 		/<meta\s+name="referrer"[^>]*no-referrer/i.test(login.text)
 	);
@@ -353,6 +358,36 @@ try {
 		mytsaEntry.status === 200 &&
 			/layui\.link\(/.test(mytsaEntry.text) &&
 			/mytsa\.bundle\.css/.test(mytsaEntry.text)
+	);
+	ok(
+		'mytsa.js 使用完整路径注册模块且不覆盖全局 base',
+		mytsaEntry.status === 200 &&
+			!/\bbase\s*:/.test(mytsaEntry.text) &&
+			/\{\/\}/.test(mytsaEntry.text) &&
+			/module\/admin/.test(mytsaEntry.text) &&
+			/module\/theme/.test(mytsaEntry.text),
+		'mytsa.js 仍在设置全局 base 或模块路径不完整'
+	);
+	const requestEntry = await request(base, '/component/request/request.js');
+	ok(
+		'request.js 按 mytsa 组件方式注册 http 模块',
+		requestEntry.status === 200 &&
+			/layui\.extend\(/.test(requestEntry.text) &&
+			/\{\/\}/.test(requestEntry.text) &&
+			/module\/http/.test(requestEntry.text),
+		`HTTP ${requestEntry.status}`
+	);
+	const httpModule = await request(base, '/component/request/module/http.js');
+	ok(
+		'HTTP 请求模块提供 token 注入与鉴权失败处理',
+		httpModule.status === 200 &&
+			/Authorization/.test(httpModule.text) &&
+			/Bearer/.test(httpModule.text) &&
+			/sessionStorage/.test(httpModule.text) &&
+			/401/.test(httpModule.text) &&
+			/withAuth/.test(httpModule.text) &&
+			/\(["']http['"],/.test(httpModule.text),
+		`HTTP ${httpModule.status}`
 	);
 	const mytsaBundle = await request(base, '/component/mytsa/css/mytsa.bundle.css');
 	ok('mytsa 合并样式可访问', mytsaBundle.status === 200, `HTTP ${mytsaBundle.status}`);
@@ -543,6 +578,14 @@ try {
 	);
 	const iframeEntry = await request(base, '/component/iframe/iframe.js');
 	const extendCss = await request(base, '/component/layui/css/extend.css');
+	ok(
+		'iframe.js 使用完整路径注册模块且不覆盖全局 base',
+		iframeEntry.status === 200 &&
+			!/\bbase\s*:/.test(iframeEntry.text) &&
+			/\{\/\}/.test(iframeEntry.text) &&
+			/module\/watermark/.test(iframeEntry.text),
+		'iframe.js 仍在设置全局 base 或模块路径不完整'
+	);
 	ok(
 		'方案按 mode 拆分且 iframe 按作用域同步',
 		iframeEntry.status === 200 &&

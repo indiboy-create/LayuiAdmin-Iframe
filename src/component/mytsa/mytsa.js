@@ -15,17 +15,16 @@
 
 	layui
 		.config({
-			base: rootPath + 'module/',
 			version: '',
 		})
 		.extend({
-			admin: 'admin',
+			admin: '{/}' + rootPath + 'module/admin',
 
-			tabPage: 'tabPage',
-			menu: 'menu',
-			sanitize: 'sanitize',
+			tabPage: '{/}' + rootPath + 'module/tabPage',
+			menu: '{/}' + rootPath + 'module/menu',
+			sanitize: '{/}' + rootPath + 'module/sanitize',
 
-			tools: 'tools',
-			theme: 'theme',
+			tools: '{/}' + rootPath + 'module/tools',
+			theme: '{/}' + rootPath + 'module/theme',
 		});
 })();
