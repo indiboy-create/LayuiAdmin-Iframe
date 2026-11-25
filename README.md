@@ -1,263 +1,153 @@
 # MyTSA
 
-MyTSA 是基于 [Layui](https://layui.dev/) 的经典后台管理系统前端模板，技术栈为原生 HTML + CSS + JavaScript，采用 Layui 的 AMD（`layui.define`）模块体系。
+MyTSA 是基于 [Layui](https://layui.dev/) 框架构建的 iframe 后台管理系统前端模板，使用原生 HTML、CSS 与 JavaScript 开发，提供完整的后台框架、登录页、标签页、菜单、主题配色与 iframe 示例页面。
 
-**在线预览**：<https://initearth.github.io/mytsa-admin-theme/iframe/>
+**预览地址**：<https://initearth.github.io/mytsa-admin-iframe/>
 
-## 技术栈
+## 功能特性
 
-- **Layui**：UI 组件与模块加载
-- **Vite**：开发服务器（实时刷新）
-- **Terser / CleanCSS**：构建时压缩 JS / CSS
-- **ESLint / Prettier**：代码规范与格式化
-- **Husky + lint-staged + Commitlint**：Git 提交规范
+- 左侧菜单 + 顶部导航 + 多标签页的后台布局
+- 标签页按需创建，支持刷新恢复与数量上限
+- 基础配色与暗黑模式，支持主题色预设、随机主题色与自定义配色
+- iframe 子页面独立资源，支持主题同步与水印
+- 菜单与标签页支持键盘操作和 ARIA 属性
+- 打印样式、404 页面与静态资源内容哈希
+- 响应式侧栏折叠与移动端适配
+- 前端不保存登录凭据，权限校验交给后端或网关
 
-## 目录结构
+## 环境要求
 
-```
-MyTSA
-├── src/                    # 源码目录
-│   ├── index.html          # 后台主页入口
-│   ├── login.html          # 登录页
-│   ├── 404.html            # 静态托管错误页
-│   ├── iframe/             # iframe 子页面
-│   │   ├── home.html       # 首页示例页
-│   │   ├── workbench.html  # 工作台示例页
-│   │   ├── table.html      # 表格示例页
-│   │   └── layui.html      # 消息中心示例页
-│   ├── theme/              # 主题资源
-│   │   ├── admin/          # 后台入口资源
-│   │   │   ├── css/        # 后台样式
-│   │   │   ├── images/     # 后台静态图片
-│   │   │   └── js/         # 后台引导脚本
-│   │   ├── login/          # 登录页静态资源
-│   │   │   ├── css/        # 登录样式
-│   │   │   └── images/     # 登录页图片
-│   │   └── iframe/         # iframe 子页面专属资源
-│   │       ├── css/        # iframe 独立样式
-│   │       ├── js/         # iframe 独立脚本
-│   │       └── config/     # iframe 独立配置
-
-│   ├── api/                # 配置与数据（mytsa.config.json/menu.json）
-│   └── component/
-│       ├── layui/          # 第三方 Layui 库（构建时不压缩）
-│       ├── mytsa/          # MyTSA Admin 模块（admin/menu/tabPage/theme/tools）
-│       └── iframe/         # 水印组件（iframe.js 入口 + module/watermark.js）
-├── test/
-│   ├── smoke.test.mjs      # 冒烟测试（菜单/主题/页面结构）
-│   ├── build.test.mjs      # 构建子步骤单测（内容哈希/样式合并/产物替换）
-│   └── sanitize.test.mjs   # 转义与地址清洗纯函数单测
-├── scripts/
-│   ├── build.mjs           # 构建流程编排（临时目录 + 原子替换）
-│   ├── check.mjs           # 产物校验脚本
-│   └── lib/
-│       ├── fs-utils.mjs    # 文件遍历 / 存在性工具
-│       ├── validate.mjs    # 引用与配置校验规则
-│       └── build/          # 构建子步骤（stamp / bundle-css / minify / replace）
-├── .github/workflows/      # CI（ci.yml 复用）+ 部署 / 发布 / 校验工作流
-├── vite.config.js          # Vite 开发服务器配置
-├── eslint.config.js        # ESLint 配置
-├── package.json            # 依赖与脚本
-├── LICENSE                 # MIT 许可证
-└── .husky/                 # Git 钩子
-```
+- Node.js：`^20.19.0 || ^22.13.0 || >=24`
+- npm：随 Node.js 安装
 
 ## 快速开始
 
 ```bash
-# 1. 安装依赖
+# 安装依赖
 npm install
 
-# 2. 启动开发服务器（默认 http://localhost:5173）
+# 启动开发服务器（默认 http://localhost:5173）
 npm run dev
 
-# 3. 构建到 dist/（静态拷贝 src 并压缩 JS/CSS）
+# 构建静态产物到 dist/
 npm run build
 
-# 4. 预览构建产物
+# 本地预览构建产物
 npm run preview
 ```
 
 ## 脚本说明
 
-| 命令                    | 说明                                                                                   |
-| ----------------------- | -------------------------------------------------------------------------------------- |
-| `npm run dev`           | 启动 Vite 开发服务器                                                                   |
-| `npm run build`         | 构建压缩产物到 `dist/`                                                                 |
-| `npm run preview`       | 本地预览 `dist/`                                                                       |
-| `npm run check`         | 校验 `dist/`（入口文件、HTML/CSS 资源引用、JSON 与主题配置、按类型体积预算、缓存标记） |
-| `npm run check:package` | 校验 npm 包名、版本、文件清单与包体上限（CI 使用）                                     |
-| `npm run e2e`           | 在 `dist/` 上起临时静态服务做 HTTP 链路 E2E（入口页、鉴权/菜单 JSON、静态资源 200）    |
-| `npm run test`          | 运行冒烟测试（菜单/主题/页面结构）                                                     |
-| `npm run lint`          | ESLint 检查                                                                            |
-| `npm run lint:fix`      | ESLint 检查并自动修复                                                                  |
-| `npm run format`        | Prettier 格式化 `src`、`scripts`、`test`、根配置、工作流与项目文档                     |
-| `npm run format:check`  | Prettier 只检查不写入（CI 使用）                                                       |
+| 命令                    | 说明                                       |
+| ----------------------- | ------------------------------------------ |
+| `npm run dev`           | 启动 Vite 开发服务器                       |
+| `npm run build`         | 构建压缩产物到 `dist/`                     |
+| `npm run preview`       | 本地预览 `dist/`                           |
+| `npm run check`         | 校验产物文件、资源引用、主题配置与体积预算 |
+| `npm run check:package` | 校验 npm 包名、版本、文件清单与包体上限    |
+| `npm run e2e`           | 在临时静态服务上执行页面与资源链路检查     |
+| `npm run test`          | 运行配置、构建与工具函数单测               |
+| `npm run lint`          | ESLint 检查                                |
+| `npm run lint:fix`      | ESLint 检查并自动修复                      |
+| `npm run format`        | 格式化源码、脚本、测试、配置与文档         |
+| `npm run format:check`  | 检查格式但不写入文件                       |
 
-## 安装
+## 目录结构
 
-首个 Release 发布后可从 npm 公共源安装；当仓库归属 `initearth` 组织时，Release 工作流也会同步发布到 GitHub Packages。若尚未发布（`npm view` 返回 404），可直接使用仓库源码构建，或下载 GitHub Release 中的 zip。
-
-```bash
-# 公共源（无需额外配置）
-npm install @initearth/mytsa-admin-iframe
+```text
+MyTSA
+├── src/
+│   ├── index.html                  # 后台入口
+│   ├── login.html                  # 登录页
+│   ├── 404.html                    # 静态托管错误页
+│   ├── robots.txt                  # 搜索引擎抓取规则
+│   ├── api/
+│   │   ├── mytsa.config.json       # 站点、菜单、主题与标签配置
+│   │   └── menu.json               # 菜单数据
+│   ├── component/
+│   │   ├── layui/                  # Layui 框架资源
+│   │   ├── mytsa/                  # 后台模块：菜单、标签、主题与工具
+│   │   └── iframe/                 # iframe 水印组件
+│   ├── iframe/
+│   │   ├── home.html               # 首页示例
+│   │   ├── workbench.html          # 工作台示例
+│   │   ├── table.html              # 表格示例
+│   │   └── layui.html              # 组件示例
+│   └── theme/
+│       ├── admin/                  # 后台样式与图片
+│       ├── iframe/                 # iframe 子页面样式与脚本
+│       └── login/                  # 登录页样式与图片
+├── scripts/
+│   ├── build.mjs                   # 构建入口
+│   ├── check.mjs                   # 产物校验
+│   ├── e2e.mjs                     # 端到端链路检查
+│   └── lib/                        # 构建与校验工具
+├── test/                           # 自动化测试
+├── .github/workflows/              # CI、部署与发布流程
+├── vite.config.js                  # 开发服务器配置
+├── eslint.config.js                # ESLint 配置
+└── package.json                    # 依赖与脚本
 ```
 
-私有仓库或内网场景使用 GitHub Packages（见下节）。
+## 配置
 
-## 从 GitHub Packages 安装（备用）
+站点信息、菜单、主题与标签页行为集中在 `src/api/mytsa.config.json`：
 
-仅当仓库归属 `initearth` 组织时，GitHub Packages 上才会有同名包；否则请直接使用上面的 npm 公共源。
+- `menu`：菜单数据源与首页地址
+- `tab`：标签页上限、会话恢复与首页配置
+- `theme.schemes`：基础配色与暗黑模式的区域底色、文字色和模式标记
+- `theme.colors`：主题色预设及色阶
+- `other`：站点名称、链接、首屏等待时间与水印相关配置
 
-```bash
-# 1. 配置 GitHub Packages registry（写入用户级或项目级 .npmrc）
-echo "@initearth:registry=https://npm.pkg.github.com" >> .npmrc
+菜单数据位于 `src/api/menu.json`，修改后重新构建即可生效。
 
-# 2. 使用具备 read:packages 权限的 GitHub Token
-echo "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" >> .npmrc
+## 主题与配色
 
-# 3. 安装
-npm install @initearth/mytsa-admin-iframe
-```
+后台提供两种明暗基调和多组主题色预设：
 
-Windows（PowerShell）：
+- `base`：浅色顶栏与标签栏、深色侧栏
+- `dark`：深色顶栏、标签栏与侧栏
 
-```powershell
-Add-Content .npmrc '@initearth:registry=https://npm.pkg.github.com'
-Add-Content .npmrc "//npm.pkg.github.com/:_authToken=$env:GITHUB_TOKEN"
-npm install @initearth/mytsa-admin-iframe
-```
+主题色预设包含 `selected`、`tab`、`header`、`headerText` 与 `shades` 等字段。设置面板支持选择预设、随机生成主题色和自定义区域颜色；选择结果保存在浏览器本地存储中。
 
-包内容为 `dist/` 下的静态资源，解压后即可作为站点部署。
+暗黑模式下，主框架向 iframe 推送模式与强调色，iframe 使用自身的 `.dark` 样式完成背景和组件覆盖。切回基础配色时会清除同步数据并恢复子页面默认配色。
 
-## 配色方案
+## 登录与权限
 
-配色方案严格取自 [Layui 官方色板](https://layui.dev/docs/2/color/)：区域底色使用其中的中色调（`#23292e`、`#2f363c`、`#fafafa`、`#f7f7f7`、`#eeeeee`、`#e2e2e2`），主题色预设以深色为首位与默认：深 `#2f363c`、红 `#ff5722`、橙 `#ffb800`、绿 `#16baaa`、蓝 `#1e9fff`、紫 `#a233c6`（浅色 `#fafafa` 未纳入）。自定义色值方案已移除。
+`login.html` 只负责展示登录界面并跳转到 `index.html`，不进行账号校验、不写入登录态。访问控制与权限校验应由后端服务或网关完成。
 
-`mytsa.config.json` 的 `theme.schemes` 声明四个区域底色，并可为顶栏单独指定文字/图标色 `headerText`（基础配色 `#000000`、暗黑模式 `#ffffff`）；未配置时文字色与边框色仍由 `theme.js` 按背景明暗派生：
-
-- `mode`：`light`（基础配色）或 `dark`（暗黑模式），决定区域配色逻辑与 iframe 同步方式
-- `base`：侧栏基色，同时作为 LOGO 缺省底色
-- `header`：顶栏底色
-- `headerText`：顶栏文字与图标色，可选；缺省时按 `header` 背景色自动计算（WCAG 对比度）
-- `tab`：标签栏底色，与顶栏独立配色
-- `logo`：LOGO 底色
-- `selected`：配套选中色，切换方案时自动应用；与 `colors[].selected` 一致时会复用该主题色的完整色阶
-
-预置方案仅两个：基础配色（浅色顶栏与标签栏、深色侧栏，黑字）与暗黑模式（深色顶栏、深色标签栏与深色侧栏，白字）。`selected` 必须在 `colors` 中存在，否则配置校验会报错。旧格式的 `side` 仍然兼容，与 `base` 等价；自定义配色面板可覆盖侧栏、顶栏、标签栏底色、LOGO、主色与顶栏文字色，手动选中的颜色优先于方案默认选中色；顶栏文字色的优先级为面板自定义 > `colors[].headerText` > `schemes[].headerText` > 按顶栏底色自动计算。
-
-两个配色方案（基础配色 / 暗黑模式）一行两个并排展示，作为**明暗基调开关**；「主题色预设」作为**色系选择**，两者正交。主题色同步调整 LOGO、头部栏与标签栏时，会按当前方案的明暗选择色阶：
-
-- 基础配色：LOGO 用深色阶、头部栏用主色、标签栏用浅色阶
-- 暗黑模式：头部栏用深色阶、标签栏用最深色阶、LOGO 用侧栏色，保持深色质感
-
-切换方案会保留已选主题色，并按新基调重新计算区域配色，不会把主题色重置为方案默认值；首次加载且无缓存时选中第一个预设（深），手动自定义项仍优先，点击主题色预设会清除自定义主色。
-
-`colors` 为每套主题色提供色阶，键名与配色方案的区域命名保持一致：
-
-- `label`：主题色名称，用于设置面板提示
-- `selected`：主色/选中色，写入 `--global-selected-color`
-- `tab`：浅色阶，写入 `--global-tab-color`
-- `header`：深色阶，写入 `--global-header-color`
-- `headerText`：顶栏文字/图标色，写入 `--scheme-header-text`，按主色对比度取黑或白；优先于方案的 `headerText`
-- `shades`：颜色数组，依次写入 `--global-color-1`、`--global-color-2`……可声明任意多档；预置主题色均提供 5 档
-
-官方色板未给出色阶，因此只有 `selected` 严格取自官方色板，`tab`、`header` 与 `shades` 是在该主色基础上派生的同色系色阶，`headerText` 是按主色 WCAG 对比度选出的顶栏文字色。缺少 `header` 或 `shades` 的旧配置仍然可用，对应 CSS 变量回落到 `variables.css` 中的默认值。
-
-顶栏文字/图标色的优先级为 `colors[].headerText` > `theme.schemes[].headerText` > 按顶栏底色自动计算；切换主题色、切换方案或自定义顶栏底色时都遵循该顺序。内容区背景、卡片背景、正文与边框由 `--scheme-body-bg`、`--scheme-card-bg`、`--scheme-text`、`--scheme-border-muted` 派生；深色方案下自动切换为深色内容区。文字色按 WCAG 相对亮度在黑/白之间取对比度更高者，主色上的选中态文字使用 `--scheme-selected-text`，避免亮色底上白字偏淡。
-
-基础配色与暗黑模式按 `theme.schemes[].mode` 完全拆分、独立运行。基础配色下 iframe 完全独立：主框架不写入 `theme-iframe-vars`，也不推送主题变量，子页使用自身默认配色，标签栏颜色与主题色变化都不会让它跟着改变。暗黑模式下主框架的 header/tab/侧栏/内容区背景锁定为 scheme 固定值，切换主题色预设只更新强调色系（`--global-*` 与选中态文字色），不改变任何背景；iframe 首次进入暗黑模式时同步一次背景 + 强调色到 `localStorage` 的 `theme-iframe-vars` 并经 `postMessage` 推送，之后主题色变化只推强调色，子页背景保持不变。暗黑样式参考 Layui 官方文档的 `:root.dark` / `.dark` 作用域覆盖，集中写在 `component/layui/css/extend.css`（仅 iframe 页面引用）：主框架只推送 `mode: 'dark'` 与强调色，iframe 给 `<html>` 加 `.dark` 类激活本地深灰背景与组件覆盖，背景不再由主框架变量控制。切回基础配色会清除缓存并移除 `.dark` 类，通知子页恢复默认配色。
-
-## 登录与鉴权
-
-登录页只做界面与跳转：提交表单后直接进入 `index.html`，不再进行账号校验，也不写入登录会话；账号权限与访问拦截由后端服务或网关负责，注销按钮仅跳回 `login.html`。登录页与后台入口除 `component/layui/` 外不共用资源：登录样式与图片放在 `theme/login/`，登录跳转逻辑直接写在 `login.html`；后台入口使用 `theme/admin/` 与 `component/mytsa/`。iframe 子页面同样独立：除 `component/layui/` 与独立的 `component/iframe` 水印组件入口外，只使用 `theme/iframe/` 内的样式与脚本。
-
-前端不保存任何登录凭据或会话；`sessionStorage` / `localStorage` 仅用于恢复标签页，与账号权限无关。
-
-这条链路只用于拦住误入和直接输入后台地址的访问，不能阻止用户读取该 JSON、改写本地存储，也无法保护被直接打开的 iframe 子页面。需要真实防护时，应由后端签发凭证并在服务端拦截入口页。
-
-## Referrer-Policy
-
-全部 7 个页面（`index`、`login`、`home`、`workbench`、`table`、`layui`、`404`）都声明了 `referrer no-referrer`，避免跳转时泄露来源地址。`index.html` 内联后台引导逻辑（跳过导航链接、初始化后台、处理注销跳转），不再引用 `theme/admin/js/bootstrap.js`；`login.html` 的登录跳转逻辑按需求内联，页面不再包含前端鉴权守卫，访问控制应交给后端或网关。
-
-```html
-<meta name="referrer" content="no-referrer" />
-```
-
-`npm run check` 与 `npm run e2e` 会逐页校验 `referrer no-referrer`，并保持 iframe 子页面无内联脚本；`index.html` 按需求内联后台引导逻辑，`login.html` 按需求保留内联登录跳转。生产环境也可改由服务端下发 `Referrer-Policy: no-referrer` 响应头。
-
-`404.html` 为静态托管兜底页（`noindex`、无外部依赖），Pages / OSS / Nginx 均可在自定义错误页中指向它；除登录页外，页面统一声明了 `theme-color`（默认 `#20222A`）与 `color-scheme: light`，切换配色方案时 `theme.js` 会把 `theme-color` 同步为该方案的侧栏色，移动端状态栏不会与页面脱节；登录页只声明 `color-scheme: light`。
-
-## 标签页与懒加载
-
-标签页按需创建：只有点击菜单时才会为该页面创建 iframe，首屏仅加载 `tab.index` 指定的首页，不会一次性建出所有页面的 iframe。
-
-`tab.max` 控制同时打开的标签页上限，默认 10；达到上限后继续打开会提示“最多打开 10 个标签页”。`tab.session` 为 `true` 时刷新会恢复已打开的标签；恢复同样受 `tab.max` 约束，超出上限的历史标签会被截断并回写存储（当前标签被截掉时回落到第一个）。
-
-## 首屏加载
-
-`other.keepLoad` 是首屏 loading 的最长等待时间（毫秒）。菜单与当前标签的 iframe 都就绪后立即隐藏 loading；超过该时间仍未就绪则强制隐藏，避免弱网白屏。配置或菜单加载失败时会结束 loading 并弹出/展示可重试的提示，不会停在首屏动画。
-
-## 可访问性与水印
-
-- 水印参数通过 `layui.use(['watermark'], function () { var watermark = layui.watermark; watermark.render({...}); })` 回调配置；模块暴露 `defaults` 供查阅，支持 `text`（`MyTSA`）、`fontSize`（13）、`fontFamily`（`'Microsoft YaHei', 'PingFang SC', sans-serif`）、`color`（`#cccccc`）、`opacity`（0.2）、`tileWidth`（220）、`tileHeight`（140）、`offsetX`（30）、`offsetY`（98）、`rotate`（-18°）、`zIndex`（10），四个 iframe 页面均显式传入全部参数，不再读取 JSON 配置。
-- `target` 指定水印覆盖的容器（CSS 选择器或 DOM 元素），默认 `null` 表示铺满整个视口（`position: fixed`）；传入元素（如 `#app`）时水印层注入该容器内部并改为 `position: absolute` 铺满容器，容器为 `static` 时模块会自动补 `relative`，不会溢出到页面其他区域。水印层带 `pointer-events: none`，不会拦截鼠标事件，也不会被卡片白色背景遮住。
-- 水印已独立为 `component/iframe` 组件：`iframe.js` 入口按 layui 约定注册 `module/watermark.js` 并默认初始化；后台入口同时加载 `mytsa.js` 与 `iframe.js`，iframe 子页面只加载 `iframe.js`。只有在顶层窗口（`window.top === window.self`）才绘制，iframe 嵌入时自动跳过，避免同一屏出现双层水印。
-- 标签栏与菜单补齐 ARIA：标签容器 `role="tablist"`、标签项 `role="tab"` + `aria-selected` + `aria-controls`（指向对应 `tabpanel`）、内容面板 `role="tabpanel"` + `aria-labelledby`；菜单 `role="menu"`、可点击项 `role="menuitem"`、含子菜单的项带 `aria-haspopup` 与 `aria-expanded`（展开后自动同步）；每个 iframe 的 `title` 取自对应标签标题。
-- 键盘可完整操作：
-    - 标签页：焦点进入标签后，`←/→`（或 `↑/↓`）切换相邻标签，`Home`/`End` 跳到首尾，`Delete` 关闭当前标签（首页等不可关闭的标签会忽略），切换后焦点跟随到新标签。
-    - 菜单：`↑/↓` 在同级可见菜单项间移动，`→` 展开子菜单，`←` 收起子菜单。
-    - 页面顶部提供“跳到主内容”链接，首次按 `Tab` 即可跳到内容区并聚焦。
-- 焦点样式统一用 `:focus-visible` 描边（主色 `--global-selected-color`），并尊重 `prefers-reduced-motion`。
-- 切换或关闭标签时同步 `document.title`（`<当前标签标题> - MyTSA`），浏览器多开多个后台页面时便于区分。
-- 所有页面 HTML 声明 `<meta name="robots" content="noindex,nofollow" />`，产物根目录附带 `robots.txt`（`Disallow: /`），避免演示后台被搜索引擎收录。
-- iframe 加载失败时会在该标签内覆盖显示“页面加载失败 + 页面地址 + 重新加载”面板：同源页面返回空内容会立即判定，15 秒内未触发 `load` 也会提示；跨域页面无法读取内容，不做误判。
-
-## 打印
-
-`mytsa.css` 末尾带 `@media print`：打印时隐藏顶栏、侧栏、标签栏、折叠按钮、水印、遮罩与 loading，内容区改为全宽、去掉阴影，并统一白底。父框架打印时会把当前标签的 iframe 撑到一页高度；由于 iframe 无法跨文档分页，内容较长的页面建议直接打开子页地址后再打印。
-
-## 端到端冒烟
-
-`npm run e2e` 在构建产物 `dist/` 上起一个临时静态服务，验证 6 个页面（`index`、`login`、`home`、`workbench`、`table`、`layui`）与 `404.html`、`api/menu.json`、`api/mytsa.config.json`、`robots.txt` 的可用性与关键配置，并逐个请求这些页面引用的本地静态资源（含行内 `url(...)` 引用），确认构建后的路径没有断链。同时校验：noindex 与 referrer 声明、index.html 内联后台引导逻辑、iframe 页面无内联脚本、login.html 内联登录跳转且无前端会话代码、前端不依赖会话守卫、登录页/后台入口/iframe 子页面三方资源隔离、菜单地址带内容哈希。该检查会读取 `tab.max`（应为 10）、`menu.data` 等配置，可作为发布前的最后一道链路验证。
+项目中的 `localStorage` / `sessionStorage` 仅用于恢复标签页和主题偏好，与账号权限无关。
 
 ## 构建说明
 
-由于 Layui 模块加载依赖 `document.currentScript` 与 `layui.config({ base: ... })`，不能使用 Vite 打包（会破坏模块加载）。因此构建采用静态拷贝脚本 [scripts/build.mjs](scripts/build.mjs)：
+Layui 的模块加载依赖 `document.currentScript` 与动态模块路径，因此构建流程采用静态拷贝与压缩，而不是将源码打入单个 bundle。Vite 仅用于本地开发服务。
 
-1. 清空并整体拷贝 `src/` 到 `dist/`
-2. 合并样式：`mytsa.css`、`module/menu.css`、`module/tabPage.css` 由 `mytsa.js` 入口通过 `layui.link` 模块化注入（页面不直接引入），构建时合并为 `mytsa.bundle.css` 并改写入口指向该文件，合并后删除只服务首页的两份模块样式；`mytsa.css` 保留供独立接入使用。项目自有的 `admin.css`、`variables.css`、`reset.css` 合并为 `admin.bundle.css`（仅保留 `variables.css` 作为合并源），首页样式请求由 5 个降到 3 个
-3. 使用 Terser 压缩 `.js`、CleanCSS 压缩 `.css`、html-minifier-terser 收缩 `.html`（折叠空白、去注释，不重写内联脚本与样式）；第三方目录 `component/layui/` 原样拷贝、不压缩（通过 `SKIP_PREFIXES` 配置跳过）
-4. 注入缓存标记：按最终产物内容计算 SHA-256 前 10 位。`mytsa.js` 中 `layui.config` 的 `version` 使用 `component/mytsa` 下全部 JS 的模块指纹；HTML 中本地 `link/script/img/iframe` 按各自文件哈希追加 `?t=<hash>`；`menu.json` 中本地 `.html` 的 `href` 用页面最终哈希；`mytsa.config.json` 的 `menu.data` 用菜单文件最终哈希。外链、非 HTML 地址与已带标记的地址保持不变，外部接口继续交给服务端 ETag 控制
-5. 替换产物：旧目录先备份，新目录原子就位；失败时回滚，避免留下半成品
+构建过程会完成：
 
-产物目录：
+1. 拷贝 `src/` 到临时目录
+2. 合并项目 CSS，减少页面样式请求
+3. 压缩 HTML、CSS 与项目脚本
+4. 按文件内容计算哈希并追加缓存标记
+5. 原子替换 `dist/`，失败时自动回滚
 
-- `dist/`：Terser/CleanCSS/html-minifier 压缩，用于部署与 npm 包
+## 部署
 
-`npm run check` 会按类型校验产物体积：HTML ≤ 8 KB、项目脚本 ≤ 20 KB、项目 CSS ≤ 16 KB、图片 ≤ 40 KB、JSON ≤ 12 KB，另有单文件 500 KB 兜底上限；`component/layui/` 为第三方原样拷贝目录，不参与预算。超限会直接失败并指出具体文件。
+将 `dist/` 部署到任意静态服务器即可。建议：
 
-产物替换是带重试的原子操作：旧目录先改名为 `.bak-<时间戳>` 备份，新目录再改名就位；Windows 下遇到 `EPERM`/`EBUSY`（目录被编辑器或预览进程短暂占用）会退避重试，仍失败则把备份改回原位并保留旧产物，不会出现删了一半、两头皆空的情况。
+- HTML 使用 `no-cache` 或较短缓存
+- 带哈希的静态资源使用长期缓存
+- 开启 gzip 或 Brotli 压缩
+- 将 404 错误页指向 `404.html`
 
-## 部署与缓存
-
-产物中本地资源按文件内容哈希加标记（`mytsa.config.json` 的 `menu.data`、`menu.json` 里的子页 `href` 也一样）：只有内容变化的文件 URL 才变，未变化的 `layui.js`、`layui.css` 等可以继续命中缓存，因此静态资源可长期缓存：
-
-- **HTML**：`Cache-Control: no-cache`（或较短的 `max-age`），保证每次拿到最新的资源哈希。
-- **带哈希的静态资源**：`Cache-Control: public, max-age=31536000, immutable`，内容变化后 URL 自然回源。
-- **压缩**：`layui.js` 约 389 KB、`layui.css` 约 129 KB，务必开启 gzip 或 Brotli（静态托管一般默认开启）。
-
-Nginx 参考配置：
+Nginx 示例：
 
 ```nginx
 root /path/to/dist;
 
-# 静态资源长期缓存（URL 带内容哈希，内容变化后自然失效）
 location ~* \.(js|css|webp|png|svg|gif|ico|woff|woff2|ttf|eot)$ {
 	add_header Cache-Control "public, max-age=31536000, immutable";
 }
 
-# HTML 每次协商
 location ~* \.html$ {
 	add_header Cache-Control "no-cache";
 }
@@ -268,38 +158,31 @@ location = /404.html {
 }
 ```
 
-对象存储（OSS / COS / S3）在控制台把上述规则写成「缓存策略」与「自定义错误页」即可；GitHub Pages 无需额外配置，内容哈希已保证更新，且 Pages 自带压缩与缓存策略。
+## 质量检查
 
-## 调试
+发布前建议执行：
 
-仓库内置 `.vscode/launch.json`，按 F5 选择「调试 MyTSA」即可；若开发服务器已在运行，选「复用已运行的 dev server」那条。
+```bash
+npm run format:check
+npm run lint
+npm run test
+npm run build
+npm run check
+npm run e2e
+```
 
-## 自动部署与发布
-
-推送到 `main` 会触发 Pages 部署，推送 `v*` 标签会触发 Release；二者复用 `.github/workflows/ci.yml` 中的质量检查（`workflow_call`，包含依赖安装、lint、测试、构建、产物校验与 E2E）：
-
-质量检查按 Node 20 / 22 / 24 三版本矩阵执行，产物构建与 artifact 上传只在 Node 24 任务进行（避免同名 artifact 冲突），E2E 也只在 Node 24 任务跑。
-
-- **Deploy GitHub Pages**（`.github/workflows/deploy.yml`）：推送到 `main` 或手动触发，下载 `dist` 产物后部署到 GitHub Pages，访问地址为 <https://initearth.github.io/mytsa-admin-theme/iframe/>。Pages 部署只从 `main` 发起，避免标签触发被环境的部署分支保护拦截；首次部署需在仓库 `Settings → Pages → Source` 中选择 **GitHub Actions**。
-- **Release Package**（`.github/workflows/release.yml`）：将 `dist` 打包为 `mytsa-admin-iframe-<tag>.zip`，附加到 Release；并把质量任务产出的 `dist` 发布到 npm 公共源（`@initearth/mytsa-admin-iframe`），仓库归属 `initearth` 时同时发布到 GitHub Packages。发布使用 `npm publish --ignore-scripts`，跳过 `prepublishOnly` 的二次构建，保证 npm 包与 zip 来自同一次构建。发布前会校验标签必须等于 `v<package.json version>`，因此打标签前需先同步 `package.json` 与 `package-lock.json` 的版本号。公共源需要仓库配置 `NPM_TOKEN`（需具备 `@initearth` scope 发布权限），未配置时该步骤自动跳过；配置后使用 `--provenance` 生成来源证明。工作流文件变更只会在其合并到默认分支后生效。
-
-向默认分支提交 Pull Request 时，`.github/workflows/verify.yml` 同样调用 `ci.yml` 执行检查（传 `upload-artifact: false`，不额外上传产物）。
-
-站点信息（仓库与在线预览地址）统一配置在 `mytsa.config.json` 的 `other.links`，由「关于我们」弹窗读取。
-
-## 依赖维护
-
-- `.github/dependabot.yml` 每周一 09:00（Asia/Shanghai）检查 npm 与 GitHub Actions 依赖：npm 的小版本与补丁合并为一个 PR，GitHub Actions 的更新合并为一个 PR；大版本（semver-major）不自动提交，需人工评估后升级。
-- CI 在 Node 24 任务中执行 `npm audit --audit-level=high`，出现高危及以上漏洞会直接阻断流水线，其余版本矩阵不重复跑审计。
+CI 会按 Node 20、22、24 三个版本执行质量检查，并在主分支与版本标签推送时执行部署或发布流程。
 
 ## 提交规范
 
-采用 [Conventional Commits](https://www.conventionalcommits.org/zh-hans/) 规范，提交信息格式：
+项目使用 Conventional Commits，提交信息格式为：
 
-```
+```text
 <type>: <subject>
 ```
 
-常用 `type`：`feat`（新功能）、`fix`（修复）、`docs`（文档）、`style`（格式）、`refactor`（重构）、`chore`（构建/工具）、`build`（构建系统）。
+常用类型：`feat`、`fix`、`docs`、`style`、`refactor`、`chore`、`build`。提交时会自动执行格式化、代码检查与提交信息校验。
 
-提交时会自动触发 Git 钩子：`pre-commit` 执行 lint-staged（Prettier 格式化 + ESLint 修复），`commit-msg` 校验提交信息。
+## 许可证
+
+MIT
