@@ -408,6 +408,16 @@ try {
 		'侧栏滚动容器宽度与侧栏不一致'
 	);
 	ok(
+		'侧边栏 GitHub 链接具备圆角 hover 背景',
+		/\.mytsa-side-links a\{[^}]*height:32px[^}]*margin:7px 8px[^}]*border-radius:6px/.test(
+			adminBundle.text
+		) &&
+			/\.mytsa-side-links a:hover\{background-color:var\(--scheme-hover-fill\)/.test(
+				adminBundle.text
+			),
+		'侧边栏 GitHub 链接缺少圆角 hover 背景'
+	);
+	ok(
 		'主题色阶 CSS 变量与写入逻辑均已构建',
 		adminBundle.status === 200 &&
 			themeModule.status === 200 &&

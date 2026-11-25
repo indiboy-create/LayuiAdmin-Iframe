@@ -133,17 +133,16 @@ body,
 	align-items: center;
 	justify-content: center;
 	gap: 6px;
-	height: 100%;
+	height: 32px;
+	margin: 7px 8px;
+	border-radius: 6px;
 	font-size: 13px;
 	color: var(--scheme-side-text);
 }
 
 .mytsa-admin .layui-side-scroll .mytsa-side-links a:hover {
+	background-color: var(--scheme-hover-fill);
 	color: var(--global-selected-color);
-}
-
-.mytsa-admin.light-theme .layui-side-scroll .mytsa-side-links {
-	border-top-color: var(--scheme-side-border);
 }
 
 .mytsa-admin .layui-side .layui-nav-tree .layui-nav-item a {
