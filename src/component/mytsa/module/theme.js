@@ -49,6 +49,18 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 
 	var DEFAULT_SIDE = '#23292E';
 	var DEFAULT_HEADER = '#FAFAFA';
+	var DARK_TEXT = {
+		strong: 'rgba(255, 255, 255, 0.8)',
+		body: 'rgba(255, 255, 255, 0.7)',
+		muted: 'rgba(255, 255, 255, 0.65)',
+		disabled: 'rgba(255, 255, 255, 0.3)',
+	};
+	var LIGHT_TEXT = {
+		strong: '#333333',
+		body: '#333333',
+		muted: 'rgba(0, 0, 0, 0.45)',
+		disabled: 'rgba(0, 0, 0, 0.3)',
+	};
 
 	function normalizeScheme(scheme) {
 		var base = scheme.base || scheme.side || DEFAULT_SIDE;
@@ -154,6 +166,67 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		];
 	}
 
+	function hslToHex(h, s, l) {
+		var saturation = s / 100;
+		var lightness = l / 100;
+		var chroma = (1 - Math.abs(2 * lightness - 1)) * saturation;
+		var second = chroma * (1 - Math.abs(((h / 60) % 2) - 1));
+		var match = lightness - chroma / 2;
+		var channels =
+			h < 60
+				? [chroma, second, 0]
+				: h < 120
+					? [second, chroma, 0]
+					: h < 180
+						? [0, chroma, second]
+						: h < 240
+							? [0, second, chroma]
+							: h < 300
+								? [second, 0, chroma]
+								: [chroma, 0, second];
+		return (
+			'#' +
+			channels
+				.map(function (value) {
+					return ('0' + Math.round((value + match) * 255).toString(16)).slice(-2);
+				})
+				.join('')
+				.toUpperCase()
+		);
+	}
+
+	function buildRandomPalette() {
+		var previous = String(readStorage('theme-color-color') || '').toUpperCase();
+		var hue = 0;
+		var saturation = 60;
+		var selected = '';
+		for (var i = 0; i < 4; i++) {
+			hue = Math.floor(Math.random() * 360);
+			saturation = 58 + Math.floor(Math.random() * 13);
+			selected = hslToHex(hue, saturation, 48 + Math.floor(Math.random() * 8));
+			if (selected !== previous) {
+				break;
+			}
+		}
+		var tab = hslToHex(hue, 72, 96);
+		var dark = Math.max(saturation - 5, 45);
+		return {
+			id: 'random-' + Date.now(),
+			label: '随机',
+			selected: selected,
+			tab: tab,
+			header: hslToHex(hue, dark, 35),
+			headerText: '#ffffff',
+			shades: [
+				tab,
+				hslToHex(hue, 65, 82),
+				selected,
+				hslToHex(hue, dark, 35),
+				hslToHex(hue, Math.max(saturation - 10, 40), 24),
+			],
+		};
+	}
+
 	function isLightColor(color) {
 		var rgb = parseRgb(color);
 		if (!rgb) {
@@ -178,13 +251,48 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		return contrastWithBlack >= contrastWithWhite ? '#000000' : '#FFFFFF';
 	}
 
+	// 暗底上的对比文字使用 Layui 的 .8 白，避免纯白过硬
+	function getContrastText(color) {
+		return getReadableTextColor(color) === '#FFFFFF' ? DARK_TEXT.strong : '#000000';
+	}
+
+	function normalizeDarkText(value, background) {
+		var text = String(value || '').trim();
+		return !isLightColor(background) && /^#fff(?:fff)?$/i.test(text) ? DARK_TEXT.strong : value;
+	}
+
+	function isDarkHeaderText(value) {
+		var text = String(value || '').trim();
+		return /^#fff(?:fff)?$/i.test(text) || /^rgba\(\s*255\s*,\s*255\s*,\s*255/.test(text);
+	}
+
+	// 暗黑语义文字与填充：正文跟内容区，顶栏相关 token 跟顶栏文字实际明暗
+	function setTextVars(darkContent, darkHeader) {
+		var style = document.documentElement.style;
+		var body = darkContent ? DARK_TEXT : LIGHT_TEXT;
+		var header = darkHeader ? DARK_TEXT : LIGHT_TEXT;
+		style.setProperty('--scheme-text-strong', body.strong);
+		style.setProperty('--scheme-text', body.body);
+		style.setProperty('--scheme-text-muted', header.muted);
+		style.setProperty('--scheme-text-disabled', body.disabled);
+		style.setProperty('--scheme-dropdown-text', darkHeader ? DARK_TEXT.strong : '#FFFFFF');
+		style.setProperty(
+			'--scheme-subtle-fill',
+			darkHeader ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.1)'
+		);
+		style.setProperty(
+			'--scheme-hover-fill',
+			darkHeader ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.16)'
+		);
+	}
+
 	// 顶栏文字/图标色：colors[].headerText > schemes[].headerText > 按背景色自动计算
 	function getHeaderTextColor(scheme, header, color) {
-		return (
+		var value =
 			(color && color.headerText) ||
 			(scheme && scheme.headerText) ||
-			getReadableTextColor(header)
-		);
+			getReadableTextColor(header);
+		return normalizeDarkText(value, header);
 	}
 
 	function getStoredColor() {
@@ -280,7 +388,7 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		var style = document.documentElement.style;
 		if (color.selected) {
 			style.setProperty('--global-selected-color', color.selected);
-			style.setProperty('--scheme-selected-text', getReadableTextColor(color.selected));
+			style.setProperty('--scheme-selected-text', getContrastText(color.selected));
 		}
 		if (color.tab) {
 			style.setProperty('--global-tab-color', color.tab);
@@ -305,16 +413,16 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		style.setProperty('--scheme-header', header);
 		style.setProperty('--scheme-tab', tab);
 		style.setProperty('--scheme-logo', logo);
-		style.setProperty('--scheme-side-text', getReadableTextColor(side));
+		style.setProperty('--scheme-side-text', getContrastText(side));
 		style.setProperty('--scheme-header-text', getHeaderTextColor(scheme, header));
-		style.setProperty('--scheme-tab-text', getReadableTextColor(tab));
+		style.setProperty('--scheme-tab-text', getContrastText(tab));
+		setTextVars(darkContent, isDarkHeaderText(style.getPropertyValue('--scheme-header-text')));
 		style.setProperty(
 			'--scheme-tab-border',
 			isLightColor(tab) ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.12)'
 		);
 		style.setProperty('--scheme-body-bg', darkContent ? side : '#F7F7F7');
 		style.setProperty('--scheme-card-bg', darkContent ? tab : '#FAFAFA');
-		style.setProperty('--scheme-text', darkContent ? '#E6E8EB' : '#333333');
 		style.setProperty(
 			'--scheme-border-muted',
 			darkContent ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.08)'
@@ -338,7 +446,7 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		var tab = readStorage('theme-custom-tab');
 		if (side) {
 			style.setProperty('--scheme-side', side);
-			style.setProperty('--scheme-side-text', getReadableTextColor(side));
+			style.setProperty('--scheme-side-text', getContrastText(side));
 			style.setProperty(
 				'--scheme-side-border',
 				isLightColor(side) ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.08)'
@@ -346,7 +454,7 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		}
 		if (selected) {
 			style.setProperty('--global-selected-color', selected);
-			style.setProperty('--scheme-selected-text', getReadableTextColor(selected));
+			style.setProperty('--scheme-selected-text', getContrastText(selected));
 		}
 		if (logo) {
 			style.setProperty('--scheme-logo', logo);
@@ -359,12 +467,22 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 			);
 		}
 		if (headerText) {
-			style.setProperty('--scheme-header-text', headerText);
+			style.setProperty(
+				'--scheme-header-text',
+				normalizeDarkText(
+					headerText,
+					header || style.getPropertyValue('--scheme-header').trim()
+				)
+			);
 		}
+		setTextVars(
+			!isLightColor(tab || style.getPropertyValue('--scheme-tab').trim() || DEFAULT_HEADER),
+			isDarkHeaderText(style.getPropertyValue('--scheme-header-text'))
+		);
 		if (tab) {
 			var darkContent = !isLightColor(tab);
 			style.setProperty('--scheme-tab', tab);
-			style.setProperty('--scheme-tab-text', getReadableTextColor(tab));
+			style.setProperty('--scheme-tab-text', getContrastText(tab));
 			style.setProperty(
 				'--scheme-tab-border',
 				isLightColor(tab) ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.12)'
@@ -376,7 +494,6 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 					: '#F7F7F7'
 			);
 			style.setProperty('--scheme-card-bg', darkContent ? tab : '#FAFAFA');
-			style.setProperty('--scheme-text', darkContent ? '#E6E8EB' : '#333333');
 			style.setProperty(
 				'--scheme-border-muted',
 				darkContent ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.08)'
@@ -411,8 +528,9 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 			'--scheme-header-text',
 			getHeaderTextColor(getCurrentScheme(), header, color)
 		);
+		setTextVars(darkTab, isDarkHeaderText(style.getPropertyValue('--scheme-header-text')));
 		style.setProperty('--scheme-tab', tab);
-		style.setProperty('--scheme-tab-text', getReadableTextColor(tab));
+		style.setProperty('--scheme-tab-text', getContrastText(tab));
 		style.setProperty(
 			'--scheme-tab-border',
 			isLightColor(tab) ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.12)'
@@ -422,7 +540,6 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 			darkTab ? style.getPropertyValue('--scheme-side').trim() || DEFAULT_SIDE : '#F7F7F7'
 		);
 		style.setProperty('--scheme-card-bg', darkTab ? tab : '#FAFAFA');
-		style.setProperty('--scheme-text', darkTab ? '#E6E8EB' : '#333333');
 		style.setProperty(
 			'--scheme-border-muted',
 			darkTab ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.08)'
@@ -443,7 +560,7 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		// 暗黑模式背景完全锁死，只更新主色相关的文字对比色
 		document.documentElement.style.setProperty(
 			'--scheme-selected-text',
-			getReadableTextColor(color.selected)
+			getContrastText(color.selected)
 		);
 	}
 
@@ -475,6 +592,9 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 			tab: '--scheme-tab',
 		}[name];
 		var value = key ? style.getPropertyValue(key).trim() : '';
+		if (name === 'headerText' && /^rgba\(/.test(value)) {
+			return isDarkHeaderText(value) ? '#FFFFFF' : '#000000';
+		}
 		return value || '#FFFFFF';
 	}
 
@@ -532,12 +652,20 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 				';"></span>' +
 				'</li>';
 		});
+		var randomItem =
+			'<li class="palette-random' +
+			(String(current).indexOf('random-') === 0 ? ' layui-this' : '') +
+			'" data-random-color title="随机主题色">' +
+			'<span class="palette-swatch" style="display:flex;align-items:center;justify-content:center;background:var(--scheme-tab);color:var(--scheme-tab-text);box-shadow:inset 0 0 0 1px var(--scheme-tab-border);font-size:20px;">' +
+			'<i class="layui-icon layui-icon-refresh"></i></span>' +
+			'</li>';
 		return (
 			'<div class="mytsaone-color">\n' +
 			'<div class="color-title">主题色预设</div>\n' +
 			'<div class="scheme-content palette-content">\n' +
 			'<ul>\n' +
 			items +
+			randomItem +
 			'</ul>\n' +
 			'</div>\n' +
 			'</div>'
@@ -737,13 +865,11 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		renderCustomPickers();
 	});
 
-	body.on('click', '[data-select-color]', function () {
-		var color = getItemById(config.colors, $(this).attr('data-select-color'));
-		if (!color) {
-			return;
+	function applyPresetColor(color, active) {
+		$('[data-select-color], [data-random-color]').removeClass('layui-this');
+		if (active) {
+			active.addClass('layui-this');
 		}
-		$('[data-select-color]').removeClass('layui-this');
-		$(this).addClass('layui-this');
 		removeStorage('theme-custom-selected');
 		writeStorage('theme-color', color.id);
 		writeStorage('theme-color-color', color.selected);
@@ -753,6 +879,17 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		applyPaletteAreas(color);
 		applyCustomTheme();
 		renderCustomPickers();
+	}
+
+	body.on('click', '[data-select-color]', function () {
+		var color = getItemById(config.colors, $(this).attr('data-select-color'));
+		if (color) {
+			applyPresetColor(color, $(this));
+		}
+	});
+
+	body.on('click', '[data-random-color]', function () {
+		applyPresetColor(buildRandomPalette(), $(this));
 	});
 
 	body.on('click', '.reset-theme', function () {

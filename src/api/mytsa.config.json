@@ -62,15 +62,6 @@
 			"shades": ["#e2e2e2", "#c2c2c2", "#2f363c", "#23292e", "#161a1d"]
 		},
 		{
-			"id": "1",
-			"label": "红",
-			"selected": "#ff5722",
-			"tab": "#fef0ec",
-			"header": "#cc451b",
-			"headerText": "#ffffff",
-			"shades": ["#fef0ec", "#ffa98d", "#ff5722", "#cc451b", "#993311"]
-		},
-		{
 			"id": "2",
 			"label": "橙",
 			"selected": "#ffb800",

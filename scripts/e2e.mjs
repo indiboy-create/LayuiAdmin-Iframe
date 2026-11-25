@@ -146,6 +146,15 @@ try {
 			/id="side"[\s\S]*mytsa-side-links/.test(index.text)
 	);
 	ok(
+		'index.html 用户导航项为头像加用户名与用户组',
+		/class="layui-nav-item user"/.test(index.text) &&
+			/class="user-entry"/.test(index.text) &&
+			/class="user-avatar"/.test(index.text) &&
+			/theme\/admin\/images\/avatar\.svg/.test(index.text) &&
+			/>管理员<\/span>/.test(index.text) &&
+			/>超级管理员组<\/span>/.test(index.text)
+	);
+	ok(
 		'index.html 内联后台引导逻辑',
 		/<script(?![^>]*\bsrc=)[^>]*>/i.test(index.text) &&
 			index.text.includes('admin.setConfigurationPath') &&
@@ -347,6 +356,15 @@ try {
 	);
 	const mytsaBundle = await request(base, '/component/mytsa/css/mytsa.bundle.css');
 	ok('mytsa 合并样式可访问', mytsaBundle.status === 200, `HTTP ${mytsaBundle.status}`);
+	const tabPageModule = await request(base, '/component/mytsa/module/tabPage.js');
+	ok(
+		'标签页右键菜单已删除',
+		tabPageModule.status === 200 &&
+			!/contextmenu/.test(tabPageModule.text) &&
+			!/mytsa-tab-page-menu/.test(tabPageModule.text) &&
+			!/mytsa-tab-page-menu/.test(mytsaBundle.text),
+		'标签页右键菜单仍存在'
+	);
 	ok(
 		'标签栏样式与配色方案独立联动',
 		/mytsa-tab-page>.layui-tab-title\{[^}]*background-color:var\(--scheme-tab\)/.test(
@@ -357,8 +375,38 @@ try {
 			) &&
 			/--scheme-tab-border/.test(mytsaBundle.text)
 	);
+	ok(
+		'标签页激活圆点无右侧外边距',
+		!/\.mytsa-tab-page>\.layui-tab-title \.mytsa-tab-page-active\{[^}]*margin-right/.test(
+			mytsaBundle.text
+		),
+		'标签页激活圆点仍存在右侧外边距'
+	);
+	ok(
+		'标签工具栏下拉菜单配色与顶部下拉一致',
+		/mytsa-tab-tool-dropdown/.test(tabPageModule.text) &&
+			/\.mytsa-tab-tool-dropdown\{[^}]*background-color:color-mix\(in srgb,var\(--scheme-header\) 85%,transparent\)/.test(
+				mytsaBundle.text
+			) &&
+			/\.mytsa-tab-tool-dropdown \.layui-menu\{[^}]*background-color:transparent/.test(
+				mytsaBundle.text
+			) &&
+			/\.mytsa-tab-tool-dropdown \.layui-menu-body-title[^{]*\{[^}]*color:var\(--scheme-dropdown-text,#fff\)/.test(
+				mytsaBundle.text
+			) &&
+			/\.mytsa-tab-tool-dropdown \.layui-menu li:hover[^{]*\{[^}]*background-color:var\(--global-selected-color\)!important/.test(
+				mytsaBundle.text
+			),
+		'标签工具栏下拉菜单配色未与顶部下拉一致'
+	);
 	const adminBundle = await request(base, '/theme/admin/css/admin.bundle.css');
 	const themeModule = await request(base, '/component/mytsa/module/theme.js');
+	ok(
+		'侧栏底部链接容器与侧栏同宽',
+		/\.mytsa-admin \.layui-side-scroll\{[^}]*width:230px/.test(adminBundle.text) &&
+			!/\.mytsa-admin \.layui-side-scroll\{[^}]*width:247px/.test(adminBundle.text),
+		'侧栏滚动容器宽度与侧栏不一致'
+	);
 	ok(
 		'主题色阶 CSS 变量与写入逻辑均已构建',
 		adminBundle.status === 200 &&
@@ -382,6 +430,19 @@ try {
 			/--scheme-selected-text/.test(themeModule.text)
 	);
 	ok(
+		'暗黑模式语义文字色按层级设置',
+		/--scheme-text-muted/.test(adminBundle.text) &&
+			/--scheme-dropdown-text/.test(adminBundle.text) &&
+			/--scheme-subtle-fill/.test(adminBundle.text) &&
+			/--scheme-hover-fill/.test(adminBundle.text) &&
+			/rgba\(255,\s*255,\s*255,\s*0\.8\)/.test(themeModule.text) &&
+			/rgba\(255,\s*255,\s*255,\s*0\.7\)/.test(themeModule.text) &&
+			/rgba\(255,\s*255,\s*255,\s*0\.65\)/.test(themeModule.text) &&
+			/rgba\(255,\s*255,\s*255,\s*0\.12\)/.test(themeModule.text) &&
+			/rgba\(255,\s*255,\s*255,\s*0\.08\)/.test(themeModule.text),
+		'暗黑语义文字或填充 token 缺失'
+	);
+	ok(
 		'头部栏文字色支持主题色 headerText、方案配置与自动回退',
 		configData.theme.schemes.every((scheme) =>
 			/^#[0-9a-f]{6}$/i.test(scheme.headerText || '')
@@ -392,6 +453,83 @@ try {
 			/--scheme-header-text/.test(themeModule.text) &&
 			/color:var\(--scheme-header-text\)/.test(adminBundle.text),
 		'headerText 配置、写入或样式消费缺失'
+	);
+	ok(
+		'用户下拉菜单背景取顶栏色加透明度、无内边距且文字使用语义 token',
+		/\.layui-layout-right \.layui-nav-child\{[^}]*padding:0/.test(adminBundle.text) &&
+			/\.layui-nav-item\.user>\.layui-nav-child\{[^}]*background-color:color-mix\(in srgb,var\(--scheme-header\) 85%,transparent\)/.test(
+				adminBundle.text
+			) &&
+			!/\.layui-nav-item\.user>\.layui-nav-child\{[^}]*--scheme-tab/.test(adminBundle.text) &&
+			/\.layui-nav-item\.user>\.layui-nav-child hr\{border-bottom-color:var\(--scheme-hover-fill\)\}/.test(
+				adminBundle.text
+			) &&
+			/\.layui-nav-item\.user>\.layui-nav-child dd>a\{color:var\(--scheme-dropdown-text,#fff\)\}/.test(
+				adminBundle.text
+			) &&
+			/\.layui-nav-item\.user>\.layui-nav-child dd>a:hover[^{]*\{[^}]*background-color:var\(--global-selected-color\)/.test(
+				adminBundle.text
+			) &&
+			/\.layui-nav-item\.user>\.layui-nav-child dd\.layui-this>a[^{]*\{[^}]*color:var\(--scheme-dropdown-text,#fff\)/.test(
+				adminBundle.text
+			),
+		'用户下拉菜单背景或文字语义 token 缺失'
+	);
+	ok(
+		'用户入口块、头像与文字尺寸已缩小且垂直居中',
+		/\.layui-nav-item\.user>a\.user-entry\{[^}]*height:38px/.test(adminBundle.text) &&
+			/\.layui-nav-item\.user>a\.user-entry\{[^}]*margin:11px 8px/.test(adminBundle.text) &&
+			/\.layui-nav-item\.user>a\.user-entry\{[^}]*vertical-align:middle/.test(
+				adminBundle.text
+			) &&
+			/\.layui-nav-item\.user \.user-avatar\{[^}]*width:28px/.test(adminBundle.text) &&
+			/\.layui-nav-item\.user \.user-avatar\{[^}]*height:28px/.test(adminBundle.text) &&
+			/\.layui-nav-item\.user \.user-name\{font-size:12px/.test(adminBundle.text) &&
+			/\.layui-nav-item\.user \.user-group\{font-size:10px[^}]*color:var\(--scheme-text-muted\)/.test(
+				adminBundle.text
+			),
+		'用户入口块、头像或文字尺寸未缩小'
+	);
+	ok(
+		'顶栏设置图标具备常驻圆角背景且垂直居中',
+		/\.layui-nav-item>a\.setting\{[^}]*height:32px/.test(adminBundle.text) &&
+			/\.layui-nav-item>a\.setting\{[^}]*margin:14px 8px/.test(adminBundle.text) &&
+			/\.layui-nav-item>a\.setting\{[^}]*vertical-align:middle/.test(adminBundle.text) &&
+			/\.layui-nav-item>a\.setting\{[^}]*border-radius:6px[^}]*background-color:var\(--scheme-subtle-fill\)/.test(
+				adminBundle.text
+			) &&
+			!/\.layui-nav-item>a\.setting:hover\{/.test(adminBundle.text),
+		'设置图标背景未常驻、仍依赖 hover 或上下留白不正确'
+	);
+	ok(
+		'顶栏右侧图标统一具备更深的 hover 背景',
+		/\.layui-layout-right \.layui-nav-item>a:hover[^{]*\{[^}]*background-color:var\(--scheme-hover-fill\)/.test(
+			adminBundle.text
+		) &&
+			/\.layui-nav-item\.user>a\.user-entry:hover\{[^}]*background-color:var\(--scheme-hover-fill\)/.test(
+				adminBundle.text
+			),
+		'顶栏图标 hover 背景缺失或过轻'
+	);
+	ok(
+		'顶栏左侧图标统一具备圆角 hover 背景且垂直居中',
+		/\.layui-layout-left \.layui-nav-item>a[^{]*\{[^}]*border-radius:6px/.test(
+			adminBundle.text
+		) &&
+			/\.layui-layout-left \.layui-nav-item>a[^{]*\{[^}]*vertical-align:middle/.test(
+				adminBundle.text
+			) &&
+			/\.layui-layout-left \.layui-nav-item>a:hover[^{]*\{[^}]*background-color:var\(--scheme-hover-fill\)/.test(
+				adminBundle.text
+			),
+		'顶栏左侧图标 hover 背景缺失或未垂直居中'
+	);
+	ok(
+		'消息中心小红点使用显式右上角定位',
+		/\.layui-layout-right \.layui-nav-item>a \.layui-badge-dot\{left:auto;right:3px;top:3px;margin:0\}/.test(
+			adminBundle.text
+		),
+		'消息中心小红点未显式定位'
 	);
 	const iframeEntry = await request(base, '/component/iframe/iframe.js');
 	const extendCss = await request(base, '/component/layui/css/extend.css');
@@ -421,6 +559,7 @@ try {
 		extendCss.status === 200 &&
 			/:root\.dark/.test(extendCss.text) &&
 			/--lay-color-bg-1/.test(extendCss.text) &&
+			/--lay-color-text-1:\s*rgba\(255,\s*255,\s*255,\s*(?:0)?\.?8\)/.test(extendCss.text) &&
 			/--lay-color-primary/.test(extendCss.text) &&
 			/\.dark\s+\.layui-card/.test(extendCss.text) &&
 			/classList\.add\(['"]dark['"]\)/.test(iframeEntry.text) &&
@@ -437,6 +576,15 @@ try {
 			/theme-palette-areas/.test(themeModule.text) &&
 			/theme-custom-headerText/.test(themeModule.text) &&
 			/顶栏文字色/.test(themeModule.text)
+	);
+	ok(
+		'主题色预设支持随机生成',
+		/data-random-color/.test(themeModule.text) &&
+			/palette-random/.test(themeModule.text) &&
+			/Math\.random/.test(themeModule.text) &&
+			/random-/.test(themeModule.text) &&
+			/data-select-color/.test(themeModule.text),
+		'主题色随机功能缺失'
 	);
 	ok(
 		'配色方案一行两个展示',

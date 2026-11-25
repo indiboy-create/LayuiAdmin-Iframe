@@ -17,7 +17,6 @@ layui.define(['jquery', 'element', 'dropdown', 'layer', 'sanitize'], function (e
 
 	var tabData = [];
 	var tabDataCurrent = 0;
-	var contextTabDOM;
 
 	// 存储可能在隐私模式或配额不足时抛异常，统一包一层避免标签页初始化中断
 	function readTabStorage(key) {
@@ -349,7 +348,6 @@ layui.define(['jquery', 'element', 'dropdown', 'layer', 'sanitize'], function (e
 			}
 		}
 
-		var lastIndex;
 		var tab = createTab(option);
 		$('#' + option.elem).html(tab);
 		$(".layui-tab[lay-filter='" + option.elem + "'] .layui-tab-prev").click(function () {
@@ -385,6 +383,7 @@ layui.define(['jquery', 'element', 'dropdown', 'layer', 'sanitize'], function (e
 
 		dropdown.render({
 			elem: `#${option.elem} .layui-tab-control > .layui-icon-down`,
+			className: 'mytsa-tab-tool-dropdown',
 			trigger: 'hover',
 			data: [
 				{
@@ -456,61 +455,6 @@ layui.define(['jquery', 'element', 'dropdown', 'layer', 'sanitize'], function (e
 				}
 			},
 		});
-
-		$("body .layui-tab[lay-filter='" + option.elem + "'] .layui-tab-title").on(
-			'contextmenu',
-			'li',
-			function (e) {
-				var top = e.clientY;
-				var left = e.clientX;
-				var menuWidth = 100;
-				var menu = `<ul>
-								<li class='item' id='${option.elem}closeThis'>关闭当前</li>
-								<li class='item' id='${option.elem}closeOther'>关闭其他</li>
-								<li class='item' id='${option.elem}closeAll'>关闭所有</li>
-							</ul>`;
-
-				contextTabDOM = $(this);
-				var isOutsideBounds = left + menuWidth > $(window).width();
-				if (isOutsideBounds) {
-					left = $(window).width() - menuWidth;
-				}
-
-				layer.open({
-					type: 1,
-					title: false,
-					shade: false,
-					skin: 'mytsa-tab-page-menu',
-					closeBtn: false,
-					area: [menuWidth + 'px', '108px'],
-					fixed: true,
-					anim: false,
-					isOutAnim: false,
-					offset: [top, left],
-					content: menu,
-					success: function (layero, index) {
-						layer.close(lastIndex);
-						lastIndex = index;
-						menuEvent(option, index);
-						var timer;
-						$(layero).on('mouseout', function () {
-							timer = setTimeout(function () {
-								layer.close(index);
-							}, 30);
-						});
-
-						$(layero).on('mouseover', function () {
-							clearTimeout(timer);
-						});
-
-						$(layero).on('contextmenu', function () {
-							return false;
-						});
-					},
-				});
-				return false;
-			}
-		);
 
 		mousewheelAndTouchmoveHandler(option);
 		bindTabKeyboard(option);
@@ -844,46 +788,6 @@ layui.define(['jquery', 'element', 'dropdown', 'layer', 'sanitize'], function (e
 					tabDelete(option.elem, $(this).attr('lay-id'), option.closeEvent, option);
 				}
 			});
-	}
-
-	function menuEvent(option, index) {
-		$('#' + option.elem + 'closeThis').click(function () {
-			var currentTab = contextTabDOM;
-
-			if (currentTab.find('span').is('.able-close')) {
-				var currentId = currentTab.attr('lay-id');
-				tabDelete(option.elem, currentId, option.closeEvent, option);
-			} else {
-				layer.msg('当前页面不允许关闭', {
-					icon: 3,
-					time: 800,
-				});
-			}
-			layer.close(index);
-		});
-
-		$('#' + option.elem + 'closeOther').click(function () {
-			var currentId = contextTabDOM.attr('lay-id');
-			var tabtitle = $(".layui-tab[lay-filter='" + option.elem + "'] .layui-tab-title li");
-			$.each(tabtitle, function () {
-				if ($(this).attr('lay-id') != currentId) {
-					if ($(this).find('span').is('.able-close')) {
-						tabDelete(option.elem, $(this).attr('lay-id'), option.closeEvent, option);
-					}
-				}
-			});
-			layer.close(index);
-		});
-
-		$('#' + option.elem + 'closeAll').click(function () {
-			var tabtitle = $(".layui-tab[lay-filter='" + option.elem + "'] .layui-tab-title li");
-			$.each(tabtitle, function () {
-				if ($(this).find('span').is('.able-close')) {
-					tabDelete(option.elem, $(this).attr('lay-id'), option.closeEvent, option);
-				}
-			});
-			layer.close(index);
-		});
 	}
 
 	function mousewheelAndTouchmoveHandler(option) {

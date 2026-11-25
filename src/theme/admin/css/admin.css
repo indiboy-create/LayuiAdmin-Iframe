@@ -22,10 +22,33 @@ body,
 
 .mytsa-admin .layui-layout-right .layui-nav-child {
 	border: 1px solid var(--scheme-border-muted);
-	border-radius: 4px;
+	border-radius: var(--global-border-radius, 4px);
 	width: auto;
+	padding: 0;
 	left: auto;
 	right: -23px;
+}
+
+.mytsa-admin .layui-layout-right .layui-nav-item.user > .layui-nav-child {
+	background-color: color-mix(in srgb, var(--scheme-header) 85%, transparent);
+}
+
+.mytsa-admin .layui-layout-right .layui-nav-item.user > .layui-nav-child dd.layui-this {
+	background-color: transparent;
+}
+
+.mytsa-admin .layui-layout-right .layui-nav-item.user > .layui-nav-child dd > a {
+	color: var(--scheme-dropdown-text, #ffffff);
+}
+
+.mytsa-admin .layui-layout-right .layui-nav-item.user > .layui-nav-child dd > a:hover,
+.mytsa-admin .layui-layout-right .layui-nav-item.user > .layui-nav-child dd.layui-this > a {
+	background-color: var(--global-selected-color);
+	color: var(--scheme-dropdown-text, #ffffff);
+}
+
+.mytsa-admin .layui-layout-right .layui-nav-item.user > .layui-nav-child hr {
+	border-bottom-color: var(--scheme-hover-fill);
 }
 
 .mytsa-admin .layui-header {
@@ -83,7 +106,7 @@ body,
 	flex-direction: column;
 	height: calc(100% - 60px) !important;
 	background-color: var(--scheme-side);
-	width: 247px;
+	width: 230px;
 }
 
 .mytsa-admin .layui-side-scroll #side {
@@ -130,6 +153,89 @@ body,
 .mytsa-admin .layui-header .layui-nav .layui-nav-item > a {
 	color: var(--scheme-header-text) !important;
 	font-size: 15px;
+}
+
+.mytsa-admin .layui-header .layui-layout-left .layui-nav-item > a,
+.mytsa-admin .layui-header .layui-layout-right .layui-nav-item > a {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	height: 36px;
+	margin: 12px 8px;
+	padding: 0 10px;
+	border-radius: 6px;
+	line-height: 1;
+	vertical-align: middle;
+	transition: background-color 0.2s;
+}
+
+.mytsa-admin .layui-header .layui-layout-left .layui-nav-item > a:hover,
+.mytsa-admin .layui-header .layui-layout-right .layui-nav-item > a:hover {
+	background-color: var(--scheme-hover-fill);
+}
+
+.mytsa-admin .layui-header .layui-layout-right .layui-nav-item > a .layui-badge-dot {
+	left: auto;
+	right: 3px;
+	top: 3px;
+	margin: 0;
+}
+
+.mytsa-admin .layui-header .layui-nav-item.user > a.user-entry {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	height: 38px;
+	margin: 11px 8px;
+	padding: 0 6px;
+	border-radius: 6px;
+	line-height: 1.2;
+	vertical-align: middle;
+	transition: background-color 0.2s;
+}
+
+.mytsa-admin .layui-header .layui-nav-item.user > a.user-entry:hover {
+	background-color: var(--scheme-hover-fill);
+}
+
+.mytsa-admin .layui-header .layui-nav-item > a.setting {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	height: 32px;
+	margin: 14px 8px;
+	padding: 0 10px;
+	border-radius: 6px;
+	background-color: var(--scheme-subtle-fill);
+	line-height: 1;
+	vertical-align: middle;
+}
+
+.mytsa-admin .layui-header .layui-nav-item.user .user-avatar {
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	flex: 0 0 auto;
+}
+
+.mytsa-admin .layui-header .layui-nav-item.user .user-meta {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 2px;
+	white-space: nowrap;
+}
+
+.mytsa-admin .layui-header .layui-nav-item.user .user-name {
+	font-size: 12px;
+	line-height: 14px;
+}
+
+.mytsa-admin .layui-header .layui-nav-item.user .user-group {
+	font-size: 10px;
+	line-height: 12px;
+	color: var(--scheme-text-muted);
 }
 
 .mytsa-admin .layui-body {
@@ -515,7 +621,7 @@ body,
 	line-height: 26px;
 	border-radius: 2px;
 	background-color: var(--global-selected-color);
-	color: #ffffff;
+	color: var(--scheme-dropdown-text, #ffffff);
 	font-size: 18px;
 	text-align: center;
 }

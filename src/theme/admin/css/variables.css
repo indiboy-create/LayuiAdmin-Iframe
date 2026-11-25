@@ -24,6 +24,10 @@
 	--scheme-border-muted: rgba(0, 0, 0, 0.08);
 	--scheme-side-border: rgba(255, 255, 255, 0.08);
 	--scheme-selected-text: #ffffff;
+	--scheme-text-muted: rgba(0, 0, 0, 0.45);
+	--scheme-dropdown-text: #ffffff;
+	--scheme-subtle-fill: rgba(0, 0, 0, 0.1);
+	--scheme-hover-fill: rgba(0, 0, 0, 0.16);
 
 	/** 圆角度数 */
 	--global-border-radius: 4px;
