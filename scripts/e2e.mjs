@@ -195,6 +195,7 @@ try {
 		/component\/request\/request\.js/.test(login.text) &&
 			/layui\.use\(\[['"]form['"],\s*['"]http['"]\]/.test(login.text)
 	);
+	ok('login.html 通过 http 模块提交登录请求', /http\s*\.\s*post\(/.test(login.text));
 	ok(
 		'login.html 声明 referrer no-referrer',
 		/<meta\s+name="referrer"[^>]*no-referrer/i.test(login.text)
@@ -379,11 +380,11 @@ try {
 	);
 	const httpModule = await request(base, '/component/request/module/http.js');
 	ok(
-		'HTTP 请求模块提供 token 注入与鉴权失败处理',
+		'HTTP 请求模块提供 token 注入、持久化与鉴权失败处理',
 		httpModule.status === 200 &&
 			/Authorization/.test(httpModule.text) &&
 			/Bearer/.test(httpModule.text) &&
-			/sessionStorage/.test(httpModule.text) &&
+			/layui\.data\(/.test(httpModule.text) &&
 			/401/.test(httpModule.text) &&
 			/withAuth/.test(httpModule.text) &&
 			/\(["']http['"],/.test(httpModule.text),

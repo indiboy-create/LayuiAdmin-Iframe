@@ -24,7 +24,6 @@
 			menu: '{/}' + rootPath + 'module/menu',
 			sanitize: '{/}' + rootPath + 'module/sanitize',
 
-			tools: '{/}' + rootPath + 'module/tools',
 			theme: '{/}' + rootPath + 'module/theme',
 		});
 })();

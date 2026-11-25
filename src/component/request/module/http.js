@@ -4,7 +4,7 @@ layui.define(['jquery'], function (exports) {
 	var $ = layui.jquery;
 	var DEFAULTS = {
 		tokenKey: 'mytsa_token',
-		storage: 'session',
+		table: 'mytsa',
 		header: 'Authorization',
 		scheme: 'Bearer',
 		baseURL: '',
@@ -19,26 +19,18 @@ layui.define(['jquery'], function (exports) {
 	var state = Object.assign({}, DEFAULTS);
 
 	function readStorage() {
-		if (state.storage !== 'session') {
-			return '';
-		}
 		try {
-			return String(window.sessionStorage.getItem(state.tokenKey) || '');
+			return String(layui.data(state.table)[state.tokenKey] || '');
 		} catch (error) {
 			return '';
 		}
 	}
 
 	function writeStorage(token) {
-		if (state.storage !== 'session') {
-			return;
-		}
+		var settings = {};
+		settings[state.tokenKey] = token || '';
 		try {
-			if (token) {
-				window.sessionStorage.setItem(state.tokenKey, token);
-			} else {
-				window.sessionStorage.removeItem(state.tokenKey);
-			}
+			layui.data(state.table, settings);
 		} catch (error) {
 			state.token = token || '';
 		}
@@ -50,10 +42,10 @@ layui.define(['jquery'], function (exports) {
 		return api;
 	}
 
-	function setToken(token, persist) {
+	function setToken(token) {
 		var value = token === undefined || token === null ? '' : String(token).trim();
 		state.token = value;
-		writeStorage(persist === false ? '' : value);
+		writeStorage(value);
 		return api;
 	}
 

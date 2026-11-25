@@ -13,7 +13,7 @@ MyTSA 是基于 [Layui](https://layui.dev/) 框架构建的 iframe 后台管理�
 - 菜单与标签页支持键盘操作和 ARIA 属性
 - 打印样式、404 页面与静态资源内容哈希
 - 响应式侧栏折叠与移动端适配
-- 前端不保存登录凭据，权限校验交给后端或网关
+- 登录凭据由后端校验，前端用 `layui.data` 持久化 token
 
 ## 环境要求
 
@@ -114,9 +114,9 @@ MyTSA
 
 ## 登录与权限
 
-`login.html` 只负责展示登录界面并跳转到 `index.html`，不进行账号校验、不写入登录态。访问控制与权限校验应由后端服务或网关完成。
+`login.html` 通过 `request/http` 向 `/api/login` 提交表单，成功后跳转到 `index.html`。账号校验与权限判定由后端服务或网关完成。
 
-项目中的 `localStorage` / `sessionStorage` 仅用于恢复标签页和主题偏好，与账号权限无关。
+`http` 模块通过 `layui.data('mytsa', { mytsa_token: token })` 持久化 token；其余 `localStorage` / `sessionStorage` 仅用于恢复标签页和主题偏好。
 
 ## 构建说明
 

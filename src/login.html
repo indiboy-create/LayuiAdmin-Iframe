@@ -141,10 +141,17 @@
 		<script>
 			layui.use(['form', 'http'], function () {
 				var form = layui.form;
+				var http = layui.http;
 
-				form.on('submit(login)', function () {
-					// 账号校验与权限由后端/网关处理，前端只负责进入后台入口
-					window.location.href = 'index.html';
+				form.on('submit(login)', function (data) {
+					http.post('/api/login', data.field, { withAuth: false })
+						.then(function () {
+							window.location.href = 'index.html';
+						})
+						.catch(function (error) {
+							document.getElementById('login-alert').textContent =
+								error.message || '登录失败';
+						});
 					return false;
 				});
 			});
