@@ -139,6 +139,13 @@ try {
 	);
 	ok('index.html 声明 noindex', /<meta\s+name="robots"[^>]*noindex/i.test(index.text));
 	ok(
+		'index.html 侧边栏底部仅含一个 GitHub 链接',
+		/mytsa-side-links/.test(index.text) &&
+			/github\.com\/initearth\/mytsa-admin-iframe/.test(index.text) &&
+			!/initearth\.github\.io/.test(index.text) &&
+			/id="side"[\s\S]*mytsa-side-links/.test(index.text)
+	);
+	ok(
 		'index.html 内联后台引导逻辑',
 		/<script(?![^>]*\bsrc=)[^>]*>/i.test(index.text) &&
 			index.text.includes('admin.setConfigurationPath') &&
@@ -237,6 +244,41 @@ try {
 		Boolean(configData && configData.tab && configData.tab.max === 10),
 		`tab.max=${configData && configData.tab && configData.tab.max}`
 	);
+	ok(
+		'所有配色方案均配置标签栏与配套选中色',
+		Boolean(
+			configData &&
+			Array.isArray(configData.theme?.schemes) &&
+			Array.isArray(configData.colors) &&
+			configData.theme.schemes.length > 0 &&
+			configData.theme.schemes.every(
+				(scheme) =>
+					/^#[0-9a-f]{6}$/i.test(scheme.tab || '') &&
+					/^#[0-9a-f]{6}$/i.test(scheme.selected || '') &&
+					configData.colors.some(
+						(color) =>
+							String(color.selected).toLowerCase() ===
+							String(scheme.selected || '').toLowerCase()
+					)
+			)
+		),
+		'theme.schemes[].tab / selected 缺失或未匹配 colors'
+	);
+	ok(
+		'主题色提供 header 与扩展色阶',
+		Boolean(
+			configData &&
+			Array.isArray(configData.colors) &&
+			configData.colors.length > 0 &&
+			configData.colors.every(
+				(color) =>
+					/^#[0-9a-f]{6}$/i.test(color.header || '') &&
+					Array.isArray(color.shades) &&
+					color.shades.every((value) => /^#[0-9a-f]{6}$/i.test(value))
+			)
+		),
+		'colors[].header / shades 缺失'
+	);
 
 	const pages = [
 		'/index.html',
@@ -305,6 +347,103 @@ try {
 	);
 	const mytsaBundle = await request(base, '/component/mytsa/css/mytsa.bundle.css');
 	ok('mytsa 合并样式可访问', mytsaBundle.status === 200, `HTTP ${mytsaBundle.status}`);
+	ok(
+		'标签栏样式与配色方案独立联动',
+		/mytsa-tab-page>.layui-tab-title\{[^}]*background-color:var\(--scheme-tab\)/.test(
+			mytsaBundle.text
+		) &&
+			/mytsa-tab-page>.layui-tab-title li\{[^}]*color:var\(--scheme-tab-text\)/.test(
+				mytsaBundle.text
+			) &&
+			/--scheme-tab-border/.test(mytsaBundle.text)
+	);
+	const adminBundle = await request(base, '/theme/admin/css/admin.bundle.css');
+	const themeModule = await request(base, '/component/mytsa/module/theme.js');
+	ok(
+		'主题色阶 CSS 变量与写入逻辑均已构建',
+		adminBundle.status === 200 &&
+			themeModule.status === 200 &&
+			/--global-selected-color/.test(adminBundle.text) &&
+			/--global-tab-color/.test(adminBundle.text) &&
+			/--global-header-color/.test(adminBundle.text) &&
+			/--global-color-1/.test(adminBundle.text) &&
+			/--global-selected-color/.test(themeModule.text) &&
+			/--global-tab-color/.test(themeModule.text) &&
+			/--global-header-color/.test(themeModule.text) &&
+			/--global-color-/.test(themeModule.text),
+		`CSS HTTP ${adminBundle.status} / JS HTTP ${themeModule.status}`
+	);
+	ok(
+		'语义配色变量与 WCAG 对比度逻辑已构建',
+		/--scheme-body-bg/.test(adminBundle.text) &&
+			/--scheme-card-bg/.test(adminBundle.text) &&
+			/--scheme-selected-text/.test(adminBundle.text) &&
+			/\.2126/.test(themeModule.text) &&
+			/--scheme-selected-text/.test(themeModule.text)
+	);
+	ok(
+		'头部栏文字色支持主题色 headerText、方案配置与自动回退',
+		configData.theme.schemes.every((scheme) =>
+			/^#[0-9a-f]{6}$/i.test(scheme.headerText || '')
+		) &&
+			Array.isArray(configData.colors) &&
+			configData.colors.every((color) => /^#[0-9a-f]{6}$/i.test(color.headerText || '')) &&
+			/headerText/.test(themeModule.text) &&
+			/--scheme-header-text/.test(themeModule.text) &&
+			/color:var\(--scheme-header-text\)/.test(adminBundle.text),
+		'headerText 配置、写入或样式消费缺失'
+	);
+	const iframeEntry = await request(base, '/component/iframe/iframe.js');
+	const extendCss = await request(base, '/component/layui/css/extend.css');
+	ok(
+		'方案按 mode 拆分且 iframe 按作用域同步',
+		iframeEntry.status === 200 &&
+			configData.theme.schemes.every((scheme) => ['light', 'dark'].includes(scheme.mode)) &&
+			configData.theme.schemes.some(
+				(scheme) =>
+					scheme.mode === 'dark' &&
+					/^#[0-9a-f]{6}$/i.test(scheme.header || '') &&
+					/^#[0-9a-f]{6}$/i.test(scheme.tab || '')
+			) &&
+			/theme-iframe-vars/.test(iframeEntry.text) &&
+			/mytsa-theme/.test(iframeEntry.text) &&
+			/addEventListener\(['"]message['"]/.test(iframeEntry.text) &&
+			/reset/.test(iframeEntry.text) &&
+			/accent/.test(themeModule.text) &&
+			/full/.test(themeModule.text) &&
+			/theme-iframe-vars/.test(themeModule.text) &&
+			/postMessage/.test(themeModule.text) &&
+			/watermark/.test(iframeEntry.text),
+		`HTTP ${iframeEntry.status}`
+	);
+	ok(
+		'iframe 暗黑模式由 Layui 风格 dark 类驱动',
+		extendCss.status === 200 &&
+			/:root\.dark/.test(extendCss.text) &&
+			/--lay-color-bg-1/.test(extendCss.text) &&
+			/--lay-color-primary/.test(extendCss.text) &&
+			/\.dark\s+\.layui-card/.test(extendCss.text) &&
+			/classList\.add\(['"]dark['"]\)/.test(iframeEntry.text) &&
+			/classList\.remove\(['"]dark['"]\)/.test(iframeEntry.text),
+		`CSS HTTP ${extendCss.status} / JS HTTP ${iframeEntry.status}`
+	);
+	ok(
+		'设置面板含方案选中色预览与栅格主题色预设',
+		/scheme-preview-selected/.test(adminBundle.text) &&
+			/palette-swatch/.test(adminBundle.text) &&
+			/grid-template-columns:repeat\(3/.test(adminBundle.text) &&
+			/scheme-preview-selected/.test(themeModule.text) &&
+			/data-select-color/.test(themeModule.text) &&
+			/theme-palette-areas/.test(themeModule.text) &&
+			/theme-custom-headerText/.test(themeModule.text) &&
+			/顶栏文字色/.test(themeModule.text)
+	);
+	ok(
+		'配色方案一行两个展示',
+		/grid-template-columns:repeat\(2/.test(adminBundle.text) &&
+			/data-select-scheme/.test(themeModule.text) &&
+			!/scheme-group-title/.test(themeModule.text)
+	);
 
 	const assets = [...new Set(pageSources.flatMap(({ page, html }) => collectAssets(html, page)))];
 	for (const asset of assets) {

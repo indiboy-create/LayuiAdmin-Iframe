@@ -10,6 +10,7 @@ import {
 	validateThemeConfig,
 	validateRuntimeConfig,
 	collectLeafMenus,
+	SCHEME_COLOR_FIELDS,
 } from '../scripts/lib/validate.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -72,10 +73,17 @@ describe('主题配置', () => {
 
 	it('配色方案使用基色精简格式', async () => {
 		const config = await readJson('api/mytsa.config.json');
+		const colorValues = new Set(config.colors.map((color) => color.selected.toLowerCase()));
 		for (const scheme of config.theme.schemes) {
 			assert.ok(scheme.base, `${scheme.id} 缺少基色 base`);
+			assert.ok(scheme.tab, `${scheme.id} 缺少标签栏配色 tab`);
+			assert.ok(scheme.selected, `${scheme.id} 缺少配套选中色 selected`);
+			assert.ok(
+				colorValues.has(scheme.selected.toLowerCase()),
+				`${scheme.id} 的 selected=${scheme.selected} 未在 colors 中找到`
+			);
 			assert.equal(scheme.side, undefined, `${scheme.id} 应使用 base 而非 side`);
-			for (const field of ['base', 'header', 'logo']) {
+			for (const field of SCHEME_COLOR_FIELDS) {
 				if (scheme[field] !== undefined) {
 					assert.match(
 						scheme[field],
@@ -83,6 +91,23 @@ describe('主题配置', () => {
 						`${scheme.id} 的 ${field} 不是颜色值`
 					);
 				}
+			}
+		}
+	});
+
+	it('主题色提供完整色阶', async () => {
+		const config = await readJson('api/mytsa.config.json');
+		for (const color of config.colors) {
+			for (const field of ['selected', 'tab', 'header', 'headerText']) {
+				assert.match(
+					color[field],
+					/^#[0-9a-f]{3,8}$/i,
+					`${color.id} 的 ${field} 不是颜色值`
+				);
+			}
+			assert.ok(Array.isArray(color.shades), `${color.id} 缺少 shades 色阶`);
+			for (const value of color.shades) {
+				assert.match(value, /^#[0-9a-f]{3,8}$/i, `${color.id} 的色阶值不是颜色值`);
 			}
 		}
 	});

@@ -147,7 +147,7 @@ layui.define(
 						'<p style="color:#9a9a9a;font-size:12px;">' +
 						escapeHtml(detail) +
 						'</p>' +
-						'<a href="javascript:;" class="mytsa-menu-retry" style="color:var(--global-primary-color);font-size:12px;">重新加载</a>' +
+						'<a href="javascript:;" class="mytsa-menu-retry" style="color:var(--global-selected-color);font-size:12px;">重新加载</a>' +
 						'</div>'
 				);
 			};

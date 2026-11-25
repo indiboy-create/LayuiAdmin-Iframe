@@ -10,9 +10,9 @@ export const SKIP_PATTERN = /^(?:[a-z][a-z0-9+.-]*:|\/\/|#)/i;
 // CSS url() 中的变量与模板占位符无需校验
 export const SKIP_URL_PATTERN = /^(?:var\(|\$\{)/i;
 
-const SCHEME_FIELDS = ['id', 'label'];
+export const SCHEME_FIELDS = ['id', 'label'];
 
-const SCHEME_COLOR_FIELDS = ['base', 'header', 'logo'];
+export const SCHEME_COLOR_FIELDS = ['base', 'header', 'headerText', 'logo', 'tab', 'selected'];
 
 const REFERENCE_PATTERN = {
 	html: /\b(?:src|href)\s*=\s*["']([^"']+)["']/gi,
@@ -75,14 +75,30 @@ export function validateThemeConfig(config, configPath, errors) {
 	}
 
 	const colorIds = new Set();
+	const colorValues = new Set();
 	for (const [index, color] of config.colors.entries()) {
-		if (!color.id || !color.color) {
-			errors.push(`${configPath} 的 colors[${index}] 缺少 id 或 color`);
+		if (!color.id || !color.selected) {
+			errors.push(`${configPath} 的 colors[${index}] 缺少 id 或 selected`);
+		}
+		for (const field of ['selected', 'tab', 'header']) {
+			if (color[field] !== undefined && typeof color[field] !== 'string') {
+				errors.push(`${configPath} 的 colors[${index}] 的 ${field} 应为字符串`);
+			}
+		}
+		if (
+			color.shades !== undefined &&
+			(!Array.isArray(color.shades) ||
+				color.shades.some((value) => typeof value !== 'string'))
+		) {
+			errors.push(`${configPath} 的 colors[${index}] 的 shades 应为颜色字符串数组`);
 		}
 		if (colorIds.has(String(color.id))) {
 			errors.push(`${configPath} 的 colors 存在重复 id：${color.id}`);
 		}
 		colorIds.add(String(color.id));
+		if (typeof color.selected === 'string') {
+			colorValues.add(color.selected.toLowerCase());
+		}
 	}
 
 	const theme = config.theme || {};
@@ -106,6 +122,15 @@ export function validateThemeConfig(config, configPath, errors) {
 			if (scheme[field] !== undefined && typeof scheme[field] !== 'string') {
 				errors.push(`${configPath} 的 theme.schemes[${index}] 的 ${field} 应为字符串`);
 			}
+		}
+		if (
+			typeof scheme.selected === 'string' &&
+			scheme.selected !== '' &&
+			!colorValues.has(scheme.selected.toLowerCase())
+		) {
+			errors.push(
+				`${configPath} 的 theme.schemes[${index}] 的 selected=${scheme.selected} 未在 colors 中找到`
+			);
 		}
 		if (schemeIds.has(String(scheme.id))) {
 			errors.push(`${configPath} 的 theme.schemes 存在重复 id：${scheme.id}`);

@@ -3,7 +3,25 @@
   width: 100%;
   padding: 10px;
   box-sizing: border-box;
-  background-color: whitesmoke;
+  background-color: var(--scheme-body-bg, whitesmoke);
+}
+
+body {
+  color: var(--scheme-text, rgba(0, 0, 0, 0.85));
+}
+
+.layui-card {
+  background-color: var(--scheme-card-bg, #ffffff);
+  transition: background-color 0.3s;
+}
+
+.layui-card-header {
+  color: var(--scheme-text, rgba(0, 0, 0, 0.85));
+  border-bottom: 1px solid var(--scheme-border-muted, #eeeeee);
+}
+
+.layui-card-body {
+  color: var(--scheme-text, rgba(0, 0, 0, 0.85));
 }
 
 .title-colorpicker {
@@ -12,7 +30,7 @@
 }
 
 .layui-bg-white {
-  background: #ffffff;
+  background: var(--scheme-card-bg, #ffffff);
 }
 
 .layui-txt-bold {
@@ -57,4 +75,232 @@
 
 .layui-txt-gray {
   color: #5f5f5f !important;
+}
+
+/* iframe 暗黑模式：参考 Layui 官方文档 :root.dark / .dark 作用域覆盖 */
+:root.dark {
+  --lay-color-bg-1: #17171a;
+  --lay-color-bg-2: #232324;
+  --lay-color-bg-3: #2a2a2b;
+  --lay-color-bg-4: #313132;
+  --lay-color-bg-5: #373739;
+  --lay-color-bg-white: #f6f6f6;
+  --lay-color-text-1: rgba(255, 255, 255, 0.9);
+  --lay-color-text-2: rgba(255, 255, 255, 0.7);
+  --lay-color-text-3: rgba(255, 255, 255, 0.5);
+  --lay-color-text-4: rgba(255, 255, 255, 0.3);
+  --lay-color-border-1: #2e2e30;
+  --lay-color-border-2: #484849;
+  --lay-color-border-3: #5f5f60;
+  --lay-color-border-4: #929293;
+  --lay-color-fill-1: rgba(255, 255, 255, 0.04);
+  --lay-color-fill-2: rgba(255, 255, 255, 0.08);
+  --lay-color-fill-3: rgba(255, 255, 255, 0.12);
+  --lay-color-fill-4: rgba(255, 255, 255, 0.16);
+  --lay-color-primary: var(--global-selected-color, #16baaa);
+  --lay-color-hover: var(--lay-color-fill-3);
+  --lay-color-active: var(--lay-color-fill-3);
+  --lay-shadow-1: 0 4px 6px rgba(0, 0, 0, 0.3), 0 1px 10px rgba(0, 0, 0, 0.2);
+  --lay-shadow-2: 0 8px 10px rgba(0, 0, 0, 0.4), 0 3px 14px rgba(0, 0, 0, 0.3);
+}
+
+html.dark {
+  background-color: var(--lay-color-bg-1);
+  color-scheme: dark;
+}
+
+.dark body,
+.dark .iframe-container {
+  background-color: var(--lay-color-bg-1);
+  color: var(--lay-color-text-2);
+}
+
+.dark a {
+  color: var(--lay-color-text-1);
+}
+
+.dark a:hover {
+  color: var(--lay-color-text-3);
+}
+
+.dark .layui-card {
+  background-color: var(--lay-color-bg-2);
+  box-shadow: var(--lay-shadow-1);
+}
+
+.dark .layui-card-header {
+  border-bottom-color: var(--lay-color-border-2);
+  color: var(--lay-color-text-1);
+}
+
+.dark .layui-card-body,
+.dark .layui-text {
+  color: var(--lay-color-text-2);
+}
+
+.dark .layui-btn {
+  background-color: var(--lay-color-primary);
+  border-color: transparent;
+  color: var(--lay-color-text-1);
+}
+
+.dark .layui-btn:hover {
+  color: var(--lay-color-text-2);
+}
+
+.dark .layui-btn-primary {
+  background-color: var(--lay-color-bg-4);
+  border-color: var(--lay-color-border-2);
+  color: var(--lay-color-text-1);
+}
+
+.dark .layui-btn-normal {
+  background-color: #1e9fff;
+}
+
+.dark .layui-btn-warm {
+  background-color: #ffb800;
+}
+
+.dark .layui-btn-danger {
+  background-color: #ff5722;
+}
+
+.dark .layui-input,
+.dark .layui-select,
+.dark .layui-textarea {
+  background-color: var(--lay-color-fill-2);
+  border-color: var(--lay-color-border-1);
+  color: var(--lay-color-text-2);
+}
+
+.dark .layui-input:focus,
+.dark .layui-textarea:focus {
+  background-color: var(--lay-color-bg-2);
+  border-color: var(--lay-color-primary) !important;
+}
+
+.dark .layui-form-select dl {
+  background-color: var(--lay-color-bg-5);
+  border-color: var(--lay-color-border-2);
+  box-shadow: var(--lay-shadow-2);
+}
+
+.dark .layui-form-select dl dd:hover,
+.dark .layui-form-select dl dd.layui-this {
+  background-color: var(--lay-color-active);
+  color: var(--lay-color-text-1);
+}
+
+.dark .layui-table {
+  background-color: var(--lay-color-bg-2);
+  color: var(--lay-color-text-2);
+}
+
+.dark .layui-table td,
+.dark .layui-table th,
+.dark .layui-table-header,
+.dark .layui-table-page,
+.dark .layui-table-tool,
+.dark .layui-table-view {
+  border-color: var(--lay-color-border-2);
+}
+
+.dark .layui-table-hover,
+.dark .layui-table-click,
+.dark .layui-table[lay-even] tbody tr:nth-child(even) {
+  background-color: var(--lay-color-fill-3);
+}
+
+.dark .layui-table-checked {
+  background-color: var(--lay-color-fill-2);
+  color: var(--lay-color-text-1);
+}
+
+.dark .layui-tab-title .layui-this {
+  color: var(--lay-color-text-1);
+}
+
+.dark .layui-tab-title .layui-this:after {
+  border-bottom-color: var(--lay-color-primary);
+}
+
+.dark .layui-nav {
+  background-color: var(--lay-color-bg-2);
+}
+
+.dark .layui-nav .layui-nav-item a {
+  color: var(--lay-color-text-1);
+}
+
+.dark .layui-nav .layui-this a,
+.dark .layui-nav .layui-nav-item a:hover {
+  background: none;
+  color: var(--lay-color-primary);
+}
+
+.dark .layui-nav-child {
+  background-color: var(--lay-color-bg-5);
+  border-color: var(--lay-color-border-2);
+}
+
+.dark .layui-layer {
+  background-color: var(--lay-color-bg-3);
+  color: var(--lay-color-text-2);
+  box-shadow: var(--lay-shadow-2);
+}
+
+.dark .layui-layer-title {
+  background-color: var(--lay-color-bg-2);
+  border-bottom-color: var(--lay-color-border-2);
+  color: var(--lay-color-text-1);
+}
+
+.dark .layui-layer-btn a {
+  background-color: var(--lay-color-bg-4);
+  border-color: var(--lay-color-border-2);
+  color: var(--lay-color-text-2);
+}
+
+.dark .layui-layer-btn .layui-layer-btn0 {
+  background-color: var(--lay-color-primary);
+  border-color: transparent;
+  color: var(--lay-color-text-1);
+}
+
+.dark .layui-elem-quote {
+  background-color: var(--lay-color-fill-1);
+  border-left-color: var(--lay-color-primary);
+}
+
+.dark .layui-breadcrumb a {
+  color: var(--lay-color-text-3) !important;
+}
+
+.dark .layui-breadcrumb a:hover {
+  color: var(--lay-color-primary) !important;
+}
+
+.dark .layui-font-gray,
+.dark .layui-word-aux {
+  color: var(--lay-color-text-3) !important;
+}
+
+.dark .layui-bg-white {
+  background: var(--lay-color-bg-2);
+}
+
+.dark .layui-laypage a,
+.dark .layui-laypage span {
+  background-color: var(--lay-color-bg-2);
+  border-color: var(--lay-color-border-2);
+  color: var(--lay-color-text-2);
+}
+
+.dark .layui-laypage .layui-laypage-curr em {
+  color: var(--lay-color-text-1);
+}
+
+.dark .layui-laypage .layui-laypage-curr .layui-laypage-em {
+  background-color: var(--lay-color-primary);
 }

@@ -29,163 +29,82 @@
 		"schemes": [
 			{
 				"id": "default",
-				"label": "默认",
-				"base": "#20222A"
+				"label": "基础配色",
+				"mode": "light",
+				"base": "#23292e",
+				"header": "#fafafa",
+				"headerText": "#000000",
+				"tab": "#f7f7f7",
+				"logo": "#23292e",
+				"selected": "#16baaa"
 			},
 			{
-				"id": "dark-blue",
-				"label": "深海蓝",
-				"base": "#03152A"
-			},
-			{
-				"id": "coffee",
-				"label": "咖啡棕",
-				"base": "#2E241B"
-			},
-			{
-				"id": "purple-red",
-				"label": "紫罗兰",
-				"base": "#50314F"
-			},
-			{
-				"id": "ocean",
-				"label": "海洋蓝",
-				"base": "#344058",
-				"logo": "#1E9FFF"
-			},
-			{
-				"id": "green",
-				"label": "墨绿",
-				"base": "#3A3D49",
-				"logo": "#2F9688"
-			},
-			{
-				"id": "red",
-				"label": "橙红",
-				"base": "#20222A",
-				"logo": "#F78400"
-			},
-			{
-				"id": "fashion-red",
-				"label": "时尚红",
-				"base": "#28333E",
-				"logo": "#AA3130"
-			},
-			{
-				"id": "classic-black",
-				"label": "经典黑",
-				"base": "#24262F",
-				"logo": "#3A3D49"
-			},
-			{
-				"id": "green-header",
-				"label": "青绿顶栏",
-				"base": "#20222A",
-				"header": "#2F9688",
-				"logo": "#226A62"
-			},
-			{
-				"id": "ocean-header",
-				"label": "海洋蓝顶栏",
-				"base": "#344058",
-				"header": "#1E9FFF",
-				"logo": "#0085E8"
-			},
-			{
-				"id": "classic-black-header",
-				"label": "经典黑顶栏",
-				"base": "#20222A",
-				"header": "#393D49"
-			},
-			{
-				"id": "purple-red-header",
-				"label": "紫罗兰顶栏",
-				"base": "#50314F",
-				"header": "#50314F"
-			},
-			{
-				"id": "fashion-red-header",
-				"label": "时尚红顶栏",
-				"base": "#28333E",
-				"header": "#AA3130"
-			},
-			{
-				"id": "green-header-2",
-				"label": "薄荷绿顶栏",
-				"base": "#28333E",
-				"header": "#16baaa",
-				"logo": "#16baaa"
-			},
-			{
-				"id": "classic-style1",
-				"label": "经典风格一",
-				"base": "#393D49",
-				"header": "#23262E"
-			},
-			{
-				"id": "classic-style2",
-				"label": "经典风格二",
-				"base": "#001529",
-				"header": "#1890FF"
-			},
-			{
-				"id": "classic-style3",
-				"label": "经典风格三",
-				"base": "#25282A",
-				"header": "#35BDB2"
+				"id": "dark",
+				"label": "暗黑模式",
+				"mode": "dark",
+				"base": "#23292e",
+				"header": "#2f363c",
+				"headerText": "#ffffff",
+				"tab": "#23292e",
+				"logo": "#23292e",
+				"selected": "#16baaa"
 			}
 		]
 	},
 	"colors": [
 		{
+			"id": "6",
+			"label": "深",
+			"selected": "#2f363c",
+			"tab": "#e2e2e2",
+			"header": "#23292e",
+			"headerText": "#ffffff",
+			"shades": ["#e2e2e2", "#c2c2c2", "#2f363c", "#23292e", "#161a1d"]
+		},
+		{
 			"id": "1",
-			"color": "#2d8cf0",
-			"second": "#ecf5ff"
+			"label": "红",
+			"selected": "#ff5722",
+			"tab": "#fef0ec",
+			"header": "#cc451b",
+			"headerText": "#ffffff",
+			"shades": ["#fef0ec", "#ffa98d", "#ff5722", "#cc451b", "#993311"]
 		},
 		{
 			"id": "2",
-			"color": "#36b368",
-			"second": "#f0f9eb"
+			"label": "橙",
+			"selected": "#ffb800",
+			"tab": "#fff8e6",
+			"header": "#cc9300",
+			"headerText": "#ffffff",
+			"shades": ["#fff8e6", "#ffdb80", "#ffb800", "#cc9300", "#996e00"]
 		},
 		{
 			"id": "3",
-			"color": "#f6ad55",
-			"second": "#fdf6ec"
+			"label": "绿",
+			"selected": "#16baaa",
+			"tab": "#e8f7f5",
+			"header": "#0f8f83",
+			"headerText": "#ffffff",
+			"shades": ["#e8f7f5", "#a3e4dc", "#16baaa", "#0f8f83", "#09645c"]
 		},
 		{
 			"id": "4",
-			"color": "#f56c6c",
-			"second": "#fef0f0"
+			"label": "蓝",
+			"selected": "#1e9fff",
+			"tab": "#ecf5ff",
+			"header": "#1677cc",
+			"headerText": "#ffffff",
+			"shades": ["#ecf5ff", "#a3c9f7", "#1e9fff", "#1677cc", "#0f5496"]
 		},
 		{
 			"id": "5",
-			"color": "#3963bc",
-			"second": "#ecf5ff"
-		},
-		{
-			"id": "6",
-			"color": "#16baaa",
-			"second": "#e8f7f5"
-		},
-		{
-			"id": "7",
-			"color": "#722ed1",
-			"second": "#f3ecfb"
-		},
-		{
-			"id": "8",
-			"color": "#eb2f96",
-			"second": "#fdeaf4"
-		},
-		{
-			"id": "9",
-			"color": "#faad14",
-			"second": "#fff8e6"
-		},
-		{
-			"id": "10",
-			"color": "#20222a",
-			"second": "#eeeef0"
+			"label": "紫",
+			"selected": "#a233c6",
+			"tab": "#f6ecfb",
+			"header": "#7d2799",
+			"headerText": "#ffffff",
+			"shades": ["#f6ecfb", "#d3a0e6", "#a233c6", "#7d2799", "#5a1d70"]
 		}
 	],
 	"other": {

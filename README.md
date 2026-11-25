@@ -132,13 +132,41 @@ npm install @initearth/mytsa-admin-iframe
 
 ## 配色方案
 
-`mytsa.config.json` 的 `theme.schemes` 只需声明基色，其余字段由 `theme.js` 派生：
+配色方案严格取自 [Layui 官方色板](https://layui.dev/docs/2/color/)：区域底色使用其中的中色调（`#23292e`、`#2f363c`、`#fafafa`、`#f7f7f7`、`#eeeeee`、`#e2e2e2`），主题色预设以深色为首位与默认：深 `#2f363c`、红 `#ff5722`、橙 `#ffb800`、绿 `#16baaa`、蓝 `#1e9fff`、紫 `#a233c6`（浅色 `#fafafa` 未纳入）。自定义色值方案已移除。
 
-- `base`：侧栏基色（缺省 `#20222A`），同时作为 LOGO 底色
-- `header`：顶栏底色（缺省 `#FFFFFF`）
-- `logo`：LOGO 底色，缺省与 `base` 相同；需要独立品牌色时显式覆盖
+`mytsa.config.json` 的 `theme.schemes` 声明四个区域底色，并可为顶栏单独指定文字/图标色 `headerText`（基础配色 `#000000`、暗黑模式 `#ffffff`）；未配置时文字色与边框色仍由 `theme.js` 按背景明暗派生：
 
-旧格式的 `side` 仍然兼容，与 `base` 等价。
+- `mode`：`light`（基础配色）或 `dark`（暗黑模式），决定区域配色逻辑与 iframe 同步方式
+- `base`：侧栏基色，同时作为 LOGO 缺省底色
+- `header`：顶栏底色
+- `headerText`：顶栏文字与图标色，可选；缺省时按 `header` 背景色自动计算（WCAG 对比度）
+- `tab`：标签栏底色，与顶栏独立配色
+- `logo`：LOGO 底色
+- `selected`：配套选中色，切换方案时自动应用；与 `colors[].selected` 一致时会复用该主题色的完整色阶
+
+预置方案仅两个：基础配色（浅色顶栏与标签栏、深色侧栏，黑字）与暗黑模式（深色顶栏、深色标签栏与深色侧栏，白字）。`selected` 必须在 `colors` 中存在，否则配置校验会报错。旧格式的 `side` 仍然兼容，与 `base` 等价；自定义配色面板可覆盖侧栏、顶栏、标签栏底色、LOGO、主色与顶栏文字色，手动选中的颜色优先于方案默认选中色；顶栏文字色的优先级为面板自定义 > `colors[].headerText` > `schemes[].headerText` > 按顶栏底色自动计算。
+
+两个配色方案（基础配色 / 暗黑模式）一行两个并排展示，作为**明暗基调开关**；「主题色预设」作为**色系选择**，两者正交。主题色同步调整 LOGO、头部栏与标签栏时，会按当前方案的明暗选择色阶：
+
+- 基础配色：LOGO 用深色阶、头部栏用主色、标签栏用浅色阶
+- 暗黑模式：头部栏用深色阶、标签栏用最深色阶、LOGO 用侧栏色，保持深色质感
+
+切换方案会保留已选主题色，并按新基调重新计算区域配色，不会把主题色重置为方案默认值；首次加载且无缓存时选中第一个预设（深），手动自定义项仍优先，点击主题色预设会清除自定义主色。
+
+`colors` 为每套主题色提供色阶，键名与配色方案的区域命名保持一致：
+
+- `label`：主题色名称，用于设置面板提示
+- `selected`：主色/选中色，写入 `--global-selected-color`
+- `tab`：浅色阶，写入 `--global-tab-color`
+- `header`：深色阶，写入 `--global-header-color`
+- `headerText`：顶栏文字/图标色，写入 `--scheme-header-text`，按主色对比度取黑或白；优先于方案的 `headerText`
+- `shades`：颜色数组，依次写入 `--global-color-1`、`--global-color-2`……可声明任意多档；预置主题色均提供 5 档
+
+官方色板未给出色阶，因此只有 `selected` 严格取自官方色板，`tab`、`header` 与 `shades` 是在该主色基础上派生的同色系色阶，`headerText` 是按主色 WCAG 对比度选出的顶栏文字色。缺少 `header` 或 `shades` 的旧配置仍然可用，对应 CSS 变量回落到 `variables.css` 中的默认值。
+
+顶栏文字/图标色的优先级为 `colors[].headerText` > `theme.schemes[].headerText` > 按顶栏底色自动计算；切换主题色、切换方案或自定义顶栏底色时都遵循该顺序。内容区背景、卡片背景、正文与边框由 `--scheme-body-bg`、`--scheme-card-bg`、`--scheme-text`、`--scheme-border-muted` 派生；深色方案下自动切换为深色内容区。文字色按 WCAG 相对亮度在黑/白之间取对比度更高者，主色上的选中态文字使用 `--scheme-selected-text`，避免亮色底上白字偏淡。
+
+基础配色与暗黑模式按 `theme.schemes[].mode` 完全拆分、独立运行。基础配色下 iframe 完全独立：主框架不写入 `theme-iframe-vars`，也不推送主题变量，子页使用自身默认配色，标签栏颜色与主题色变化都不会让它跟着改变。暗黑模式下主框架的 header/tab/侧栏/内容区背景锁定为 scheme 固定值，切换主题色预设只更新强调色系（`--global-*` 与选中态文字色），不改变任何背景；iframe 首次进入暗黑模式时同步一次背景 + 强调色到 `localStorage` 的 `theme-iframe-vars` 并经 `postMessage` 推送，之后主题色变化只推强调色，子页背景保持不变。暗黑样式参考 Layui 官方文档的 `:root.dark` / `.dark` 作用域覆盖，集中写在 `component/layui/css/extend.css`（仅 iframe 页面引用）：主框架只推送 `mode: 'dark'` 与强调色，iframe 给 `<html>` 加 `.dark` 类激活本地深灰背景与组件覆盖，背景不再由主框架变量控制。切回基础配色会清除缓存并移除 `.dark` 类，通知子页恢复默认配色。
 
 ## 登录与鉴权
 
@@ -180,7 +208,7 @@ npm install @initearth/mytsa-admin-iframe
     - 标签页：焦点进入标签后，`←/→`（或 `↑/↓`）切换相邻标签，`Home`/`End` 跳到首尾，`Delete` 关闭当前标签（首页等不可关闭的标签会忽略），切换后焦点跟随到新标签。
     - 菜单：`↑/↓` 在同级可见菜单项间移动，`→` 展开子菜单，`←` 收起子菜单。
     - 页面顶部提供“跳到主内容”链接，首次按 `Tab` 即可跳到内容区并聚焦。
-- 焦点样式统一用 `:focus-visible` 描边（主色 `--global-primary-color`），并尊重 `prefers-reduced-motion`。
+- 焦点样式统一用 `:focus-visible` 描边（主色 `--global-selected-color`），并尊重 `prefers-reduced-motion`。
 - 切换或关闭标签时同步 `document.title`（`<当前标签标题> - MyTSA`），浏览器多开多个后台页面时便于区分。
 - 所有页面 HTML 声明 `<meta name="robots" content="noindex,nofollow" />`，产物根目录附带 `robots.txt`（`Disallow: /`），避免演示后台被搜索引擎收录。
 - iframe 加载失败时会在该标签内覆盖显示“页面加载失败 + 页面地址 + 重新加载”面板：同源页面返回空内容会立即判定，15 秒内未触发 `load` 也会提示；跨域页面无法读取内容，不做误判。

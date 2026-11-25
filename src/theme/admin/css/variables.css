@@ -1,13 +1,29 @@
 :root {
 	/* 主题颜色 */
-	--global-primary-color: #16baaa;
+	--global-selected-color: #16baaa;
+	--global-tab-color: #e8f7f5;
+	--global-header-color: #0f8f83;
+	--global-color-1: #e8f7f5;
+	--global-color-2: #a3e4dc;
+	--global-color-3: #16baaa;
+	--global-color-4: #0f8f83;
+	--global-color-5: #09645c;
 
 	/* 配色方案 */
-	--scheme-side: #20222a;
-	--scheme-header: #ffffff;
-	--scheme-logo: #20222a;
+	--scheme-side: #23292e;
+	--scheme-header: #fafafa;
+	--scheme-tab: #f7f7f7;
+	--scheme-logo: #23292e;
 	--scheme-side-text: #ffffff;
 	--scheme-header-text: #000000;
+	--scheme-tab-text: #000000;
+	--scheme-tab-border: rgba(0, 0, 0, 0.08);
+	--scheme-body-bg: #f7f7f7;
+	--scheme-card-bg: #fafafa;
+	--scheme-text: #333333;
+	--scheme-border-muted: rgba(0, 0, 0, 0.08);
+	--scheme-side-border: rgba(255, 255, 255, 0.08);
+	--scheme-selected-text: #ffffff;
 
 	/** 圆角度数 */
 	--global-border-radius: 4px;

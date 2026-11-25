@@ -1,7 +1,7 @@
 .mytsa-nav-tree {
 	width: 230px !important;
 	border-radius: 0px;
-	background-color: #28333e;
+	background-color: var(--scheme-side);
 }
 
 .mytsa-nav-tree .layui-nav-item > a {
@@ -34,7 +34,7 @@
 .layui-nav-tree .layui-this,
 .layui-nav-tree .layui-this > a,
 .layui-nav-tree .layui-this > a:hover {
-	background-color: var(--global-primary-color);
+	background-color: var(--global-selected-color);
 }
 
 .mytsa-nav-tree .toast {
@@ -44,7 +44,8 @@
 	text-align: center;
 	height: 40px;
 	line-height: 40px;
-	color: lightgray;
+	color: var(--scheme-side-text);
+	opacity: 0.65;
 }
 
 .mytsa-nav-tree .layui-nav-item a i {
@@ -113,7 +114,7 @@
 	top: 0;
 	border-radius: 4px;
 	overflow: hidden;
-	background-color: #28333e;
+	background-color: var(--scheme-side);
 	display: block;
 	box-shadow: 0px 0px 3px lightgray;
 }
@@ -145,38 +146,38 @@
 
 /** 亮 样 式*/
 .dark-theme .layui-nav-tree {
-	background-color: #28333e !important;
+	background-color: var(--scheme-side) !important;
 }
 
 .light-theme {
-	background-color: white !important;
+	background-color: var(--scheme-card-bg) !important;
 }
 
 .light-theme .mytsa-nav-tree,
 .light-theme .mytsa-nav-tree .layui-nav-hover:before,
 .light-theme .mytsa-nav-tree .layui-nav-child {
-	background-color: white !important;
+	background-color: var(--scheme-card-bg) !important;
 }
 
 .light-theme .mytsa-nav-tree a,
 .light-theme .mytsa-nav-tree .layui-nav-more {
-	color: dimgray !important;
-	border-top-color: dimgray;
+	color: var(--scheme-text) !important;
+	border-top-color: var(--scheme-text);
 }
 
 .light-theme .mytsa-nav-tree .layui-nav-itemed > a > .layui-nav-more {
-	border-top-color: white !important;
-	border-bottom-color: dimgray !important;
+	border-top-color: var(--scheme-card-bg) !important;
+	border-bottom-color: var(--scheme-text) !important;
 }
 
 .light-theme .mytsa-nav-tree .layui-this a,
 .light-theme .mytsa-nav-tree .layui-this {
-	color: white !important;
-	background-color: var(--global-primary-color) !important;
+	color: var(--scheme-selected-text, #ffffff) !important;
+	background-color: var(--global-selected-color) !important;
 }
 
 .light-theme .mytsa-nav-tree .layui-this a:hover {
-	background-color: var(--global-primary-color) !important;
+	background-color: var(--global-selected-color) !important;
 }
 
 .light-theme .mytsa-nav-tree .layui-nav-bar {

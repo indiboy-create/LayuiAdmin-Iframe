@@ -21,7 +21,7 @@ body,
 }
 
 .mytsa-admin .layui-layout-right .layui-nav-child {
-	border: 1px solid whitesmoke;
+	border: 1px solid var(--scheme-border-muted);
 	border-radius: 4px;
 	width: auto;
 	left: auto;
@@ -37,7 +37,7 @@ body,
 .mytsa-admin .layui-logo {
 	height: 60px;
 	line-height: 60px;
-	border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+	border-bottom: 1px solid var(--scheme-border-muted);
 	box-sizing: border-box;
 	position: relative;
 	background-color: var(--scheme-logo);
@@ -79,9 +79,48 @@ body,
 }
 
 .mytsa-admin .layui-side-scroll {
+	display: flex;
+	flex-direction: column;
 	height: calc(100% - 60px) !important;
 	background-color: var(--scheme-side);
 	width: 247px;
+}
+
+.mytsa-admin .layui-side-scroll #side {
+	flex: 1 1 auto;
+	min-height: 0;
+}
+
+.mytsa-admin .layui-side-scroll .mytsa-side-links {
+	flex: 0 0 auto;
+	display: flex;
+	height: 46px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	border-top: 1px solid var(--scheme-side-border);
+}
+
+.mytsa-admin .layui-side-scroll .mytsa-side-links li {
+	flex: 1 1 0;
+}
+
+.mytsa-admin .layui-side-scroll .mytsa-side-links a {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	height: 100%;
+	font-size: 13px;
+	color: var(--scheme-side-text);
+}
+
+.mytsa-admin .layui-side-scroll .mytsa-side-links a:hover {
+	color: var(--global-selected-color);
+}
+
+.mytsa-admin.light-theme .layui-side-scroll .mytsa-side-links {
+	border-top-color: var(--scheme-side-border);
 }
 
 .mytsa-admin .layui-side .layui-nav-tree .layui-nav-item a {
@@ -96,7 +135,7 @@ body,
 .mytsa-admin .layui-body {
 	bottom: 0px;
 	padding-bottom: 0px;
-	background-color: whitesmoke;
+	background-color: var(--scheme-body-bg);
 	height: calc(100% - 60px);
 	overflow-y: auto;
 	left: 230px;
@@ -142,11 +181,20 @@ body,
 
 .mytsa-mini .layui-side-scroll {
 	height: calc(100% - 60px);
+	width: 60px;
+}
+
+.mytsa-mini .layui-side-scroll .mytsa-side-links a span {
+	display: none;
+}
+
+.mytsa-mini .layui-side-scroll .mytsa-side-links a {
+	gap: 0;
 }
 
 .mytsa-admin .layui-header .layui-nav .layui-nav-bar {
 	top: 0px !important;
-	background-color: var(--global-primary-color);
+	background-color: var(--global-selected-color);
 	height: 2px !important;
 }
 
@@ -163,7 +211,7 @@ body,
 	bottom: 30px;
 	z-index: 400000;
 	position: absolute;
-	background-color: var(--global-primary-color) !important;
+	background-color: var(--global-selected-color) !important;
 	box-shadow: 2px 0 6px rgba(0, 21, 41, 0.2);
 	text-align: center;
 	border-radius: 4px;
@@ -174,7 +222,7 @@ body,
 }
 
 .mytsa-collapsed-pe a {
-	color: white !important;
+	color: var(--scheme-selected-text, #ffffff) !important;
 }
 
 /** 新增兼容 */
@@ -194,6 +242,7 @@ body,
 
 	.mytsa-mini .layui-side-scroll {
 		height: calc(100% - 62px);
+		width: 0px;
 	}
 
 	.mytsa-mini .layui-side {
@@ -304,15 +353,18 @@ body,
 	list-style: none;
 	padding: 0;
 	margin: 0;
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 10px;
 }
 
 .scheme-content li {
 	position: relative;
 	display: inline-block;
 	vertical-align: top;
-	width: 80px;
+	width: auto;
 	height: 50px;
-	margin: 0 14px 15px 0;
+	margin: 0;
 	background-color: #f2f2f2;
 	cursor: pointer;
 }
@@ -324,7 +376,7 @@ body,
 	width: calc(100% + 4px);
 	height: calc(100% + 4px);
 	padding: 0;
-	border: var(--global-primary-color) 2px solid;
+	border: var(--global-selected-color) 2px solid;
 	opacity: 1;
 	border-radius: 4px;
 	box-sizing: border-box;
@@ -373,6 +425,43 @@ body,
 	top: 0;
 	width: 20px;
 	height: 10px;
+}
+
+.scheme-preview-tab {
+	position: absolute;
+	left: 20px;
+	top: 10px;
+	width: calc(100% - 20px);
+	height: 4px;
+}
+
+.scheme-preview-selected {
+	position: absolute;
+	left: 20px;
+	top: 14px;
+	width: calc(100% - 20px);
+	height: 4px;
+}
+
+.palette-content ul {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 10px;
+}
+
+.palette-content li {
+	width: auto;
+	height: 48px;
+	margin: 0;
+	padding: 5px;
+}
+
+.palette-swatch {
+	display: block;
+	width: 100%;
+	height: 100%;
+	border-radius: 2px;
+	box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
 }
 
 /** 自定义配色 */
@@ -425,8 +514,8 @@ body,
 	height: 26px;
 	line-height: 26px;
 	border-radius: 2px;
-	background-color: #16baaa;
-	color: #fff;
+	background-color: var(--global-selected-color);
+	color: #ffffff;
 	font-size: 18px;
 	text-align: center;
 }
@@ -471,7 +560,7 @@ body,
 	padding: 4px;
 	top: -6px;
 	left: -6px;
-	border: var(--global-primary-color) 2px solid;
+	border: var(--global-selected-color) 2px solid;
 	opacity: 1;
 	border-radius: 4px;
 }
@@ -495,7 +584,7 @@ body,
 	position: fixed;
 	width: 100%;
 	height: 100%;
-	background-color: whitesmoke;
+	background-color: var(--scheme-body-bg);
 	z-index: 9999999;
 }
 
@@ -506,7 +595,7 @@ body,
 	margin-top: 20%;
 	position: relative;
 	z-index: 999999;
-	background-color: whitesmoke;
+	background-color: var(--scheme-body-bg);
 }
 
 .loader:before {
@@ -514,7 +603,7 @@ body,
 	width: 50px;
 	height: 7px;
 	border-radius: 50%;
-	background: #000;
+	background: var(--scheme-text);
 	opacity: 0.1;
 	position: absolute;
 	top: 59px;
@@ -527,7 +616,7 @@ body,
 	width: 50px;
 	height: 50px;
 	border-radius: 10px;
-	background-color: var(--global-primary-color);
+	background-color: var(--global-selected-color);
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -610,8 +699,8 @@ body,
 	z-index: 19999999;
 	padding: 8px 14px;
 	border-radius: var(--global-border-radius, 4px);
-	background: var(--global-primary-color, #16baaa);
-	color: #fff;
+	background: var(--global-selected-color, #16baaa);
+	color: var(--scheme-selected-text, #ffffff);
 	font-size: 14px;
 	line-height: 1;
 	text-decoration: none;
@@ -620,7 +709,7 @@ body,
 
 .mytsa-skip-link:focus {
 	top: 12px;
-	outline: 2px solid #fff;
+	outline: 2px solid var(--scheme-selected-text, #ffffff);
 	outline-offset: 2px;
 }
 
@@ -628,7 +717,7 @@ body,
 .layui-tab-title li:focus-visible,
 .mytsa-menu a:focus-visible,
 #content:focus-visible {
-	outline: 2px solid var(--global-primary-color, #16baaa);
+	outline: 2px solid var(--global-selected-color, #16baaa);
 	outline-offset: -2px;
 }
 
