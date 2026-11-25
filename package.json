@@ -1,6 +1,6 @@
 {
 	"name": "@initearth/mytsa-admin-iframe",
-	"version": "1.0.1",
+	"version": "1.0.3",
 	"type": "module",
 	"description": "MyTSA - 基于 Layui 的 iframe 后台管理系统前端模板",
 	"keywords": [
