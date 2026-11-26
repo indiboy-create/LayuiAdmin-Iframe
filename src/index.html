@@ -160,13 +160,21 @@
 		</div>
 		<!-- 依 赖 脚 本 -->
 		<script src="component/layui/layui.js"></script>
+		<script src="component/request/request.js"></script>
 		<script src="component/mytsa/mytsa.js"></script>
 		<script src="component/iframe/iframe.js"></script>
 		<script>
-			layui.use(['admin'], function () {
+			layui.use(['admin', 'http'], function () {
 				var admin = layui.admin;
+				var http = layui.http;
+				var configPath = 'api/mytsa.config.json';
 
-				admin.setConfigurationPath('api/mytsa.config.json');
+				admin.setConfigurationPath(configPath);
+				admin.setConfigurationProvider(function () {
+					return http.get(configPath).then(function (response) {
+						return response.data;
+					});
+				});
 
 				admin.render();
 

@@ -167,6 +167,12 @@ try {
 	);
 	ok('index.html 引入 mytsa 组件入口', /component\/mytsa\/mytsa\.js/.test(index.text));
 	ok('index.html 引入 iframe 水印组件入口', /component\/iframe\/iframe\.js/.test(index.text));
+	ok(
+		'index.html 通过 http 模块加载后台配置',
+		/component\/request\/request\.js/.test(index.text) &&
+			/layui\.use\(\[['"]admin['"],\s*['"]http['"]\]/.test(index.text) &&
+			/http\.get\(/.test(index.text)
+	);
 	ok('index.html 与登录资源隔离', !/(?:theme\/login|component\/login)\//.test(index.text));
 
 	const watermark = await request(base, '/component/iframe/module/watermark.js');
