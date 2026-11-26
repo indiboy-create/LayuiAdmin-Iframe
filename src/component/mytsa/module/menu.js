@@ -289,29 +289,19 @@ layui.define(['jquery', 'element', 'sanitize'], function (exports) {
 		return type === '_blank' || type === '_layer' || type === '_iframe' ? type : '_iframe';
 	}
 
-	function syncMenuAria(elem) {
-		$('#' + elem + " a[menu-type='0']").each(function () {
-			var $trigger = $(this);
-			$trigger.attr(
-				'aria-expanded',
-				$trigger.parent().hasClass('layui-nav-itemed') ? 'true' : 'false'
-			);
-		});
-	}
-
 	function createMenu(option) {
 		var menuHtml =
 			'<div style="height:100%!important;" class="mytsa-side-scroll layui-side-scroll ' +
 			escapeHtml(option.theme) +
 			'"><ul lay-filter="' +
 			escapeHtml(option.elem) +
-			'" role="menu" aria-label="主菜单" class="layui-nav arrow   mytsa-menu layui-nav-tree mytsa-nav-tree" ' +
+			'" class="layui-nav arrow   mytsa-menu layui-nav-tree mytsa-nav-tree" ' +
 			(option.accordion ? 'lay-accordion' : '') +
 			'>';
 		$.each(option.data, function (i, item) {
-			var content = '<li class="layui-nav-item" role="none">';
+			var content = '<li class="layui-nav-item">';
 			if (i == option.defaultOpen) {
-				content = '<li class="layui-nav-item layui-nav-itemed" role="none">';
+				content = '<li class="layui-nav-item layui-nav-itemed">';
 			}
 			var href = 'javascript:;';
 			var target = '';
@@ -326,7 +316,7 @@ layui.define(['jquery', 'element', 'sanitize'], function (exports) {
 				content +=
 					'<a href="' +
 					href +
-					'" role="menuitem" aria-haspopup="true" aria-expanded="false" menu-type="' +
+					'" menu-type="' +
 					escapeHtml(item.type) +
 					'" menu-id="' +
 					escapeHtml(item.id) +
@@ -341,7 +331,7 @@ layui.define(['jquery', 'element', 'sanitize'], function (exports) {
 				content +=
 					'<a class="' +
 					className +
-					'" role="menuitem" menu-type="' +
+					'" menu-type="' +
 					escapeHtml(item.type) +
 					'" menu-open-type="' +
 					openType +
@@ -371,64 +361,6 @@ layui.define(['jquery', 'element', 'sanitize'], function (exports) {
 		menuHtml += '</ul></div>';
 		// 将 菜 单 拼 接 到 初 始 化 容 器 中
 		$('#' + option.elem).html(menuHtml);
-		syncMenuAria(option.elem);
-		$('#' + option.elem)
-			.off('click.menuAria')
-			.on('click.menuAria', function () {
-				window.setTimeout(function () {
-					syncMenuAria(option.elem);
-				}, 0);
-			});
-		$('#' + option.elem)
-			.off('keydown.menuA11y')
-			.on('keydown.menuA11y', "a[role='menuitem']", function (event) {
-				var $items = $('#' + option.elem + " a[role='menuitem']").filter(':visible');
-				if (!$items.length) {
-					return;
-				}
-
-				var index = $items.index(this);
-				var next;
-				var $holder = $(this).parent();
-
-				if (event.key === 'ArrowDown') {
-					next = $items.eq((index + 1) % $items.length);
-				} else if (event.key === 'ArrowUp') {
-					next = $items.eq((index - 1 + $items.length) % $items.length);
-				} else if (event.key === 'Home') {
-					next = $items.first();
-				} else if (event.key === 'End') {
-					next = $items.last();
-				} else if (event.key === 'ArrowRight') {
-					if (
-						$(this).attr('menu-type') === '0' &&
-						!$holder.hasClass('layui-nav-itemed')
-					) {
-						event.preventDefault();
-						$(this).trigger('click');
-						window.setTimeout(function () {
-							syncMenuAria(option.elem);
-						}, 0);
-					}
-					return;
-				} else if (event.key === 'ArrowLeft') {
-					if ($(this).attr('menu-type') === '0' && $holder.hasClass('layui-nav-itemed')) {
-						event.preventDefault();
-						$(this).trigger('click');
-						window.setTimeout(function () {
-							syncMenuAria(option.elem);
-						}, 0);
-					}
-					return;
-				} else {
-					return;
-				}
-
-				event.preventDefault();
-				if (next && next.length) {
-					next.trigger('focus');
-				}
-			});
 	}
 
 	/** 加载子菜单 (递归)*/
@@ -438,13 +370,13 @@ layui.define(['jquery', 'element', 'sanitize'], function (exports) {
 			return '';
 		}
 		// 创 建 子 菜 单 结 构
-		var content = '<dl class="layui-nav-child" role="group">';
+		var content = '<dl class="layui-nav-child">';
 		// 如 果 嵌 套 不 等 于 空
 		if (obj.children != null && obj.children.length > 0) {
 			// 遍 历 子 项 目
 			$.each(obj.children, function (i, note) {
 				// 创 建 子 项 结 构
-				content += '<dd role="none">';
+				content += '<dd>';
 				var href = 'javascript:;';
 				var target = '';
 				var className = 'site-demo-active';
@@ -458,7 +390,7 @@ layui.define(['jquery', 'element', 'sanitize'], function (exports) {
 				if (note.type == 0) {
 					// 创 建 目 录 结 构
 					content +=
-						'<a role="menuitem" aria-haspopup="true" aria-expanded="false" ' +
+						'<a ' +
 						target +
 						' href="' +
 						href +
@@ -474,7 +406,7 @@ layui.define(['jquery', 'element', 'sanitize'], function (exports) {
 				} else if (note.type == 1) {
 					// 创 建 菜 单 结 构
 					content +=
-						'<a role="menuitem" ' +
+						'<a ' +
 						target +
 						' class="' +
 						className +

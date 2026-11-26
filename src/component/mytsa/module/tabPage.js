@@ -54,7 +54,7 @@ layui.define(['jquery', 'element', 'dropdown', 'layer', 'sanitize'], function (e
 	function titleHtml(item) {
 		return `<span class="mytsa-tab-page-active"></span>
 					 <span class="${item.close ? 'able-close' : 'disable-close'} title">${escapeHtml(item.title)}</span>
-					 <i class="layui-icon layui-unselect layui-tab-close" aria-hidden="true">ဆ</i>`;
+					 <i class="layui-icon layui-unselect layui-tab-close">ဆ</i>`;
 	}
 
 	function frameHtml(item) {
@@ -67,103 +67,6 @@ layui.define(['jquery', 'element', 'dropdown', 'layer', 'sanitize'], function (e
 		});
 	}
 
-	function decorateTabs(elem) {
-		var $tab = $(".layui-tab[lay-filter='" + elem + "']");
-		if (!$tab.length) {
-			return;
-		}
-
-		var $title = $tab.find('.layui-tab-title');
-		var $panels = $tab.find('.layui-tab-content > div');
-
-		$title.attr('role', 'tablist');
-		$title.find('li[lay-id]').each(function (index) {
-			var $li = $(this);
-			var selected = $li.hasClass('layui-this');
-			var tabId =
-				'mytsa-tab-' +
-				elem +
-				'-' +
-				String($li.attr('lay-id') || index).replace(/[^\w-]/g, '');
-			var panel = $panels.eq(index).get(0);
-
-			$li.attr({
-				role: 'tab',
-				id: tabId,
-				tabindex: selected ? '0' : '-1',
-				'aria-selected': selected ? 'true' : 'false',
-				'aria-keyshortcuts': 'Delete',
-			});
-
-			if (panel) {
-				panel.id = panel.id || tabId + '-panel';
-				$li.attr('aria-controls', panel.id);
-				$(panel).attr({
-					role: 'tabpanel',
-					'aria-labelledby': tabId,
-					tabindex: '0',
-				});
-			}
-		});
-	}
-
-	function bindTabKeyboard(option) {
-		var elem = option.elem;
-		var $title = $(".layui-tab[lay-filter='" + elem + "'] .layui-tab-title");
-
-		$title.off('keydown.mytsaA11y').on('keydown.mytsaA11y', "li[role='tab']", function (event) {
-			var $items = $title.find("li[role='tab']");
-			if (!$items.length) {
-				return;
-			}
-
-			var index = $items.index(this);
-			var next;
-
-			switch (event.key) {
-				case 'ArrowRight':
-				case 'ArrowDown':
-					next = $items.eq((index + 1) % $items.length);
-					break;
-				case 'ArrowLeft':
-				case 'ArrowUp':
-					next = $items.eq((index - 1 + $items.length) % $items.length);
-					break;
-				case 'Home':
-					next = $items.first();
-					break;
-				case 'End':
-					next = $items.last();
-					break;
-				case 'Delete':
-					if ($(this).find('span').is('.able-close')) {
-						event.preventDefault();
-						tabDelete(elem, $(this).attr('lay-id'), option.closeEvent);
-						window.setTimeout(function () {
-							$title.find('li.layui-this').trigger('focus');
-						}, 0);
-					}
-					return;
-				case 'Enter':
-				case ' ':
-					event.preventDefault();
-					element.tabChange(elem, $(this).attr('lay-id'));
-					return;
-				default:
-					return;
-			}
-
-			if (!next || !next.length || next.get(0) === this) {
-				return;
-			}
-
-			event.preventDefault();
-			element.tabChange(elem, next.attr('lay-id'));
-			decorateTabs(elem);
-			next.trigger('focus');
-		});
-	}
-
 	function showFrameError(frame, url) {
 		var $frame = $(frame);
 		if ($frame.siblings('.mytsa-frame-error').length) {
@@ -172,7 +75,7 @@ layui.define(['jquery', 'element', 'dropdown', 'layer', 'sanitize'], function (e
 
 		$frame.parent().css('position', 'relative');
 
-		var $hint = $("<div class='mytsa-frame-error' role='alert'></div>").css({
+		var $hint = $("<div class='mytsa-frame-error'></div>").css({
 			position: 'absolute',
 			top: 0,
 			left: 0,
@@ -457,8 +360,6 @@ layui.define(['jquery', 'element', 'dropdown', 'layer', 'sanitize'], function (e
 		});
 
 		mousewheelAndTouchmoveHandler(option);
-		bindTabKeyboard(option);
-		decorateTabs(option.elem);
 		return new tabPage(option);
 	};
 
@@ -476,7 +377,6 @@ layui.define(['jquery', 'element', 'dropdown', 'layer', 'sanitize'], function (e
 
 		element.on('tab(' + elem + ')', function () {
 			var id = $('#' + elem + ' .layui-tab-title .layui-this').attr('lay-id');
-			decorateTabs(elem);
 			writeTabStorage(elem + '-mytsa-tab-page-data-current', id);
 			var handler = clickCallbacks[elem];
 			if (typeof handler === 'function') {
@@ -645,7 +545,6 @@ layui.define(['jquery', 'element', 'dropdown', 'layer', 'sanitize'], function (e
 		}
 		element.tabChange(this.option.elem, opt.id);
 		writeTabStorage(this.option.elem + '-mytsa-tab-page-data-current', opt.id);
-		decorateTabs(this.option.elem);
 	};
 
 	/**
@@ -695,7 +594,6 @@ layui.define(['jquery', 'element', 'dropdown', 'layer', 'sanitize'], function (e
 				return item.id != id;
 			});
 			saveTabSession(elem);
-			decorateTabs(elem);
 			return false;
 		}
 
@@ -717,7 +615,6 @@ layui.define(['jquery', 'element', 'dropdown', 'layer', 'sanitize'], function (e
 		saveTabSession(elem, currId);
 		removeTab.remove();
 		findFrame(elem, id).parent().remove();
-		decorateTabs(elem);
 	}
 
 	/**

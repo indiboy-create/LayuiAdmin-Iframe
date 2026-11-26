@@ -53,9 +53,7 @@ layui.define(['jquery'], function (exports) {
 
 		var $layer = $container.children('.mytsa-watermark-layer');
 		if (!$layer.length) {
-			$layer = $('<div class="mytsa-watermark-layer" aria-hidden="true"></div>').appendTo(
-				$container
-			);
+			$layer = $('<div class="mytsa-watermark-layer"></div>').appendTo($container);
 		}
 		$layer.css({
 			'background-image': background,

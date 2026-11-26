@@ -20,7 +20,6 @@
 	<!-- 结 构 代 码 -->
 
 	<body class="layui-layout-body mytsa-admin">
-		<a class="mytsa-skip-link" href="#content">跳到主内容</a>
 		<!-- 布 局 框 架 -->
 		<div class="layui-layout layui-layout-admin">
 			<!-- 顶 部 样 式 -->
@@ -39,7 +38,6 @@
 							href="javascript:;"
 							class="layui-icon layui-icon-shrink-right"
 							title="侧边伸缩"
-							aria-label="侧边伸缩"
 						></a>
 					</li>
 					<li class="refresh layui-nav-item layui-hide-xs" lay-unselect>
@@ -53,7 +51,6 @@
 							class="layui-icon layui-icon-refresh-1"
 							loading="600"
 							title="刷新"
-							aria-label="刷新"
 						></a>
 					</li>
 				</ul>
@@ -68,7 +65,6 @@
 							user-menu-title="首页"
 							user-menu-url="iframe/layui.html"
 							title="消息中心"
-							aria-label="消息中心"
 						>
 							<i class="layui-icon layui-icon-notice"></i>
 							<span class="layui-badge-dot"></span>
@@ -130,7 +126,7 @@
 				<!-- 菜 单 内 容 -->
 				<div class="layui-side-scroll">
 					<div id="side"></div>
-					<ul class="mytsa-side-links" aria-label="站点链接">
+					<ul class="mytsa-side-links">
 						<li>
 							<a
 								href="https://github.com/initearth/mytsa-admin-iframe"
@@ -147,7 +143,7 @@
 			<!-- 视 图 页 面 -->
 			<div class="layui-body">
 				<!-- 内 容 页 面 -->
-				<div id="content" tabindex="-1"></div>
+				<div id="content"></div>
 			</div>
 
 			<!-- 遮 盖 层 -->
@@ -160,11 +156,7 @@
 		</div>
 		<!-- 移 动 端 便 捷 操 作 -->
 		<div class="mytsa-collapsed-pe collapse">
-			<a
-				href="javascript:;"
-				class="layui-icon layui-icon-shrink-right"
-				aria-label="收起侧边栏"
-			></a>
+			<a href="javascript:;" class="layui-icon layui-icon-shrink-right"></a>
 		</div>
 		<!-- 依 赖 脚 本 -->
 		<script src="component/layui/layui.js"></script>
