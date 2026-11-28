@@ -31,4 +31,8 @@
 
 	/** 圆角度数 */
 	--global-border-radius: 4px;
+
+	/** 皮肤背景（独立于主题模式与配色方案，默认不加载） */
+	--skin-image: none;
+	--skin-alpha: 1;
 }

@@ -4,6 +4,11 @@
 	var defaultThemeColor = themeMeta ? themeMeta.getAttribute('content') : '';
 	var defaultScheme = schemeMeta ? schemeMeta.getAttribute('content') : '';
 
+	// 嵌入主框架时背景透明，透出 panel 的皮肤背景
+	if (window.self !== window.top) {
+		document.documentElement.classList.add('mytsa-embedded');
+	}
+
 	function applyThemeVars(data) {
 		if (!data || typeof data !== 'object') {
 			return;
@@ -44,6 +49,21 @@
 		}
 	}
 
+	// 皮肤透明度独立于主题配色，嵌入时直接读取父文档变量，保证首屏一致
+	function syncSkinFromParent() {
+		try {
+			if (window.parent && window.parent !== window && window.parent.document) {
+				var value =
+					window.parent.document.documentElement.style.getPropertyValue('--skin-alpha');
+				if (value) {
+					document.documentElement.style.setProperty('--skin-alpha', value);
+				}
+			}
+		} catch (error) {
+			// 跨域时忽略
+		}
+	}
+
 	// 站点标识随父页面下发的 mytsa_scope 参数传递，子页据此读取本站点的主题缓存
 	function getThemeScope() {
 		try {
@@ -56,6 +76,8 @@
 
 	var themeScope = getThemeScope();
 	var themeStoragePrefix = themeScope ? 'mytsa:' + themeScope + ':' : '';
+
+	syncSkinFromParent();
 
 	try {
 		var stored = window.localStorage.getItem(themeStoragePrefix + 'theme-iframe-vars');

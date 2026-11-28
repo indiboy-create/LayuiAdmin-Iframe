@@ -139,10 +139,10 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 			label: mode ? mode.label : c.label,
 			mode: mode ? mode.mode : 'light',
 			side: c.side,
-			// 深色模式固定顶栏为纯黑、标签栏为略浅的黑（均不随配色方案变化），顶栏文字用白色
-			header: dark ? '#000000' : c.header,
+			// 深色模式固定顶栏为稍浅深灰、标签栏再略浅（均不随配色方案变化），顶栏文字用白色
+			header: dark ? '#141414' : c.header,
 			headerText: dark ? '#ffffff' : c.headerText,
-			tab: dark ? '#1a1a1a' : c.tab,
+			tab: dark ? '#1e1e1e' : c.tab,
 			logo: c.logo,
 			selected: c.selected,
 		};
@@ -169,6 +169,7 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		'--scheme-border-muted',
 	];
 	var IFRAME_ACCENT_VARS = [
+		'--skin-alpha',
 		'--scheme-side-border',
 		'--scheme-selected-text',
 		'--global-selected-color',
@@ -181,6 +182,48 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		'--global-color-5',
 	];
 	var IFRAME_VARS = IFRAME_BACKGROUND_VARS.concat(IFRAME_ACCENT_VARS);
+
+	// 皮肤背景独立于主题模式与配色方案，默认不加载
+	var DEFAULT_SKIN_OPACITY = 15;
+	var DEFAULT_MASK_ALPHA = 15;
+
+	function getSkins() {
+		return (config && config.theme && config.theme.skins) || [];
+	}
+
+	function applySkin() {
+		var skinId = readStorage('skin-background');
+		var skin = skinId ? getItemById(getSkins(), skinId) : null;
+		var fallbackOpacity = skin
+			? skin.opacity === undefined || skin.opacity === null
+				? DEFAULT_SKIN_OPACITY
+				: Number(skin.opacity)
+			: 0;
+		var stored = readStorage('skin-opacity');
+		var opacity = stored === null || stored === '' ? fallbackOpacity : Number(stored);
+		if (isNaN(opacity)) {
+			opacity = fallbackOpacity;
+		}
+		opacity = Math.min(100, Math.max(0, opacity));
+		var style = document.documentElement.style;
+		var maskColor = readStorage('skin-mask-color');
+		if (!maskColor && skin && skin.mask) {
+			maskColor = skin.mask;
+		}
+		style.setProperty('--skin-image', skin && skin.src ? 'url("' + skin.src + '")' : 'none');
+		style.setProperty('--skin-alpha', String(1 - opacity / 100));
+		style.setProperty('--skin-mask-color', maskColor || getDefaultMaskColor());
+		syncToIframe('accent');
+	}
+
+	function getDefaultMaskColor() {
+		var base =
+			document.documentElement.style.getPropertyValue('--scheme-body-bg').trim() || '#000000';
+		var rgb = parseRgb(base) || [0, 0, 0];
+		return (
+			'rgba(' + rgb[0] + ', ' + rgb[1] + ', ' + rgb[2] + ', ' + DEFAULT_MASK_ALPHA / 100 + ')'
+		);
+	}
 
 	function parseRgb(color) {
 		var hex = String(color || '').replace('#', '');
@@ -593,16 +636,33 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		return value || '#FFFFFF';
 	}
 
+	function getMaskColor() {
+		return readStorage('skin-mask-color') || getDefaultMaskColor();
+	}
+
 	function renderCustomPickers() {
-		$.each($('.scheme-custom .set-custom-theme'), function () {
+		$.each($('.scheme-custom .set-custom-theme, .skin-mask-color'), function () {
 			var elem = $(this);
 			var name = elem.attr('data-name');
+			var isMask = elem.hasClass('skin-mask-color');
 			elem.empty().removeClass('layui-inline').removeAttr('lay-colorpicker-id');
 			colorpicker.render({
 				elem: elem[0],
-				color: getCustomColor(name),
+				color: isMask ? getMaskColor() : getCustomColor(name),
+				alpha: isMask,
+				format: isMask ? 'rgb' : 'hex',
 				predefine: true,
+				change: function (value) {
+					if (isMask) {
+						document.documentElement.style.setProperty('--skin-mask-color', value);
+					}
+				},
 				done: function (value) {
+					if (isMask) {
+						writeStorage('skin-mask-color', value);
+						applySkin();
+						return;
+					}
 					writeStorage('theme-custom-' + name, value);
 					applyCustomTheme();
 				},
@@ -675,6 +735,58 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 			'<ul>\n' +
 			'<li>恢复默认主题 <div class="set-default-theme"><button type="button" class="layui-btn layui-btn-primary reset-theme"><i class="layui-icon layui-icon-refresh-1"></i></button></div></li>\n' +
 			'</ul>\n' +
+			'</div>\n' +
+			'</div>'
+		);
+	}
+
+	function buildSkinHtml() {
+		var skins = getSkins();
+		var current = readStorage('skin-background') || '';
+
+		var stored = readStorage('skin-opacity');
+		var opacity = stored === null || stored === '' ? DEFAULT_SKIN_OPACITY : Number(stored);
+		if (isNaN(opacity)) {
+			opacity = DEFAULT_SKIN_OPACITY;
+		}
+		var items =
+			'<li' + (current ? '' : ' class="layui-this"') + ' data-select-skin="">无背景</li>';
+		$.each(skins, function (i, skin) {
+			items +=
+				'<li' +
+				(String(skin.id) === String(current) ? ' class="layui-this"' : '') +
+				' data-select-skin="' +
+				skin.id +
+				'" title="' +
+				(skin.label || '') +
+				'"><span class="skin-thumb" style="background-image: url(\'' +
+				skin.src +
+				'\');"></span></li>';
+		});
+		return (
+			'<div class="mytsaone-color">\n' +
+			'<div class="color-title">背景皮肤</div>\n' +
+			'<div class="skin-content">\n' +
+			'<ul class="skin-list">' +
+			items +
+			'</ul>\n' +
+			'<div class="skin-opacity' +
+			(current ? '' : ' is-disabled') +
+			'">\n' +
+			'<span class="skin-opacity-label">整体透明度</span>\n' +
+			'<input type="range" class="skin-opacity-range" min="0" max="100" step="1" value="' +
+			opacity +
+			'"' +
+			(current ? '' : ' disabled') +
+			'>\n' +
+			'<span class="skin-opacity-value">' +
+			opacity +
+			'%</span>\n' +
+			'</div>\n' +
+			'<div class="skin-mask-row">\n' +
+			'<span class="skin-mask-label">背景蒙层</span>\n' +
+			'<div class="set-custom-theme skin-mask-color" data-name="mask"></div>\n' +
+			'</div>\n' +
 			'</div>\n' +
 			'</div>'
 		);
@@ -757,6 +869,7 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 			// 应用“主题模式 + 配色方案”：模式只决定 iframe 明暗，六处颜色全部取自配色方案
 			applyActiveTheme();
 			applyCustomTheme();
+			applySkin();
 		},
 
 		/**
@@ -771,6 +884,7 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		var modeHtml = buildModeHtml();
 		var paletteHtml = buildPaletteHtml();
 		var customHtml = buildCustomHtml();
+		var skinHtml = buildSkinHtml();
 		var resetHtml = buildResetHtml();
 
 		layer.open({
@@ -784,7 +898,7 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 			anim: -1,
 			skin: 'layer-anim-right',
 			move: false,
-			content: modeHtml + paletteHtml + customHtml + resetHtml,
+			content: modeHtml + paletteHtml + customHtml + skinHtml + resetHtml,
 			success: function (layero, index) {
 				layero.find('.layui-layer-content').css({
 					height: '100%',
@@ -828,6 +942,54 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		applyActiveTheme();
 		applyCustomTheme();
 		renderCustomPickers();
+	});
+
+	body.on('click', '[data-select-skin]', function () {
+		var id = $(this).attr('data-select-skin');
+		var skin = id ? getItemById(getSkins(), id) : null;
+		$('[data-select-skin]').removeClass('layui-this');
+		$(this).addClass('layui-this');
+		if (id) {
+			writeStorage('skin-background', id);
+		} else {
+			removeStorage('skin-background');
+		}
+		// 点击皮肤时套用配置中的默认方案（整体透明度 + 背景蒙层）
+		if (skin) {
+			if (skin.opacity !== undefined && skin.opacity !== null) {
+				writeStorage('skin-opacity', String(skin.opacity));
+			}
+			if (skin.mask) {
+				writeStorage('skin-mask-color', skin.mask);
+			}
+		}
+		applySkin();
+		var $box = $(this).closest('.skin-content');
+		$box.find('.skin-opacity').toggleClass('is-disabled', !id);
+		$box.find('.skin-opacity-range').prop('disabled', !id);
+		if (skin) {
+			var opacity =
+				skin.opacity === undefined || skin.opacity === null
+					? DEFAULT_SKIN_OPACITY
+					: Number(skin.opacity);
+			$box.find('.skin-opacity-range').val(opacity);
+			$box.find('.skin-opacity-value').text(opacity + '%');
+			renderCustomPickers();
+		}
+	});
+
+	body.on('input change', '.skin-opacity-range', function () {
+		var value = Number($(this).val());
+		if (isNaN(value)) {
+			value = DEFAULT_SKIN_OPACITY;
+		}
+		value = Math.min(100, Math.max(0, value));
+		writeStorage('skin-opacity', String(value));
+		$(this)
+			.closest('.skin-opacity')
+			.find('.skin-opacity-value')
+			.text(value + '%');
+		applySkin();
 	});
 
 	function applyPresetColor(color, active) {
@@ -876,6 +1038,10 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 				'theme-custom-header',
 				'theme-custom-headerText',
 				'theme-custom-tab',
+				'skin-background',
+				'skin-opacity',
+				'skin-mask-color',
+
 				'theme-menu',
 				'theme-header',
 				'auto-head',

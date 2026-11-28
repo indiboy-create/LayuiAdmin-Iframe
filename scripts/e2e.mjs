@@ -411,7 +411,7 @@ try {
 	);
 	ok(
 		'标签栏样式与配色方案独立联动',
-		/mytsa-tab-page>.layui-tab-title\{[^}]*background-color:var\(--scheme-tab\)/.test(
+		/mytsa-tab-page>.layui-tab-title\{[^}]*background-color:color-mix\(in srgb,var\(--scheme-tab\)/.test(
 			mytsaBundle.text
 		) &&
 			/mytsa-tab-page>.layui-tab-title li\{[^}]*color:var\(--scheme-tab-text\)/.test(
@@ -429,7 +429,7 @@ try {
 	ok(
 		'标签工具栏下拉菜单参考左侧菜单配色（背景与文字同侧栏）',
 		/mytsa-tab-tool-dropdown/.test(tabPageModule.text) &&
-			/\.mytsa-tab-tool-dropdown\{[^}]*background-color:var\(--scheme-side\)/.test(
+			/\.mytsa-tab-tool-dropdown\{[^}]*background-color:color-mix\(in srgb,var\(--scheme-side\)/.test(
 				mytsaBundle.text
 			) &&
 			/\.mytsa-tab-tool-dropdown \.layui-menu\{[^}]*background-color:transparent/.test(
@@ -508,7 +508,7 @@ try {
 	ok(
 		'用户下拉菜单参考左侧菜单配色（背景与文字同侧栏）、无内边距且悬停用主题色高亮',
 		/\.layui-layout-right \.layui-nav-child\{[^}]*padding:0/.test(adminBundle.text) &&
-			/\.layui-nav-item\.user>\.layui-nav-child\{[^}]*background-color:var\(--scheme-side\)/.test(
+			/\.layui-nav-item\.user>\.layui-nav-child\{[^}]*background-color:color-mix\(in srgb,var\(--scheme-side\)/.test(
 				adminBundle.text
 			) &&
 			/\.layui-nav-item\.user>\.layui-nav-child dd>a\{color:var\(--scheme-side-text\)/.test(
@@ -524,7 +524,7 @@ try {
 	);
 	ok(
 		'右侧主题面板参考左侧菜单配色（背景与文字同侧栏）',
-		/\.layui-layer\.layer-anim-right\{[^}]*background-color:var\(--scheme-side\)/.test(
+		/\.layui-layer\.layer-anim-right\{[^}]*background-color:color-mix\(in srgb,var\(--scheme-side\)/.test(
 			adminBundle.text
 		) &&
 			/\.layui-layer\.layer-anim-right \.layui-layer-content\{[^}]*color:var\(--scheme-side-text\)/.test(
@@ -532,6 +532,33 @@ try {
 			) &&
 			/\.scheme-custom li\{[^}]*color:var\(--scheme-side-text\)/.test(adminBundle.text),
 		'右侧主题面板未参考左侧菜单配色'
+	);
+	ok(
+		'皮肤背景独立于主题模式与配色方案且默认不加载',
+		/--skin-image/.test(adminBundle.text) &&
+			/--skin-alpha/.test(adminBundle.text) &&
+			/skin-background/.test(themeModule.text) &&
+			/skin-opacity/.test(themeModule.text) &&
+			/data-select-skin/.test(themeModule.text) &&
+			!/theme\/skins\//.test(themeModule.text),
+		'皮肤背景未独立或存在默认加载'
+	);
+	ok(
+		'背景蒙层颜色与透明度合并在取色器中配置',
+		/skin-mask-color/.test(themeModule.text) &&
+			/alpha:[^\s,}]/.test(themeModule.text) &&
+			/--skin-mask-color/.test(adminBundle.text) &&
+			!/skin-mask-alpha/.test(themeModule.text),
+		'背景蒙层未合并为带 alpha 的取色器'
+	);
+	ok(
+		'背景皮肤与透明度/蒙层在配置中联动',
+		configData.theme.skins.every(
+			(skin) => typeof skin.opacity === 'number' && /^rgba\(/.test(skin.mask || '')
+		) &&
+			/\.opacity\b/.test(themeModule.text) &&
+			/\.mask\b/.test(themeModule.text),
+		'皮肤联动配置缺失'
 	);
 	ok(
 		'自定义配色选择器边框随侧栏配色自适应',

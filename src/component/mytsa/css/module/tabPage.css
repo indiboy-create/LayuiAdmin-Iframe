@@ -20,7 +20,11 @@
 .mytsa-tab-page > .layui-tab-title {
 	border: none;
 	border: 1px solid var(--scheme-tab-border);
-	background-color: var(--scheme-tab);
+	background-color: color-mix(
+		in srgb,
+		var(--scheme-tab) calc(var(--skin-alpha, 1) * 100%),
+		transparent
+	);
 }
 
 .mytsa-tab-page > .layui-tab-title,
@@ -61,7 +65,11 @@
 }
 
 .mytsa-tab-page > .layui-tab-title .layui-tab-close:hover {
-	background-color: var(--scheme-tab);
+	background-color: color-mix(
+		in srgb,
+		var(--scheme-tab) calc(var(--skin-alpha, 1) * 100%),
+		transparent
+	);
 	line-height: 19px;
 	color: var(--scheme-tab-text);
 }
@@ -80,7 +88,11 @@
 	height: 40px;
 	line-height: 40px;
 	width: 40px;
-	background-color: var(--scheme-tab);
+	background-color: color-mix(
+		in srgb,
+		var(--scheme-tab) calc(var(--skin-alpha, 1) * 100%),
+		transparent
+	);
 	border-top: 1px solid var(--scheme-tab-border);
 	border-bottom: 1px solid var(--scheme-tab-border);
 	color: var(--scheme-tab-text);
@@ -160,7 +172,11 @@
 	padding: 0;
 	border: 1px solid var(--scheme-side-border);
 	border-radius: var(--global-border-radius, 4px);
-	background-color: var(--scheme-side);
+	background-color: color-mix(
+		in srgb,
+		var(--scheme-side) calc(var(--skin-alpha, 1) * 100%),
+		transparent
+	);
 }
 
 .mytsa-tab-tool-dropdown .layui-menu {
@@ -192,7 +208,11 @@
 	height: calc(100% - 42px);
 	top: 42px;
 	z-index: 19;
-	background-color: var(--scheme-body-bg);
+	background-color: color-mix(
+		in srgb,
+		var(--scheme-body-bg) calc(var(--skin-alpha, 1) * 100%),
+		transparent
+	);
 }
 
 .mytsa-tab-page-loading.close {

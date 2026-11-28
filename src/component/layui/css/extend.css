@@ -3,7 +3,11 @@
   width: 100%;
   padding: 10px;
   box-sizing: border-box;
-  background-color: var(--scheme-body-bg, whitesmoke);
+  background-color: color-mix(in srgb, var(--scheme-body-bg, whitesmoke) calc(var(--skin-alpha, 1) * 100%), transparent);
+}
+
+html.mytsa-embedded body {
+  background-color: transparent;
 }
 
 body {
@@ -11,7 +15,7 @@ body {
 }
 
 .layui-card {
-  background-color: var(--scheme-card-bg, #ffffff);
+  background-color: color-mix(in srgb, var(--scheme-card-bg, #ffffff) calc(var(--skin-alpha, 1) * 100%), transparent);
   transition: background-color 0.3s;
 }
 
@@ -30,7 +34,7 @@ body {
 }
 
 .layui-bg-white {
-  background: var(--scheme-card-bg, #ffffff);
+  background: color-mix(in srgb, var(--scheme-card-bg, #ffffff) calc(var(--skin-alpha, 1) * 100%), transparent);
 }
 
 .layui-txt-bold {
@@ -79,11 +83,11 @@ body {
 
 /* iframe 暗黑模式：参考 Layui 官方文档 :root.dark / .dark 作用域覆盖 */
 :root.dark {
-  --lay-color-bg-1: #17171a;
-  --lay-color-bg-2: #232324;
-  --lay-color-bg-3: #2a2a2b;
-  --lay-color-bg-4: #313132;
-  --lay-color-bg-5: #373739;
+  --lay-color-bg-1: color-mix(in srgb, #17171a calc(var(--skin-alpha, 1) * 100%), transparent);
+  --lay-color-bg-2: color-mix(in srgb, #232324 calc(var(--skin-alpha, 1) * 100%), transparent);
+  --lay-color-bg-3: color-mix(in srgb, #2a2a2b calc(var(--skin-alpha, 1) * 100%), transparent);
+  --lay-color-bg-4: color-mix(in srgb, #313132 calc(var(--skin-alpha, 1) * 100%), transparent);
+  --lay-color-bg-5: color-mix(in srgb, #373739 calc(var(--skin-alpha, 1) * 100%), transparent);
   --lay-color-bg-white: #f6f6f6;
   --lay-color-text-1: rgba(255, 255, 255, 0.8);
   --lay-color-text-2: rgba(255, 255, 255, 0.7);
@@ -107,6 +111,23 @@ body {
 html.dark {
   background-color: var(--lay-color-bg-1);
   color-scheme: dark;
+}
+
+html.mytsa-embedded,
+html.mytsa-embedded.dark,
+html.mytsa-embedded body,
+html.mytsa-embedded .iframe-container {
+  background-color: transparent;
+}
+
+.layui-table,
+.layui-table-view,
+.layui-table-header,
+.layui-table-page,
+.layui-table-tool,
+.layui-layer,
+.layui-layer-page .layui-layer-content {
+  background-color: color-mix(in srgb, var(--scheme-card-bg, #ffffff) calc(var(--skin-alpha, 1) * 100%), transparent);
 }
 
 .dark body,

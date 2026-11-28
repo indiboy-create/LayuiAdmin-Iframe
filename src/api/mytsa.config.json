@@ -40,6 +40,36 @@
 				"label": "深色模式",
 				"mode": "dark"
 			}
+		],
+		"skins": [
+			{
+				"id": "01",
+				"label": "皮肤 1",
+				"src": "/theme/skins/01.jpg",
+				"opacity": 15,
+				"mask": "rgba(0, 0, 0, 0.15)"
+			},
+			{
+				"id": "02",
+				"label": "皮肤 2",
+				"src": "/theme/skins/02.jpg",
+				"opacity": 20,
+				"mask": "rgba(0, 0, 0, 0.2)"
+			},
+			{
+				"id": "03",
+				"label": "皮肤 3",
+				"src": "/theme/skins/03.jpg",
+				"opacity": 15,
+				"mask": "rgba(255, 255, 255, 0.12)"
+			},
+			{
+				"id": "04",
+				"label": "皮肤 4",
+				"src": "/theme/skins/04.jpg",
+				"opacity": 25,
+				"mask": "rgba(0, 0, 0, 0.25)"
+			}
 		]
 	},
 	"colors": [

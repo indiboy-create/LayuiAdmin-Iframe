@@ -1,7 +1,11 @@
 .mytsa-nav-tree {
 	width: 230px !important;
 	border-radius: 0px;
-	background-color: var(--scheme-side);
+	background-color: color-mix(
+		in srgb,
+		var(--scheme-side) calc(var(--skin-alpha, 1) * 100%),
+		transparent
+	);
 }
 
 .mytsa-nav-tree .layui-nav-item > a {
@@ -116,7 +120,11 @@
 	top: 0;
 	border-radius: 4px;
 	overflow: hidden;
-	background-color: var(--scheme-side);
+	background-color: color-mix(
+		in srgb,
+		var(--scheme-side) calc(var(--skin-alpha, 1) * 100%),
+		transparent
+	);
 	display: block;
 	box-shadow: 0px 0px 3px lightgray;
 }
@@ -148,17 +156,29 @@
 
 /** 亮 样 式*/
 .dark-theme .layui-nav-tree {
-	background-color: var(--scheme-side) !important;
+	background-color: color-mix(
+		in srgb,
+		var(--scheme-side) calc(var(--skin-alpha, 1) * 100%),
+		transparent
+	) !important;
 }
 
 .light-theme {
-	background-color: var(--scheme-card-bg) !important;
+	background-color: color-mix(
+		in srgb,
+		var(--scheme-card-bg) calc(var(--skin-alpha, 1) * 100%),
+		transparent
+	) !important;
 }
 
 .light-theme .mytsa-nav-tree,
 .light-theme .mytsa-nav-tree .layui-nav-hover:before,
 .light-theme .mytsa-nav-tree .layui-nav-child {
-	background-color: var(--scheme-card-bg) !important;
+	background-color: color-mix(
+		in srgb,
+		var(--scheme-card-bg) calc(var(--skin-alpha, 1) * 100%),
+		transparent
+	) !important;
 }
 
 .light-theme .mytsa-nav-tree a,

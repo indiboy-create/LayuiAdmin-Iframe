@@ -20,6 +20,28 @@ body,
 	font-size: 20px;
 }
 
+body::before {
+	content: '';
+	position: fixed;
+	inset: 0;
+	z-index: -1;
+	pointer-events: none;
+	background-image: var(--skin-image, none);
+	background-size: cover;
+	background-position: center;
+	background-attachment: fixed;
+}
+
+/* 整页遮罩：颜色含 alpha，由取色器统一配置；位于背景图之上、内容之下 */
+body::after {
+	content: '';
+	position: fixed;
+	inset: 0;
+	z-index: -1;
+	pointer-events: none;
+	background-color: var(--skin-mask-color, transparent);
+}
+
 .mytsa-admin .layui-layout-right .layui-nav-child {
 	border: 1px solid var(--scheme-side-border);
 	border-radius: var(--global-border-radius, 4px);
@@ -30,7 +52,11 @@ body,
 }
 
 .mytsa-admin .layui-layout-right .layui-nav-item.user > .layui-nav-child {
-	background-color: var(--scheme-side);
+	background-color: color-mix(
+		in srgb,
+		var(--scheme-side) calc(var(--skin-alpha, 1) * 100%),
+		transparent
+	);
 }
 
 .mytsa-admin .layui-layout-right .layui-nav-item.user > .layui-nav-child dd.layui-this {
@@ -54,7 +80,11 @@ body,
 .mytsa-admin .layui-header {
 	left: 230px;
 	width: calc(100% - 230px);
-	background-color: var(--scheme-header);
+	background-color: color-mix(
+		in srgb,
+		var(--scheme-header) calc(var(--skin-alpha, 1) * 100%),
+		transparent
+	);
 }
 
 .mytsa-admin .layui-logo {
@@ -89,7 +119,11 @@ body,
 	width: 230px;
 	box-shadow: 2px 0 6px rgba(0, 21, 41, 0.2);
 	z-index: 9999;
-	background-color: var(--scheme-side) !important;
+	background-color: color-mix(
+		in srgb,
+		var(--scheme-side) calc(var(--skin-alpha, 1) * 100%),
+		transparent
+	) !important;
 }
 
 .mytsa-admin .layui-side .mytsa-nav-tree {
@@ -105,7 +139,11 @@ body,
 	display: flex;
 	flex-direction: column;
 	height: calc(100% - 60px) !important;
-	background-color: var(--scheme-side);
+	background-color: color-mix(
+		in srgb,
+		var(--scheme-side) calc(var(--skin-alpha, 1) * 100%),
+		transparent
+	);
 	width: 230px;
 }
 
@@ -251,7 +289,11 @@ body,
 .mytsa-admin .layui-body {
 	bottom: 0px;
 	padding-bottom: 0px;
-	background-color: var(--scheme-body-bg);
+	background-color: color-mix(
+		in srgb,
+		var(--scheme-body-bg) calc(var(--skin-alpha, 1) * 100%),
+		transparent
+	);
 	height: calc(100% - 60px);
 	overflow-y: auto;
 	left: 230px;
@@ -461,12 +503,32 @@ body,
 
 /** 右侧主题面板参考左侧菜单配色 */
 .layui-layer.layer-anim-right {
-	background-color: var(--scheme-side);
+	background-color: color-mix(
+		in srgb,
+		var(--scheme-side) calc(var(--skin-alpha, 1) * 100%),
+		transparent
+	);
 }
 
 .layui-layer.layer-anim-right .layui-layer-content {
 	background-color: transparent;
 	color: var(--scheme-side-text);
+	padding-bottom: 18px;
+	scrollbar-width: thin;
+	scrollbar-color: var(--scheme-side-border) transparent;
+}
+
+.layui-layer.layer-anim-right .layui-layer-content::-webkit-scrollbar {
+	width: 6px;
+}
+
+.layui-layer.layer-anim-right .layui-layer-content::-webkit-scrollbar-track {
+	background-color: transparent;
+}
+
+.layui-layer.layer-anim-right .layui-layer-content::-webkit-scrollbar-thumb {
+	border-radius: 3px;
+	background-color: var(--scheme-side-border);
 }
 
 .layui-layer.layer-anim-right .mytsaone-color .color-title,
@@ -651,6 +713,104 @@ body,
 	color: #9aa0a6;
 }
 
+/** 背景皮肤设置（独立于主题模式与配色方案） */
+.skin-content {
+	padding: 15px 10px 0 20px;
+}
+
+.skin-content .skin-list {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 8px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.skin-content .skin-list li {
+	position: relative;
+	height: 46px;
+	border: 1px solid var(--scheme-side-border);
+	border-radius: 4px;
+	overflow: hidden;
+	cursor: pointer;
+	font-size: 12px;
+	line-height: 46px;
+	text-align: center;
+	color: var(--scheme-side-text);
+	background-color: rgba(255, 255, 255, 0.06);
+}
+
+.skin-content .skin-list li.layui-this {
+	border-color: var(--global-selected-color);
+}
+
+.skin-content .skin-thumb {
+	display: block;
+	width: 100%;
+	height: 100%;
+	background-size: cover;
+	background-position: center;
+}
+
+.skin-content .skin-opacity {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 10px;
+	color: var(--scheme-side-text);
+}
+
+.skin-content .skin-opacity.is-disabled {
+	opacity: 0.45;
+}
+
+.skin-content .skin-opacity-label {
+	flex: 0 0 auto;
+	font-size: 12px;
+}
+
+.skin-content .skin-opacity-range {
+	flex: 1 1 auto;
+	accent-color: var(--global-selected-color);
+}
+
+.skin-content .skin-opacity-value {
+	flex: 0 0 38px;
+	text-align: right;
+	font-size: 12px;
+}
+
+.skin-content .skin-mask-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	height: 44px;
+	margin-top: 6px;
+	color: var(--scheme-side-text);
+	font-size: 12px;
+}
+
+.skin-content .skin-mask-row .set-custom-theme {
+	line-height: 0;
+}
+
+.skin-content .skin-opacity.skin-mask-opacity {
+	margin-top: 4px;
+}
+
+.layui-layer.layer-anim-right .skin-content .set-custom-theme .layui-colorpicker {
+	border-color: var(--scheme-side-border);
+}
+
+.layui-layer.layer-anim-right .skin-content .set-custom-theme .layui-colorpicker:hover {
+	border-color: var(--scheme-side-text);
+}
+
+.layui-layer.layer-anim-right .skin-content .set-custom-theme .layui-colorpicker-trigger-span {
+	border-color: var(--scheme-side-border);
+}
+
 .palette-content ul {
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
@@ -662,14 +822,16 @@ body,
 	height: 48px;
 	margin: 0;
 	padding: 5px;
+	background-color: transparent;
+	border-radius: 4px;
 }
 
 .palette-swatch {
 	display: block;
 	width: 100%;
 	height: 100%;
-	border-radius: 2px;
-	box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+	border-radius: 3px;
+	box-shadow: inset 0 0 0 1px var(--scheme-side-border);
 }
 
 /** 自定义配色 */
@@ -687,9 +849,14 @@ body,
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	height: 42px;
+	height: 44px;
+	border-bottom: 1px solid var(--scheme-side-border);
 	color: #666;
 	font-size: 13px;
+}
+
+.scheme-custom li:last-child {
+	border-bottom: 0;
 }
 
 .scheme-custom li .set-custom-theme {
@@ -733,9 +900,35 @@ body,
 	line-height: 42px;
 }
 
+/** 分组之间留出更松的间距 */
+.mytsaone-color {
+	padding-bottom: 16px;
+}
+
+.mytsaone-color + .mytsaone-color {
+	margin-top: 4px;
+	border-top: 1px solid var(--scheme-side-border);
+}
+
 .mytsaone-color .color-title {
-	padding: 15px 0 0px 20px;
-	margin-bottom: 4px;
+	position: relative;
+	padding: 18px 20px 8px;
+	margin: 0;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 20px;
+	letter-spacing: 0.3px;
+}
+
+.mytsaone-color .color-title:before {
+	content: '';
+	position: absolute;
+	left: 10px;
+	top: 23px;
+	width: 3px;
+	height: 12px;
+	border-radius: 2px;
+	background-color: var(--global-selected-color);
 }
 
 .mytsaone-color .color-content {
