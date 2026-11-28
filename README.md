@@ -1,18 +1,18 @@
 # MyTSA
 
-MyTSA 是基于 [Layui](https://layui.dev/) 框架构建的 iframe 后台管理系统前端模板，使用原生 HTML、CSS 与 JavaScript 开发，提供完整的后台框架、登录页、标签页、菜单、主题配色与 iframe 示例页面。
+MyTSA 是基于 [Layui](https://layui.dev/) 的 iframe 后台管理系统前端模板，使用原生 HTML、CSS 与 JavaScript 开发，包含后台框架、登录页、多标签页、主题配色、背景皮肤与 iframe 示例页面。
 
-**预览地址**：<https://initearth.github.io/mytsa-admin-iframe/>
+**在线预览**：<https://initearth.github.io/mytsa-admin-iframe/>
 
-## 功能特性
+## 特性
 
-- 左侧菜单 + 顶部导航 + 多标签页的后台布局
-- 标签页按需创建，支持刷新恢复与数量上限
-- 基础配色与暗黑模式，支持主题色预设、随机主题色与自定义配色
-- iframe 子页面独立资源，支持主题同步与水印
-- 打印样式、404 页面与静态资源内容哈希
-- 响应式侧栏折叠与移动端适配
-- 登录凭据由后端校验，前端用 `layui.data` 持久化 token
+- 左侧菜单 + 顶部导航 + 多标签页的后台布局，支持侧栏折叠与移动端适配
+- 标签页按需创建，支持会话恢复、状态保留与数量上限
+- 主题模式（light / dark）与 8 组配色方案，支持自定义取色与随机生成
+- 背景皮肤：独立于主题与配色，可选图片、整体透明度与整页蒙层，默认不加载
+- iframe 子页主题同步（`postMessage`），按 `site.scope` 隔离本地存储
+- iframe 水印组件，仅在存在 `.watermark` 容器时绘制
+- 登录页、404 页面、打印样式与构建产物内容哈希
 
 ## 环境要求
 
@@ -35,7 +35,9 @@ npm run build
 npm run preview
 ```
 
-## 脚本说明
+后台入口为 `src/panel.html`，登录页为 `src/login.html`。
+
+## 脚本
 
 | 命令                    | 说明                                       |
 | ----------------------- | ------------------------------------------ |
@@ -59,14 +61,15 @@ MyTSA
 │   ├── panel.html                  # 后台入口
 │   ├── login.html                  # 登录页
 │   ├── 404.html                    # 静态托管错误页
-
 │   ├── api/
-│   │   ├── mytsa.config.json       # 站点、菜单、主题与标签配置
-│   │   └── menu.json               # 菜单数据
+│   │   ├── mytsa.config.json       # 站点、菜单、主题、配色与皮肤配置
+│   │   ├── menu.json               # 菜单数据
+│   │   └── user.json / demo*.json  # iframe 示例数据
 │   ├── component/
-│   │   ├── layui/                  # Layui 框架资源
-│   │   ├── mytsa/                  # 后台模块：菜单、标签、主题与工具
-│   │   └── iframe/                 # iframe 水印组件
+│   │   ├── layui/                  # Layui 框架资源与扩展样式
+│   │   ├── mytsa/                  # 后台模块：菜单、标签页、主题
+│   │   ├── iframe/                 # iframe 入口与水印组件
+│   │   └── request/                # 请求封装
 │   ├── iframe/
 │   │   ├── home.html               # 首页示例
 │   │   ├── workbench.html          # 工作台示例
@@ -74,49 +77,79 @@ MyTSA
 │   │   └── layui.html              # 组件示例
 │   └── theme/
 │       ├── admin/                  # 后台样式与图片
-│       ├── iframe/                 # iframe 子页面样式与脚本
-│       └── login/                  # 登录页样式与图片
+│       ├── iframe/                 # iframe 子页样式与脚本
+│       ├── login/                  # 登录页样式与图片
+│       └── skins/                  # 背景皮肤图片
 ├── scripts/
 │   ├── build.mjs                   # 构建入口
 │   ├── check.mjs                   # 产物校验
+│   ├── check-package.mjs           # 包体校验
 │   ├── e2e.mjs                     # 端到端链路检查
 │   └── lib/                        # 构建与校验工具
 ├── test/                           # 自动化测试
-├── .github/workflows/              # CI、部署与发布流程
+├── .github/workflows/              # CI、校验、部署与发布流程
 ├── vite.config.js                  # 开发服务器配置
 ├── eslint.config.js                # ESLint 配置
 └── package.json                    # 依赖与脚本
 ```
 
-## 配置
+## 配置说明
 
-站点信息、菜单、主题与标签页行为集中在 `src/api/mytsa.config.json`：
+站点、菜单、标签页、主题、配色与皮肤配置集中在 `src/api/mytsa.config.json`：
 
-- `site.scope`：站点标识，用于同源多站点间的本地存储与主题隔离（默认 `default`）
-- `menu`：菜单数据源与首页地址
-- `tab`：标签页上限、会话恢复与首页配置
-- `theme.schemes`：基础配色与暗黑模式的区域底色、文字色和模式标记
-- `theme.colors`：主题色预设及色阶
-- `other`：站点名称、链接、首屏等待时间与水印相关配置
+| 字段                 | 说明                                                             |
+| -------------------- | ---------------------------------------------------------------- |
+| `site.scope`         | 站点标识，用于同源多站点间的本地存储与主题隔离（默认 `default`） |
+| `logo`               | 站点标题与 LOGO 图片                                             |
+| `menu`               | 菜单数据源、请求方式、手风琴与默认选中项                         |
+| `tab`                | 标签页上限、状态保留、会话恢复与首页配置                         |
+| `theme.defaultMode`  | 默认主题模式（`light` / `dark`）                                 |
+| `theme.defaultColor` | 默认配色方案 id                                                  |
+| `theme.allowCustom`  | 是否允许自定义配色                                               |
+| `theme.modes`        | 主题模式列表                                                     |
+| `theme.skins`        | 背景皮肤列表，见下文“背景皮肤”                                   |
+| `colors`             | 配色方案，包含主色、侧栏、顶栏、标签栏与色阶                     |
+| `other`              | 首屏等待时间与站点链接                                           |
 
 菜单数据位于 `src/api/menu.json`，修改后重新构建即可生效。
 
-## 主题与配色
+### 配色方案
 
-后台提供两种明暗基调和多组主题色预设：
+`colors` 中每个方案包含 `side`、`selected`、`logo`、`header`、`headerText`、`tab` 与 `shades`，当前提供 8 组：默认、红、橙、黄、绿、蓝、靛、紫。
 
-- `base`：浅色顶栏与标签栏、深色侧栏
-- `dark`：深色顶栏、标签栏与侧栏
+主题模式只决定页面明暗，区域颜色全部取自所选配色方案。暗黑模式下顶栏与标签栏使用固定深灰基色（`#141414` / `#1e1e1e`），不随配色方案变化。设置面板支持选择配色、自定义各区域颜色与随机生成配色。
 
-主题色预设包含 `selected`、`tab`、`header`、`headerText` 与 `shades` 等字段。设置面板支持选择预设、随机生成主题色和自定义区域颜色；选择结果保存在浏览器本地存储中。
+### 背景皮肤
 
-暗黑模式下，主框架向 iframe 推送模式与强调色，iframe 使用自身的 `.dark` 样式完成背景和组件覆盖。切回基础配色时会清除同步数据并恢复子页面默认配色。
+背景皮肤是独立于主题模式与配色方案的全局能力：
+
+- 默认不加载：`--skin-image: none`，配置只提供皮肤清单，不预加载图片
+- 选中皮肤后全局按 `--skin-alpha` 半透明，背景图透出；未选皮肤保持不透明
+- 整体透明度默认 15%，可在设置面板调整
+- 整页蒙层由 `body::after` 实现，取色器开启 `alpha`，颜色与透明度合并配置
+- 每个皮肤可在配置中携带默认方案，点击时自动套用：
+
+```json
+{
+	"id": "01",
+	"label": "皮肤 1",
+	"src": "/theme/skins/01.jpg",
+	"opacity": 15,
+	"mask": "rgba(0, 0, 0, 0.15)"
+}
+```
+
+皮肤与主题相关偏好保存在本地存储（按 `site.scope` 前缀隔离）：`theme-mode`、`theme-color`、`theme-custom-*`、`skin-background`、`skin-opacity`、`skin-mask-color`。
+
+## iframe 与主题同步
+
+- 主框架以 `postMessage`（`mytsa-theme`）向 iframe 推送主题模式与强调色，作用域通过 `mytsa_scope` 参数传递
+- 暗黑模式使用 `.dark` 类驱动 layui 组件样式；iframe 背景透明，透出主框架的背景皮肤
+- 水印组件仅在 iframe 子页存在 `.watermark` 容器时绘制，未放置容器的页面不会执行水印逻辑
 
 ## 登录与权限
 
-`login.html` 通过 `request/http` 向 `/api/login` 提交表单，成功后跳转到 `panel.html`。账号校验与权限判定由后端服务或网关完成。
-
-`http` 模块通过 `layui.data('mytsa', { mytsa_token: token })` 持久化 token；其余 `localStorage` / `sessionStorage` 仅用于恢复标签页和主题偏好。
+`login.html` 通过请求模块向 `/api/login` 提交表单，成功后跳转到 `panel.html`。账号校验与权限判定由后端服务或网关完成，前端仅持久化 token。
 
 ## 构建说明
 
@@ -132,7 +165,7 @@ Layui 的模块加载依赖 `document.currentScript` 与动态模块路径，因
 
 ## 部署
 
-将 `dist/` 部署到任意静态服务器即可。建议：
+将 `dist/` 部署到任意静态服务器，默认首页指向 `panel.html`。建议：
 
 - HTML 使用 `no-cache` 或较短缓存
 - 带哈希的静态资源使用长期缓存
@@ -143,8 +176,9 @@ Nginx 示例：
 
 ```nginx
 root /path/to/dist;
+index panel.html;
 
-location ~* \.(js|css|webp|png|svg|gif|ico|woff|woff2|ttf|eot)$ {
+location ~* \.(js|css|webp|png|svg|gif|ico|woff|woff2|ttf|eot|jpg)$ {
 	add_header Cache-Control "public, max-age=31536000, immutable";
 }
 
@@ -171,7 +205,7 @@ npm run check
 npm run e2e
 ```
 
-CI 会按 Node 20、22、24 三个版本执行质量检查，并在主分支与版本标签推送时执行部署或发布流程。
+`.github/workflows` 中的 CI 会执行格式、Lint、测试、构建与校验，并在主分支与版本标签推送时执行部署或发布流程。
 
 ## 提交规范
 
