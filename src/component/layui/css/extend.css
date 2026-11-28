@@ -217,6 +217,32 @@ html.dark {
   color: var(--lay-color-text-1);
 }
 
+/* 表格右上角工具栏图标按钮（筛选列 / 导出 / 打印等 defaultToolbar） */
+.dark .layui-table-tool .layui-inline[lay-event] {
+  color: var(--lay-color-text-2);
+  border-color: var(--lay-color-border-2);
+}
+
+.dark .layui-table-tool .layui-inline[lay-event]:hover {
+  border-color: var(--lay-color-border-4);
+}
+
+/* 点击「筛选列」弹出的列显示面板 */
+.dark .layui-table-tool-panel {
+  background-color: var(--lay-color-bg-5);
+  border-color: var(--lay-color-border-2);
+  box-shadow: var(--lay-shadow-2);
+}
+
+.dark .layui-table-tool-panel li:hover {
+  background-color: var(--lay-color-active);
+}
+
+.dark .layui-table-tool-panel .layui-form-checkbox[lay-skin='primary']:not(.layui-form-checked) i {
+  background-color: transparent;
+  border-color: var(--lay-color-border-3);
+}
+
 .dark .layui-tab-title .layui-this {
   color: var(--lay-color-text-1);
 }
