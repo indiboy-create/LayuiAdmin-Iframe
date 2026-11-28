@@ -61,7 +61,7 @@ function startServer() {
 			return;
 		}
 		if (pathname === '/') {
-			pathname = '/index.html';
+			pathname = '/panel.html';
 		}
 
 		const filePath = resolve(dist, `.${pathname}`);
@@ -93,7 +93,7 @@ async function request(base, path) {
 	return { status: response.status, text };
 }
 
-function collectAssets(html, page = '/index.html') {
+function collectAssets(html, page = '/panel.html') {
 	const pageDir = page.slice(0, page.lastIndexOf('/') + 1) || '/';
 	const resolveUrl = (url) => new URL(url, `http://e2e.local${pageDir}`).pathname;
 	const references = [...html.matchAll(/(?:href|src)="([^"]+)"/g)].map((match) => match[1]);
@@ -122,7 +122,7 @@ function parseJson(label, text) {
 
 console.log(`E2E 目标：${dist}`);
 
-if (!(await exists(resolve(dist, 'index.html')))) {
+if (!(await exists(resolve(dist, 'panel.html')))) {
 	console.error('::error::未找到构建产物，请先执行 npm run build');
 	process.exit(1);
 }
@@ -131,22 +131,22 @@ const server = await startServer();
 const base = `http://127.0.0.1:${server.address().port}`;
 
 try {
-	const index = await request(base, '/index.html');
-	ok('index.html 可访问', index.status === 200, `HTTP ${index.status}`);
+	const index = await request(base, '/panel.html');
+	ok('panel.html 可访问', index.status === 200, `HTTP ${index.status}`);
 	ok(
-		'index.html 不依赖前端会话守卫',
+		'panel.html 不依赖前端会话守卫',
 		!index.text.includes('theme/admin/js/auth.js') && !/data-guard\b/.test(index.text)
 	);
-	ok('index.html 声明 noindex', /<meta\s+name="robots"[^>]*noindex/i.test(index.text));
+	ok('panel.html 声明 noindex', /<meta\s+name="robots"[^>]*noindex/i.test(index.text));
 	ok(
-		'index.html 侧边栏底部仅含一个 GitHub 链接',
+		'panel.html 侧边栏底部仅含一个 GitHub 链接',
 		/mytsa-side-links/.test(index.text) &&
 			/github\.com\/initearth\/mytsa-admin-iframe/.test(index.text) &&
 			!/initearth\.github\.io/.test(index.text) &&
 			/id="side"[\s\S]*mytsa-side-links/.test(index.text)
 	);
 	ok(
-		'index.html 用户导航项为头像加用户名与用户组',
+		'panel.html 用户导航项为头像加用户名与用户组',
 		/class="layui-nav-item user"/.test(index.text) &&
 			/class="user-entry"/.test(index.text) &&
 			/class="user-avatar"/.test(index.text) &&
@@ -155,25 +155,25 @@ try {
 			/>超级管理员组<\/span>/.test(index.text)
 	);
 	ok(
-		'index.html 内联后台引导逻辑',
+		'panel.html 内联后台引导逻辑',
 		/<script(?![^>]*\bsrc=)[^>]*>/i.test(index.text) &&
 			index.text.includes('admin.setConfigurationPath') &&
 			index.text.includes('admin.render()') &&
 			!index.text.includes('theme/admin/js/bootstrap.js')
 	);
 	ok(
-		'index.html 声明 referrer no-referrer',
+		'panel.html 声明 referrer no-referrer',
 		/<meta\s+name="referrer"[^>]*no-referrer/i.test(index.text)
 	);
-	ok('index.html 引入 mytsa 组件入口', /component\/mytsa\/mytsa\.js/.test(index.text));
-	ok('index.html 引入 iframe 水印组件入口', /component\/iframe\/iframe\.js/.test(index.text));
+	ok('panel.html 引入 mytsa 组件入口', /component\/mytsa\/mytsa\.js/.test(index.text));
+	ok('panel.html 引入 iframe 水印组件入口', /component\/iframe\/iframe\.js/.test(index.text));
 	ok(
-		'index.html 通过 http 模块加载后台配置',
+		'panel.html 通过 http 模块加载后台配置',
 		/component\/request\/request\.js/.test(index.text) &&
 			/layui\.use\(\[['"]admin['"],\s*['"]http['"]\]/.test(index.text) &&
 			/http\.get\(/.test(index.text)
 	);
-	ok('index.html 与登录资源隔离', !/(?:theme\/login|component\/login)\//.test(index.text));
+	ok('panel.html 与登录资源隔离', !/(?:theme\/login|component\/login)\//.test(index.text));
 
 	const watermark = await request(base, '/component/iframe/module/watermark.js');
 	ok(
@@ -194,7 +194,7 @@ try {
 	ok('login.html 可访问', login.status === 200, `HTTP ${login.status}`);
 	ok(
 		'login.html 内联登录跳转',
-		/<script>[\s\S]*submit\(login\)[\s\S]*index\.html[\s\S]*<\/script>/.test(login.text)
+		/<script>[\s\S]*submit\(login\)[\s\S]*panel\.html[\s\S]*<\/script>/.test(login.text)
 	);
 	ok(
 		'login.html 引入请求模块入口',
@@ -244,13 +244,6 @@ try {
 		}
 	})(menuData);
 	ok('api/menu.json 的页面地址带构建戳', unstampedPages.length === 0, unstampedPages.join('、'));
-
-	const robots = await request(base, '/robots.txt');
-	ok(
-		'robots.txt 禁止抓取',
-		robots.status === 200 && /Disallow:\s*\//i.test(robots.text),
-		`HTTP ${robots.status}`
-	);
 
 	const config = await request(base, '/api/mytsa.config.json');
 	ok('mytsa.config.json 可访问', config.status === 200, `HTTP ${config.status}`);
@@ -302,7 +295,7 @@ try {
 	);
 
 	const pages = [
-		'/index.html',
+		'/panel.html',
 		'/login.html',
 		'/iframe/home.html',
 		'/iframe/workbench.html',
@@ -310,7 +303,7 @@ try {
 		'/iframe/layui.html',
 	];
 	const pageSources = [
-		{ page: '/index.html', html: index.text },
+		{ page: '/panel.html', html: index.text },
 		{ page: '/login.html', html: login.text },
 	];
 

@@ -49,7 +49,7 @@ const required = [
 	'package.json',
 	'README.md',
 	'LICENSE',
-	'dist/index.html',
+	'dist/panel.html',
 	'dist/login.html',
 	'dist/404.html',
 	'dist/api/mytsa.config.json',

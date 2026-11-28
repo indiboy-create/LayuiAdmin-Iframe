@@ -56,10 +56,10 @@ npm run preview
 ```text
 MyTSA
 ├── src/
-│   ├── index.html                  # 后台入口
+│   ├── panel.html                  # 后台入口
 │   ├── login.html                  # 登录页
 │   ├── 404.html                    # 静态托管错误页
-│   ├── robots.txt                  # 搜索引擎抓取规则
+
 │   ├── api/
 │   │   ├── mytsa.config.json       # 站点、菜单、主题与标签配置
 │   │   └── menu.json               # 菜单数据
@@ -92,6 +92,7 @@ MyTSA
 
 站点信息、菜单、主题与标签页行为集中在 `src/api/mytsa.config.json`：
 
+- `site.scope`：站点标识，用于同源多站点间的本地存储与主题隔离（默认 `default`）
 - `menu`：菜单数据源与首页地址
 - `tab`：标签页上限、会话恢复与首页配置
 - `theme.schemes`：基础配色与暗黑模式的区域底色、文字色和模式标记
@@ -113,7 +114,7 @@ MyTSA
 
 ## 登录与权限
 
-`login.html` 通过 `request/http` 向 `/api/login` 提交表单，成功后跳转到 `index.html`。账号校验与权限判定由后端服务或网关完成。
+`login.html` 通过 `request/http` 向 `/api/login` 提交表单，成功后跳转到 `panel.html`。账号校验与权限判定由后端服务或网关完成。
 
 `http` 模块通过 `layui.data('mytsa', { mytsa_token: token })` 持久化 token；其余 `localStorage` / `sessionStorage` 仅用于恢复标签页和主题偏好。
 

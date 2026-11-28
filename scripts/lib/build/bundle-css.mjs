@@ -41,13 +41,13 @@ export async function bundleAdminCss(distDir) {
 	}
 	await writeFile(join(cssDir, 'admin.bundle.css'), content);
 
-	// 合并后这两份只被 index.html 引用，删除避免产物冗余；variables.css 保留作为合并源
+	// 合并后这两份只被 panel.html 引用，删除避免产物冗余；variables.css 保留作为合并源
 	await Promise.all([
 		rm(join(cssDir, 'admin.css'), { force: true }),
 		rm(join(cssDir, 'reset.css'), { force: true }),
 	]);
 
-	const htmlPath = join(distDir, 'index.html');
+	const htmlPath = join(distDir, 'panel.html');
 	const html = await readFile(htmlPath, 'utf8');
 	const next = html
 		.replace(

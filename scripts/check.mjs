@@ -15,7 +15,7 @@ const dist = resolve(root, 'dist');
 
 // 构建产物必须包含的入口与核心资源
 const REQUIRED_FILES = [
-	'index.html',
+	'panel.html',
 	'login.html',
 	'404.html',
 	'iframe/home.html',
@@ -40,7 +40,6 @@ const REQUIRED_FILES = [
 
 	'api/mytsa.config.json',
 	'api/menu.json',
-	'robots.txt',
 ];
 
 const CONFIG_PATH = 'api/mytsa.config.json';

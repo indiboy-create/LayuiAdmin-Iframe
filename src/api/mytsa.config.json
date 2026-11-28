@@ -1,4 +1,7 @@
 {
+	"site": {
+		"scope": "default"
+	},
 	"logo": {
 		"title": "MyTSA",
 		"image": "theme/admin/images/logo.webp"

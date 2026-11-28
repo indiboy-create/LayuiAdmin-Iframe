@@ -136,7 +136,7 @@
 				form.on('submit(login)', function (data) {
 					http.post('/api/login', data.field, { withAuth: false })
 						.then(function () {
-							window.location.href = 'index.html';
+							window.location.href = 'panel.html';
 						})
 						.catch(function (error) {
 							document.getElementById('login-alert').textContent =

@@ -48,7 +48,7 @@ async function createFixture() {
 	await writeFile(join(dir, 'theme', 'admin', 'css', 'variables.css'), ':root{}\n', 'utf8');
 	await writeFile(join(dir, 'theme', 'admin', 'css', 'reset.css'), '.reset{}\n', 'utf8');
 	await writeFile(
-		join(dir, 'index.html'),
+		join(dir, 'panel.html'),
 		[
 			'<!doctype html>',
 			'<html>',
@@ -99,7 +99,7 @@ describe('构建子步骤', () => {
 	it('stampHtmlAssets 只给本地 link/script/img 追加 ?t=', async () => {
 		fixtureDir = await createFixture();
 		await stampHtmlAssets(fixtureDir, 'abc');
-		const html = await readFile(join(fixtureDir, 'index.html'), 'utf8');
+		const html = await readFile(join(fixtureDir, 'panel.html'), 'utf8');
 
 		assert.match(html, /admin\.css\?t=abc/);
 		assert.match(html, /app\.js\?t=abc/);
@@ -117,7 +117,7 @@ describe('构建子步骤', () => {
 		assert.notEqual(cssHash, appHash);
 
 		await stampHtmlAssets(fixtureDir, hashes);
-		const html = await readFile(join(fixtureDir, 'index.html'), 'utf8');
+		const html = await readFile(join(fixtureDir, 'panel.html'), 'utf8');
 		assert.match(html, new RegExp(`app\\.js\\?t=${appHash}`));
 	});
 
@@ -237,7 +237,7 @@ describe('构建子步骤', () => {
 		);
 	});
 
-	it('bundleAdminCss 合并项目样式、删除冗余源文件并改写 index.html', async () => {
+	it('bundleAdminCss 合并项目样式、删除冗余源文件并改写 panel.html', async () => {
 		fixtureDir = await createFixture();
 		await bundleAdminCss(fixtureDir);
 
@@ -249,7 +249,7 @@ describe('构建子步骤', () => {
 		assert.match(bundle, /:root\{\}/);
 		assert.match(bundle, /\.reset\{\}/);
 
-		const html = await readFile(join(fixtureDir, 'index.html'), 'utf8');
+		const html = await readFile(join(fixtureDir, 'panel.html'), 'utf8');
 		assert.match(html, /theme\/admin\/css\/admin\.bundle\.css/);
 		assert.doesNotMatch(html, /theme\/admin\/css\/admin\.css"/);
 		assert.doesNotMatch(html, /variables\.css/);
