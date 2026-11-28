@@ -10,12 +10,15 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 
 	var config = null;
 
+	// 主题存储按站点隔离：scope 为空时沿用全局 key，避免破坏旧行为
+	var storagePrefix = '';
+
 	var body = $('body');
 
 	// 存储可能在隐私模式、禁用 Cookie 或配额不足时抛异常，统一包一层避免中断主题渲染
 	function readStorage(key) {
 		try {
-			return window.localStorage.getItem(key);
+			return window.localStorage.getItem(storagePrefix + key);
 		} catch (error) {
 			return null;
 		}
@@ -23,7 +26,7 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 
 	function writeStorage(key, value) {
 		try {
-			window.localStorage.setItem(key, value);
+			window.localStorage.setItem(storagePrefix + key, value);
 		} catch (error) {
 			// 存储不可用时忽略，主题仅在本次会话生效
 		}
@@ -31,7 +34,7 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 
 	function removeStorage(key) {
 		try {
-			window.localStorage.removeItem(key);
+			window.localStorage.removeItem(storagePrefix + key);
 		} catch (error) {
 			// 忽略
 		}
@@ -62,36 +65,21 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		disabled: 'rgba(0, 0, 0, 0.3)',
 	};
 
-	function normalizeScheme(scheme) {
-		var base = scheme.base || scheme.side || DEFAULT_SIDE;
-		var header = scheme.header || DEFAULT_HEADER;
+	// 归一化一套配色方案（colors 每项即完整六位置配色）
+	function normalizeColor(color) {
+		var side = color.side || color.base || DEFAULT_SIDE;
+		var header = color.header || color.selected || DEFAULT_HEADER;
 		return {
-			id: scheme.id,
-			label: scheme.label,
-			mode: scheme.mode || '',
-			side: base,
+			id: color.id,
+			label: color.label,
+			side: side,
 			header: header,
-			headerText: scheme.headerText || '',
-			tab: scheme.tab || header,
-			logo: scheme.logo || base,
-			selected: scheme.selected,
+			headerText: color.headerText || '',
+			tab: color.tab || header,
+			logo: color.logo || color.selected || side,
+			selected: color.selected,
+			shades: color.shades || [],
 		};
-	}
-
-	function getSchemeList() {
-		var list = config && config.theme && config.theme.schemes;
-		return list && list.length
-			? list.map(normalizeScheme)
-			: [normalizeScheme({ id: 'default', label: 'default' })];
-	}
-
-	function resolveScheme(option) {
-		var schemes = getSchemeList();
-		var fallback = getItemById(schemes, option.theme.defaultScheme) || schemes[0];
-		if (option.theme.allowCustom === false) {
-			return fallback;
-		}
-		return getItemById(schemes, readStorage('theme-scheme')) || fallback;
 	}
 
 	function getColorById(id) {
@@ -103,27 +91,73 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		return fallback || config.colors[0];
 	}
 
-	function getColorByValue(value) {
-		var result = null;
-		$.each(config.colors || [], function (i, item) {
-			if (String(item.selected).toLowerCase() === String(value || '').toLowerCase()) {
-				result = item;
-				return false;
-			}
-		});
-		return result;
+	// 归一化主题模式（仅 light/dark，不含配色）
+	function normalizeMode(mode) {
+		return {
+			id: mode.id,
+			label: mode.label,
+			mode: mode.mode || (mode.id === 'dark' ? 'dark' : 'light'),
+		};
 	}
 
-	// 方案自带选中色：优先命中同名主题色以复用完整色阶，否则回退默认色
-	function applySelectedColor(value) {
-		var color = getColorByValue(value) || getColorById(config.theme.defaultColor);
-		if (!color) {
-			return;
+	function getModeList() {
+		var list = config && config.theme && config.theme.modes;
+		return list && list.length
+			? list.map(normalizeMode)
+			: [normalizeMode({ id: 'light', label: '浅色模式', mode: 'light' })];
+	}
+
+	function resolveMode(option) {
+		var modes = getModeList();
+		var fallback = getItemById(modes, option.theme.defaultMode) || modes[0];
+		if (option.theme.allowCustom === false) {
+			return fallback;
 		}
+		return getItemById(modes, readStorage('theme-mode')) || fallback;
+	}
+
+	function resolveColor(option) {
+		var fallback = getColorById(option.theme.defaultColor) || config.colors[0];
+		if (option.theme.allowCustom === false) {
+			return fallback;
+		}
+		var byId = getItemById(config.colors, readStorage('theme-color'));
+		return byId || getStoredColor() || fallback;
+	}
+
+	function getCurrentMode() {
+		var id = readStorage('theme-mode') || (config && config.theme && config.theme.defaultMode);
+		return getItemById(getModeList(), id) || getModeList()[0];
+	}
+
+	// 由“配色方案 + 主题模式”合成内部方案对象，供 applyScheme 使用
+	function buildEffectiveScheme(color, mode) {
+		var c = normalizeColor(color);
+		return {
+			id: mode ? mode.id : c.id,
+			label: mode ? mode.label : c.label,
+			mode: mode ? mode.mode : 'light',
+			side: c.side,
+			header: c.header,
+			headerText: c.headerText,
+			tab: c.tab,
+			logo: c.logo,
+			selected: c.selected,
+		};
+	}
+
+	// 应用当前“主题模式 + 配色方案”：模式决定 iframe 明暗，六处颜色全部取配色方案
+	function applyActiveTheme() {
+		var mode = resolveMode(config);
+		var color = resolveColor(config);
+		applyScheme(buildEffectiveScheme(color, mode));
+		applyColor(color);
+		writeStorage('theme-mode', mode.id);
 		writeStorage('theme-color', color.id);
+		writeStorage('theme-color-value', JSON.stringify(color));
 		writeStorage('theme-color-color', color.selected);
 		writeStorage('theme-color-second', color.tab || '');
-		writeStorage('theme-color-value', JSON.stringify(color));
+		return color;
 	}
 
 	var IFRAME_BACKGROUND_VARS = [
@@ -195,35 +229,64 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		);
 	}
 
+	function randomInt(min, max) {
+		return Math.floor(Math.random() * (max - min + 1)) + min;
+	}
+
+	// 随机配色方案：同一色相派生六位置，保证侧栏/主色/LOGO/头部/顶栏文字/标签栏协调且可读
 	function buildRandomPalette() {
 		var previous = String(readStorage('theme-color-color') || '').toUpperCase();
-		var hue = 0;
-		var saturation = 60;
-		var selected = '';
-		for (var i = 0; i < 4; i++) {
-			hue = Math.floor(Math.random() * 360);
-			saturation = 58 + Math.floor(Math.random() * 13);
-			selected = hslToHex(hue, saturation, 48 + Math.floor(Math.random() * 8));
-			if (selected !== previous) {
-				break;
-			}
+		var hue = randomInt(0, 359);
+		var saturation = randomInt(56, 70);
+		var mainLight = randomInt(44, 52);
+		var selected = hslToHex(hue, saturation, mainLight);
+
+		// 与上一次主色重复时，按较大步长换色相，避免连点随机变化不明显
+		var guard = 0;
+		while (selected === previous && guard < 6) {
+			hue = (hue + randomInt(37, 97)) % 360;
+			selected = hslToHex(hue, saturation, mainLight);
+			guard++;
 		}
-		var tab = hslToHex(hue, 72, 96);
-		var dark = Math.max(saturation - 5, 45);
+
+		var headerLight = randomInt(28, 36);
+		var sideLight = randomInt(18, 26);
+		var logoLight = Math.max(mainLight - randomInt(10, 16), 30);
+
+		var header = hslToHex(hue, Math.max(saturation - 6, 42), headerLight);
+		var side = hslToHex(hue, randomInt(32, 48), sideLight);
+		var logo = hslToHex(hue, saturation, logoLight);
+		var tab = hslToHex(hue, randomInt(46, 56), randomInt(94, 97));
+		var headerText = getReadableTextColor(header);
+
+		// 由浅到深的完整色阶，去重后写入
+		var seen = {};
+		var shades = [
+			tab,
+			hslToHex(hue, Math.min(saturation + 6, 78), 88),
+			hslToHex(hue, saturation, Math.min(mainLight + 10, 62)),
+			selected,
+			header,
+			side,
+		].filter(function (color) {
+			var key = String(color).toUpperCase();
+			if (seen[key]) {
+				return false;
+			}
+			seen[key] = true;
+			return true;
+		});
+
 		return {
 			id: 'random-' + Date.now(),
 			label: '随机',
+			side: side,
 			selected: selected,
+			logo: logo,
+			header: header,
+			headerText: headerText,
 			tab: tab,
-			header: hslToHex(hue, dark, 35),
-			headerText: '#ffffff',
-			shades: [
-				tab,
-				hslToHex(hue, 65, 82),
-				selected,
-				hslToHex(hue, dark, 35),
-				hslToHex(hue, Math.max(saturation - 10, 40), 24),
-			],
+			shades: shades,
 		};
 	}
 
@@ -308,9 +371,7 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 	}
 
 	function getCurrentScheme() {
-		var id =
-			readStorage('theme-scheme') || (config && config.theme && config.theme.defaultScheme);
-		return getItemById(getSchemeList(), id);
+		return buildEffectiveScheme(resolveColor(config), getCurrentMode());
 	}
 
 	function collectIframeVars() {
@@ -432,7 +493,7 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 			darkSide ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)'
 		);
 		syncThemeColor(side);
-		writeStorage('theme-scheme', scheme.id);
+		writeStorage('theme-mode', scheme.id);
 		syncToIframe(scheme.mode === 'dark' ? 'full' : 'reset');
 	}
 
@@ -503,78 +564,10 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		syncToIframe(isDarkScheme() ? 'accent' : 'reset');
 	}
 
-	// 当前方案是否为暗黑模式：按 scheme.mode 判定，旧配置按 id 回退
+	// 是否暗黑模式：仅由“主题模式”决定，用于 iframe 明暗推送
 	function isDarkScheme() {
-		var scheme = getCurrentScheme();
-		if (!scheme) {
-			return false;
-		}
-		return scheme.mode ? scheme.mode === 'dark' : scheme.id === 'dark';
-	}
-
-	// 根据方案明暗选择色阶：浅色基调用主色/浅色阶，深色基调用深色阶
-	function applyPaletteAreaValues(areas, color) {
-		if (!areas || !areas.header || !areas.tab) {
-			return;
-		}
-		var style = document.documentElement.style;
-		var logo = areas.logo || DEFAULT_SIDE;
-		var header = areas.header;
-		var tab = areas.tab;
-		var darkTab = !isLightColor(tab);
-		style.setProperty('--scheme-logo', logo);
-		style.setProperty('--scheme-header', header);
-		style.setProperty(
-			'--scheme-header-text',
-			getHeaderTextColor(getCurrentScheme(), header, color)
-		);
-		setTextVars(darkTab, isDarkHeaderText(style.getPropertyValue('--scheme-header-text')));
-		style.setProperty('--scheme-tab', tab);
-		style.setProperty('--scheme-tab-text', getContrastText(tab));
-		style.setProperty(
-			'--scheme-tab-border',
-			isLightColor(tab) ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.12)'
-		);
-		style.setProperty(
-			'--scheme-body-bg',
-			darkTab ? style.getPropertyValue('--scheme-side').trim() || DEFAULT_SIDE : '#F7F7F7'
-		);
-		style.setProperty('--scheme-card-bg', darkTab ? tab : '#FAFAFA');
-		style.setProperty(
-			'--scheme-border-muted',
-			darkTab ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.08)'
-		);
-	}
-
-	function applyLightAccent(color) {
-		var areas = {
-			logo: color.header || color.selected,
-			header: color.selected,
-			tab: color.tab || color.selected,
-		};
-		applyPaletteAreaValues(areas, color);
-		writeStorage('theme-palette-areas', JSON.stringify(areas));
-	}
-
-	function applyDarkAccent(color) {
-		// 暗黑模式背景完全锁死，只更新主色相关的文字对比色
-		document.documentElement.style.setProperty(
-			'--scheme-selected-text',
-			getContrastText(color.selected)
-		);
-	}
-
-	function applyPaletteAreas(color) {
-		if (!color) {
-			return;
-		}
-		if (isDarkScheme()) {
-			applyDarkAccent(color);
-			syncToIframe('accent');
-		} else {
-			applyLightAccent(color);
-			syncToIframe('reset');
-		}
+		var mode = getCurrentMode();
+		return !!(mode && mode.mode === 'dark');
 	}
 
 	function getCustomColor(name) {
@@ -661,7 +654,7 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 			'</li>';
 		return (
 			'<div class="mytsaone-color">\n' +
-			'<div class="color-title">主题色预设</div>\n' +
+			'<div class="color-title">配色方案</div>\n' +
 			'<div class="scheme-content palette-content">\n' +
 			'<ul>\n' +
 			items +
@@ -685,22 +678,25 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		);
 	}
 
-	function buildSchemeHtml() {
-		var schemes = getSchemeList();
-		var current = readStorage('theme-scheme');
+	function buildModeHtml() {
+		var modes = getModeList();
+		var current =
+			readStorage('theme-mode') || (config && config.theme ? config.theme.defaultMode : '');
+		var accent = normalizeColor(resolveColor(config)).selected;
 		var items = '';
-		$.each(schemes, function (i, scheme) {
-			var side = scheme.side || '#23292E';
-			var header = scheme.header || '#FAFAFA';
-			var tab = scheme.tab || header;
-			var logo = scheme.logo || side;
+		$.each(modes, function (i, mode) {
+			var dark = mode.mode === 'dark';
+			var side = '#23292E';
+			var header = dark ? '#2F363C' : '#FAFAFA';
+			var tab = dark ? '#23292E' : '#F7F7F7';
+			var logo = '#23292E';
 			items +=
 				'<li' +
-				(String(scheme.id) === String(current) ? ' class="layui-this"' : '') +
-				' data-select-scheme="' +
-				scheme.id +
+				(String(mode.id) === String(current) ? ' class="layui-this"' : '') +
+				' data-select-mode="' +
+				mode.id +
 				'" title="' +
-				scheme.label +
+				mode.label +
 				'">' +
 				'<div class="scheme-preview">' +
 				'<span class="scheme-preview-header" style="background: ' +
@@ -710,7 +706,7 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 				tab +
 				';"></span>' +
 				'<span class="scheme-preview-selected" style="background: ' +
-				scheme.selected +
+				accent +
 				';"></span>' +
 				'<span class="scheme-preview-side" style="background: ' +
 				side +
@@ -723,7 +719,7 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		});
 		return (
 			'<div class="mytsaone-color">\n' +
-			'<div class="color-title">配色方案</div>\n' +
+			'<div class="color-title">主题模式</div>\n' +
 			'<div class="scheme-content">\n' +
 			'<ul>\n' +
 			items +
@@ -742,29 +738,16 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		render: function (option) {
 			config = option;
 
+			// 按站点隔离主题存储，避免同源多站点共用 localStorage 造成串站
+			var site = (option && option.site) || {};
+			storagePrefix = site.scope ? 'mytsa:' + site.scope + ':' : '';
+
 			if (option.theme.allowCustom === false) {
 				$('.setting').remove();
 			}
 
-			var scheme = resolveScheme(option);
-			applyScheme(scheme);
-
-			var storedColor = readStorage('theme-color-value');
-			if (storedColor) {
-				try {
-					applyPaletteAreas(JSON.parse(storedColor));
-				} catch (error) {
-					// 缓存损坏时回退方案默认色
-				}
-			} else {
-				var defaultColor = getColorById(config.theme.defaultColor);
-				applySelectedColor(defaultColor ? defaultColor.selected : scheme.selected);
-				if (defaultColor) {
-					applyPaletteAreas(defaultColor);
-				}
-			}
-
-			theme.changeTheme();
+			// 应用“主题模式 + 配色方案”：模式只决定 iframe 明暗，六处颜色全部取自配色方案
+			applyActiveTheme();
 			applyCustomTheme();
 		},
 
@@ -772,28 +755,12 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		 * 切换主题色
 		 */
 		changeTheme: function () {
-			var stored = readStorage('theme-color-value');
-			var color = null;
-			if (stored) {
-				try {
-					color = JSON.parse(stored);
-				} catch (error) {
-					color = null;
-				}
-			}
-			if (!color) {
-				color = {
-					selected: readStorage('theme-color-color'),
-					tab: readStorage('theme-color-second'),
-				};
-			}
-			applyColor(color);
-			syncToIframe(isDarkScheme() ? 'accent' : 'reset');
+			applyActiveTheme();
 		},
 	};
 
 	body.on('click', '.setting', function () {
-		var schemeHtml = buildSchemeHtml();
+		var modeHtml = buildModeHtml();
 		var paletteHtml = buildPaletteHtml();
 		var customHtml = buildCustomHtml();
 		var resetHtml = buildResetHtml();
@@ -809,7 +776,7 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 			anim: -1,
 			skin: 'layer-anim-right',
 			move: false,
-			content: schemeHtml + paletteHtml + customHtml + resetHtml,
+			content: modeHtml + paletteHtml + customHtml + resetHtml,
 			success: function (layero, index) {
 				layero.find('.layui-layer-content').css({
 					height: '100%',
@@ -820,9 +787,9 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 
 				renderCustomPickers();
 
-				var currentScheme = readStorage('theme-scheme');
-				$('[data-select-scheme]').removeClass('layui-this');
-				$("[data-select-scheme='" + currentScheme + "']").addClass('layui-this');
+				var currentMode = readStorage('theme-mode');
+				$('[data-select-mode]').removeClass('layui-this');
+				$("[data-select-mode='" + currentMode + "']").addClass('layui-this');
 
 				$('#layui-layer-shade' + index).click(function () {
 					var $layero = $('#layui-layer' + index);
@@ -842,26 +809,16 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		});
 	});
 
-	body.on('click', '[data-select-scheme]', function () {
-		var scheme = getItemById(getSchemeList(), $(this).attr('data-select-scheme'));
-		if (!scheme) {
+	body.on('click', '[data-select-mode]', function () {
+		var mode = getItemById(getModeList(), $(this).attr('data-select-mode'));
+		if (!mode) {
 			return;
 		}
-		$('[data-select-scheme]').removeClass('layui-this');
+		$('[data-select-mode]').removeClass('layui-this');
 		$(this).addClass('layui-this');
-		$.each(['side', 'selected', 'logo', 'header', 'headerText', 'tab'], function (i, name) {
-			removeStorage('theme-custom-' + name);
-		});
-		applyScheme(scheme);
-		var storedColor = readStorage('theme-color-value');
-		if (storedColor) {
-			try {
-				applyPaletteAreas(JSON.parse(storedColor));
-			} catch (error) {
-				// 缓存损坏时保留方案默认区域色
-			}
-		}
-		theme.changeTheme();
+		writeStorage('theme-mode', mode.id);
+		applyActiveTheme();
+		applyCustomTheme();
 		renderCustomPickers();
 	});
 
@@ -870,13 +827,16 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		if (active) {
 			active.addClass('layui-this');
 		}
-		removeStorage('theme-custom-selected');
+		$.each(['side', 'selected', 'logo', 'header', 'headerText', 'tab'], function (i, name) {
+			removeStorage('theme-custom-' + name);
+		});
 		writeStorage('theme-color', color.id);
 		writeStorage('theme-color-color', color.selected);
 		writeStorage('theme-color-second', color.tab || '');
 		writeStorage('theme-color-value', JSON.stringify(color));
+		// 六处颜色全部由所选配色方案决定
+		applyScheme(buildEffectiveScheme(color, getCurrentMode()));
 		applyColor(color);
-		applyPaletteAreas(color);
 		applyCustomTheme();
 		renderCustomPickers();
 	}
@@ -895,7 +855,7 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 	body.on('click', '.reset-theme', function () {
 		$.each(
 			[
-				'theme-scheme',
+				'theme-mode',
 				'theme-color',
 				'theme-color-color',
 				'theme-color-second',

@@ -57,8 +57,30 @@ layui.define(['jquery', 'element', 'dropdown', 'layer', 'sanitize'], function (e
 					 <i class="layui-icon layui-unselect layui-tab-close">ဆ</i>`;
 	}
 
+	var frameScope = '';
+
+	// 给 iframe 地址追加站点标识，子页据此读取同站点的主题缓存
+	function withScope(url, scope) {
+		var value = String(url || '');
+		if (
+			!scope ||
+			/^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(value) ||
+			/[?&]mytsa_scope=/.test(value)
+		) {
+			return value;
+		}
+		var hash = '';
+		var hashIndex = value.indexOf('#');
+		if (hashIndex >= 0) {
+			hash = value.slice(hashIndex);
+			value = value.slice(0, hashIndex);
+		}
+		var sep = value.indexOf('?') >= 0 ? '&' : '?';
+		return value + sep + 'mytsa_scope=' + encodeURIComponent(scope) + hash;
+	}
+
 	function frameHtml(item) {
-		return `<iframe id="${escapeHtml(item.id)}" type="_iframe" data-frameid="${escapeHtml(item.id)}" title="${escapeHtml(item.title || item.id)}" scrolling="auto" frameborder="0" src="${escapeHtml(safeUrl(item.url))}" style="width:100%;height:100%;" allowfullscreen="true"></iframe>`;
+		return `<iframe id="${escapeHtml(item.id)}" type="_iframe" data-frameid="${escapeHtml(item.id)}" title="${escapeHtml(item.title || item.id)}" scrolling="auto" frameborder="0" src="${escapeHtml(safeUrl(withScope(item.url, frameScope)))}" style="width:100%;height:100%;" allowfullscreen="true"></iframe>`;
 	}
 
 	function findTabTitle(elem, id) {
@@ -218,10 +240,14 @@ layui.define(['jquery', 'element', 'dropdown', 'layer', 'sanitize'], function (e
 			width: opt.width || '100%',
 			closeEvent: opt.closeEvent,
 			tabMax: opt.tabMax,
+			scope: opt.scope,
 		};
 
 		option.tool = opt.tool !== false;
 		option.roll = opt.roll !== false;
+
+		// iframe 打开时统一带上站点标识，确保子页读取同一站点的主题缓存
+		frameScope = option.scope || '';
 
 		if (option.session) {
 			var storedTabs = readTabSession(option.elem);

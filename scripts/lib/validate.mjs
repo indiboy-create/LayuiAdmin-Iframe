@@ -12,7 +12,7 @@ export const SKIP_URL_PATTERN = /^(?:var\(|\$\{)/i;
 
 export const SCHEME_FIELDS = ['id', 'label'];
 
-export const SCHEME_COLOR_FIELDS = ['base', 'header', 'headerText', 'logo', 'tab', 'selected'];
+export const SCHEME_COLOR_FIELDS = ['side', 'selected', 'logo', 'header', 'headerText', 'tab'];
 
 const REFERENCE_PATTERN = {
 	html: /\b(?:src|href)\s*=\s*["']([^"']+)["']/gi,
@@ -75,14 +75,13 @@ export function validateThemeConfig(config, configPath, errors) {
 	}
 
 	const colorIds = new Set();
-	const colorValues = new Set();
 	for (const [index, color] of config.colors.entries()) {
 		if (!color.id || !color.selected) {
 			errors.push(`${configPath} 的 colors[${index}] 缺少 id 或 selected`);
 		}
-		for (const field of ['selected', 'tab', 'header']) {
-			if (color[field] !== undefined && typeof color[field] !== 'string') {
-				errors.push(`${configPath} 的 colors[${index}] 的 ${field} 应为字符串`);
+		for (const field of SCHEME_COLOR_FIELDS) {
+			if (typeof color[field] !== 'string' || !color[field]) {
+				errors.push(`${configPath} 的 colors[${index}] 缺少 ${field}`);
 			}
 		}
 		if (
@@ -96,56 +95,40 @@ export function validateThemeConfig(config, configPath, errors) {
 			errors.push(`${configPath} 的 colors 存在重复 id：${color.id}`);
 		}
 		colorIds.add(String(color.id));
-		if (typeof color.selected === 'string') {
-			colorValues.add(color.selected.toLowerCase());
-		}
 	}
 
 	const theme = config.theme || {};
 	if (theme.defaultColor !== undefined && !colorIds.has(String(theme.defaultColor))) {
 		errors.push(`${configPath} 的 theme.defaultColor=${theme.defaultColor} 未在 colors 中找到`);
 	}
-	if (!Array.isArray(theme.schemes) || !theme.schemes.length) {
-		errors.push(`${configPath} 的 theme.schemes 必须是非空数组`);
+	if (!Array.isArray(theme.modes) || !theme.modes.length) {
+		errors.push(`${configPath} 的 theme.modes 必须是非空数组`);
 		return;
 	}
 
-	const schemeIds = new Set();
-	const schemeLabels = new Set();
-	for (const [index, scheme] of theme.schemes.entries()) {
-		for (const field of SCHEME_FIELDS) {
-			if (!scheme[field]) {
-				errors.push(`${configPath} 的 theme.schemes[${index}] 缺少 ${field}`);
+	const modeIds = new Set();
+	const modeLabels = new Set();
+	for (const [index, mode] of theme.modes.entries()) {
+		for (const field of ['id', 'label', 'mode']) {
+			if (!mode[field]) {
+				errors.push(`${configPath} 的 theme.modes[${index}] 缺少 ${field}`);
 			}
 		}
-		for (const field of SCHEME_COLOR_FIELDS) {
-			if (scheme[field] !== undefined && typeof scheme[field] !== 'string') {
-				errors.push(`${configPath} 的 theme.schemes[${index}] 的 ${field} 应为字符串`);
-			}
+		if (mode.mode && mode.mode !== 'light' && mode.mode !== 'dark') {
+			errors.push(`${configPath} 的 theme.modes[${index}] 的 mode 只能是 light 或 dark`);
 		}
-		if (
-			typeof scheme.selected === 'string' &&
-			scheme.selected !== '' &&
-			!colorValues.has(scheme.selected.toLowerCase())
-		) {
-			errors.push(
-				`${configPath} 的 theme.schemes[${index}] 的 selected=${scheme.selected} 未在 colors 中找到`
-			);
+		if (modeIds.has(String(mode.id))) {
+			errors.push(`${configPath} 的 theme.modes 存在重复 id：${mode.id}`);
 		}
-		if (schemeIds.has(String(scheme.id))) {
-			errors.push(`${configPath} 的 theme.schemes 存在重复 id：${scheme.id}`);
+		modeIds.add(String(mode.id));
+		if (modeLabels.has(mode.label)) {
+			errors.push(`${configPath} 的 theme.modes 存在重复 label：${mode.label}`);
 		}
-		schemeIds.add(String(scheme.id));
-		if (schemeLabels.has(scheme.label)) {
-			errors.push(`${configPath} 的 theme.schemes 存在重复 label：${scheme.label}`);
-		}
-		schemeLabels.add(scheme.label);
+		modeLabels.add(mode.label);
 	}
 
-	if (theme.defaultScheme !== undefined && !schemeIds.has(String(theme.defaultScheme))) {
-		errors.push(
-			`${configPath} 的 theme.defaultScheme=${theme.defaultScheme} 未在 schemes 中找到`
-		);
+	if (theme.defaultMode !== undefined && !modeIds.has(String(theme.defaultMode))) {
+		errors.push(`${configPath} 的 theme.defaultMode=${theme.defaultMode} 未在 modes 中找到`);
 	}
 }
 export function validateRuntimeConfig(config, configPath, errors) {

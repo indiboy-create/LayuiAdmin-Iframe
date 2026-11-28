@@ -44,8 +44,21 @@
 		}
 	}
 
+	// 站点标识随父页面下发的 mytsa_scope 参数传递，子页据此读取本站点的主题缓存
+	function getThemeScope() {
+		try {
+			var match = /[?&]mytsa_scope=([^&]*)/.exec(window.location.search || '');
+			return match ? decodeURIComponent(match[1]) : '';
+		} catch (error) {
+			return '';
+		}
+	}
+
+	var themeScope = getThemeScope();
+	var themeStoragePrefix = themeScope ? 'mytsa:' + themeScope + ':' : '';
+
 	try {
-		var stored = window.localStorage.getItem('theme-iframe-vars');
+		var stored = window.localStorage.getItem(themeStoragePrefix + 'theme-iframe-vars');
 		if (stored) {
 			applyThemeVars(JSON.parse(stored));
 		}
@@ -54,6 +67,10 @@
 	}
 
 	window.addEventListener('message', function (event) {
+		// 只接受同源页面推送，避免其他站点 iframe 的消息串入
+		if (event.origin && event.origin !== window.location.origin) {
+			return;
+		}
 		if (event.data && event.data.type === 'mytsa-theme') {
 			applyThemeVars(event.data);
 		}

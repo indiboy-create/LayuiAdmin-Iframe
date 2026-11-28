@@ -71,26 +71,29 @@ describe('主题配置', () => {
 		assert.deepEqual(errors, [], errors.join('\n'));
 	});
 
-	it('配色方案使用基色精简格式', async () => {
+	it('主题模式仅 light/dark，配色方案含完整六色', async () => {
 		const config = await readJson('api/mytsa.config.json');
-		const colorValues = new Set(config.colors.map((color) => color.selected.toLowerCase()));
-		for (const scheme of config.theme.schemes) {
-			assert.ok(scheme.base, `${scheme.id} 缺少基色 base`);
-			assert.ok(scheme.tab, `${scheme.id} 缺少标签栏配色 tab`);
-			assert.ok(scheme.selected, `${scheme.id} 缺少配套选中色 selected`);
+		const modes = config.theme.modes;
+		assert.ok(Array.isArray(modes) && modes.length > 0, 'theme.modes 必须是非空数组');
+		const modeIds = new Set(modes.map((mode) => String(mode.id)));
+		for (const mode of modes) {
+			assert.ok(mode.id && mode.label, `${mode.id} 缺少 id/label`);
 			assert.ok(
-				colorValues.has(scheme.selected.toLowerCase()),
-				`${scheme.id} 的 selected=${scheme.selected} 未在 colors 中找到`
+				mode.mode === 'light' || mode.mode === 'dark',
+				`${mode.id} 的 mode 只能是 light/dark`
 			);
-			assert.equal(scheme.side, undefined, `${scheme.id} 应使用 base 而非 side`);
+		}
+		assert.ok(
+			modeIds.has(String(config.theme.defaultMode)),
+			`defaultMode=${config.theme.defaultMode} 未在 modes 中`
+		);
+		for (const color of config.colors) {
 			for (const field of SCHEME_COLOR_FIELDS) {
-				if (scheme[field] !== undefined) {
-					assert.match(
-						scheme[field],
-						/^#[0-9a-f]{3,8}$/i,
-						`${scheme.id} 的 ${field} 不是颜色值`
-					);
-				}
+				assert.match(
+					color[field],
+					/^#[0-9a-f]{3,8}$/i,
+					`${color.id} 的 ${field} 不是颜色值`
+				);
 			}
 		}
 	});

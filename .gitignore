@@ -8,3 +8,4 @@ dist*.tmp/
 !.vscode/launch.json
 !.vscode/tasks.json
 .arts/
+.security/

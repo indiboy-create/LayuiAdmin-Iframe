@@ -166,7 +166,10 @@ try {
 		/<meta\s+name="referrer"[^>]*no-referrer/i.test(index.text)
 	);
 	ok('panel.html 引入 mytsa 组件入口', /component\/mytsa\/mytsa\.js/.test(index.text));
-	ok('panel.html 引入 iframe 水印组件入口', /component\/iframe\/iframe\.js/.test(index.text));
+	ok(
+		'panel.html 不引入 iframe 水印组件（水印仅在 iframe 子页内生效）',
+		!/component\/iframe\/iframe\.js/.test(index.text)
+	);
 	ok(
 		'panel.html 通过 http 模块加载后台配置',
 		/component\/request\/request\.js/.test(index.text) &&
@@ -177,10 +180,8 @@ try {
 
 	const watermark = await request(base, '/component/iframe/module/watermark.js');
 	ok(
-		'watermark 模块导出 render 且只在顶层窗口绘制',
-		watermark.status === 200 &&
-			/window\.top\s*[!=]==?\s*window\.self/.test(watermark.text) &&
-			/render\s*:/.test(watermark.text),
+		'watermark 模块导出 render 并在当前文档内绘制',
+		watermark.status === 200 && /render\s*:/.test(watermark.text),
 		`HTTP ${watermark.status}`
 	);
 	const printCss = await request(base, '/component/mytsa/css/mytsa.css');
@@ -259,24 +260,29 @@ try {
 		`tab.max=${configData && configData.tab && configData.tab.max}`
 	);
 	ok(
-		'所有配色方案均配置标签栏与配套选中色',
+		'主题模式仅 light/dark，配色方案含完整六色',
 		Boolean(
 			configData &&
-			Array.isArray(configData.theme?.schemes) &&
+			Array.isArray(configData.theme?.modes) &&
+			configData.theme.modes.length > 0 &&
+			configData.theme.modes.every(
+				(mode) =>
+					(mode.mode === 'light' || mode.mode === 'dark') &&
+					Boolean(mode.id) &&
+					Boolean(mode.label)
+			) &&
 			Array.isArray(configData.colors) &&
-			configData.theme.schemes.length > 0 &&
-			configData.theme.schemes.every(
-				(scheme) =>
-					/^#[0-9a-f]{6}$/i.test(scheme.tab || '') &&
-					/^#[0-9a-f]{6}$/i.test(scheme.selected || '') &&
-					configData.colors.some(
-						(color) =>
-							String(color.selected).toLowerCase() ===
-							String(scheme.selected || '').toLowerCase()
-					)
+			configData.colors.every(
+				(color) =>
+					/^#[0-9a-f]{6}$/i.test(color.side || '') &&
+					/^#[0-9a-f]{6}$/i.test(color.selected || '') &&
+					/^#[0-9a-f]{6}$/i.test(color.logo || '') &&
+					/^#[0-9a-f]{6}$/i.test(color.header || '') &&
+					/^#[0-9a-f]{6}$/i.test(color.headerText || '') &&
+					/^#[0-9a-f]{6}$/i.test(color.tab || '')
 			)
 		),
-		'theme.schemes[].tab / selected 缺失或未匹配 colors'
+		'theme.modes 或 colors 六色配置缺失'
 	);
 	ok(
 		'主题色提供 header 与扩展色阶',
@@ -337,7 +343,7 @@ try {
 		];
 		ok(
 			`${page} 通过 layui.use 回调配置完整水印参数`,
-			/layui\.use\(\['watermark'\]/.test(response.text) &&
+			/layui\.use\(\[[^\]]*['"]watermark['"]/.test(response.text) &&
 				/watermark\.render\(\{/.test(response.text) &&
 				watermarkParams.every((key) => new RegExp(`\\b${key}\\s*:`).test(response.text))
 		);
@@ -488,11 +494,8 @@ try {
 		'暗黑语义文字或填充 token 缺失'
 	);
 	ok(
-		'头部栏文字色支持主题色 headerText、方案配置与自动回退',
-		configData.theme.schemes.every((scheme) =>
-			/^#[0-9a-f]{6}$/i.test(scheme.headerText || '')
-		) &&
-			Array.isArray(configData.colors) &&
+		'头部栏文字色由配色方案 headerText 驱动',
+		Array.isArray(configData.colors) &&
 			configData.colors.every((color) => /^#[0-9a-f]{6}$/i.test(color.headerText || '')) &&
 			/headerText/.test(themeModule.text) &&
 			/--scheme-header-text/.test(themeModule.text) &&
@@ -587,15 +590,10 @@ try {
 		'iframe.js 仍在设置全局 base 或模块路径不完整'
 	);
 	ok(
-		'方案按 mode 拆分且 iframe 按作用域同步',
+		'主题模式按 mode 拆分且 iframe 按作用域同步',
 		iframeEntry.status === 200 &&
-			configData.theme.schemes.every((scheme) => ['light', 'dark'].includes(scheme.mode)) &&
-			configData.theme.schemes.some(
-				(scheme) =>
-					scheme.mode === 'dark' &&
-					/^#[0-9a-f]{6}$/i.test(scheme.header || '') &&
-					/^#[0-9a-f]{6}$/i.test(scheme.tab || '')
-			) &&
+			configData.theme.modes.every((mode) => ['light', 'dark'].includes(mode.mode)) &&
+			configData.theme.modes.some((mode) => mode.mode === 'dark') &&
 			/theme-iframe-vars/.test(iframeEntry.text) &&
 			/mytsa-theme/.test(iframeEntry.text) &&
 			/addEventListener\(['"]message['"]/.test(iframeEntry.text) &&
@@ -620,18 +618,18 @@ try {
 		`CSS HTTP ${extendCss.status} / JS HTTP ${iframeEntry.status}`
 	);
 	ok(
-		'设置面板含方案选中色预览与栅格主题色预设',
+		'设置面板含主题模式预览与配色方案色板',
 		/scheme-preview-selected/.test(adminBundle.text) &&
 			/palette-swatch/.test(adminBundle.text) &&
 			/grid-template-columns:repeat\(3/.test(adminBundle.text) &&
 			/scheme-preview-selected/.test(themeModule.text) &&
+			/data-select-mode/.test(themeModule.text) &&
 			/data-select-color/.test(themeModule.text) &&
-			/theme-palette-areas/.test(themeModule.text) &&
 			/theme-custom-headerText/.test(themeModule.text) &&
 			/顶栏文字色/.test(themeModule.text)
 	);
 	ok(
-		'主题色预设支持随机生成',
+		'配色方案支持随机生成',
 		/data-random-color/.test(themeModule.text) &&
 			/palette-random/.test(themeModule.text) &&
 			/Math\.random/.test(themeModule.text) &&
@@ -640,9 +638,9 @@ try {
 		'主题色随机功能缺失'
 	);
 	ok(
-		'配色方案一行两个展示',
+		'主题模式一行两个展示',
 		/grid-template-columns:repeat\(2/.test(adminBundle.text) &&
-			/data-select-scheme/.test(themeModule.text) &&
+			/data-select-mode/.test(themeModule.text) &&
 			!/scheme-group-title/.test(themeModule.text)
 	);
 

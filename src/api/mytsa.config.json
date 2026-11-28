@@ -26,78 +26,109 @@
 		}
 	},
 	"theme": {
-		"defaultScheme": "default",
-		"defaultColor": "6",
+		"defaultMode": "light",
+		"defaultColor": "0",
 		"allowCustom": true,
-		"schemes": [
+		"modes": [
 			{
-				"id": "default",
-				"label": "基础配色",
-				"mode": "light",
-				"base": "#23292e",
-				"header": "#fafafa",
-				"headerText": "#000000",
-				"tab": "#f7f7f7",
-				"logo": "#23292e",
-				"selected": "#16baaa"
+				"id": "light",
+				"label": "浅色模式",
+				"mode": "light"
 			},
 			{
 				"id": "dark",
-				"label": "暗黑模式",
-				"mode": "dark",
-				"base": "#23292e",
-				"header": "#2f363c",
-				"headerText": "#ffffff",
-				"tab": "#23292e",
-				"logo": "#23292e",
-				"selected": "#16baaa"
+				"label": "深色模式",
+				"mode": "dark"
 			}
 		]
 	},
 	"colors": [
 		{
-			"id": "6",
-			"label": "深",
-			"selected": "#2f363c",
-			"tab": "#e2e2e2",
-			"header": "#23292e",
-			"headerText": "#ffffff",
-			"shades": ["#e2e2e2", "#c2c2c2", "#2f363c", "#23292e", "#161a1d"]
+			"id": "0",
+			"label": "默认",
+			"side": "#23292E",
+			"selected": "#16BAAA",
+			"logo": "#23292E",
+			"header": "#FAFAFA",
+			"headerText": "#000000",
+			"tab": "#F7F7F7",
+			"shades": ["#E8F7F5", "#A3E4DC", "#16BAAA", "#0F8F83", "#09645C"]
+		},
+		{
+			"id": "1",
+			"label": "红",
+			"side": "#4A1C1E",
+			"selected": "#F5222D",
+			"logo": "#F5222D",
+			"header": "#B71C1C",
+			"headerText": "#FFFFFF",
+			"tab": "#FDECEC",
+			"shades": ["#FDECEC", "#F8B4B4", "#F5222D", "#B71C1C", "#7A1010"]
 		},
 		{
 			"id": "2",
 			"label": "橙",
+			"side": "#45350C",
 			"selected": "#ffb800",
-			"tab": "#fff8e6",
+			"logo": "#ffb800",
 			"header": "#cc9300",
 			"headerText": "#ffffff",
+			"tab": "#fff8e6",
 			"shades": ["#fff8e6", "#ffdb80", "#ffb800", "#cc9300", "#996e00"]
+		},
+		{
+			"id": "8",
+			"label": "黄",
+			"side": "#473F15",
+			"selected": "#FADB14",
+			"logo": "#FADB14",
+			"header": "#B89E00",
+			"headerText": "#ffffff",
+			"tab": "#FFFBE6",
+			"shades": ["#FFFBE6", "#FFF08A", "#FADB14", "#B89E00", "#7A6700"]
 		},
 		{
 			"id": "3",
 			"label": "绿",
+			"side": "#10413C",
 			"selected": "#16baaa",
-			"tab": "#e8f7f5",
+			"logo": "#16baaa",
 			"header": "#0f8f83",
 			"headerText": "#ffffff",
+			"tab": "#e8f7f5",
 			"shades": ["#e8f7f5", "#a3e4dc", "#16baaa", "#0f8f83", "#09645c"]
 		},
 		{
 			"id": "4",
 			"label": "蓝",
+			"side": "#0E2D43",
 			"selected": "#1e9fff",
-			"tab": "#ecf5ff",
+			"logo": "#1e9fff",
 			"header": "#1677cc",
 			"headerText": "#ffffff",
+			"tab": "#ecf5ff",
 			"shades": ["#ecf5ff", "#a3c9f7", "#1e9fff", "#1677cc", "#0f5496"]
+		},
+		{
+			"id": "9",
+			"label": "靛",
+			"side": "#1B2041",
+			"selected": "#3F51B5",
+			"logo": "#3F51B5",
+			"header": "#283593",
+			"headerText": "#ffffff",
+			"tab": "#E8EAF6",
+			"shades": ["#E8EAF6", "#9FA8DA", "#3F51B5", "#283593", "#151B54"]
 		},
 		{
 			"id": "5",
 			"label": "紫",
+			"side": "#3B1547",
 			"selected": "#a233c6",
-			"tab": "#f6ecfb",
+			"logo": "#a233c6",
 			"header": "#7d2799",
 			"headerText": "#ffffff",
+			"tab": "#f6ecfb",
 			"shades": ["#f6ecfb", "#d3a0e6", "#a233c6", "#7d2799", "#5a1d70"]
 		}
 	],

@@ -20,6 +20,26 @@ layui.define(['jquery', 'element', 'layer', 'tabPage', 'menu', 'theme'], functio
 			.replace(/'/g, '&#39;');
 	}
 
+	// 给 iframe 地址追加站点标识，子页据此读取同站点的主题缓存
+	function appendScope(url, scope) {
+		var value = String(url || '');
+		if (
+			!scope ||
+			/^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(value) ||
+			/[?&]mytsa_scope=/.test(value)
+		) {
+			return value;
+		}
+		var hash = '';
+		var hashIndex = value.indexOf('#');
+		if (hashIndex >= 0) {
+			hash = value.slice(hashIndex);
+			value = value.slice(0, hashIndex);
+		}
+		var sep = value.indexOf('?') >= 0 ? '&' : '?';
+		return value + sep + 'mytsa_scope=' + encodeURIComponent(scope) + hash;
+	}
+
 	// 浏览器标签标题跟随当前激活的标签页，多开时便于区分
 	var baseTitle = document.title;
 
@@ -371,6 +391,7 @@ layui.define(['jquery', 'element', 'layer', 'tabPage', 'menu', 'theme'], functio
 				session: param.tab.session,
 				index: 0,
 				tabMax: param.tab.max,
+				scope: (param.site && param.site.scope) || '',
 				closeEvent: function (id) {
 					mytsaAdmin.instances.menu.selectItem(id);
 					// layui 关闭标签后才会切换 layui-this，等一帧再同步标题
@@ -410,7 +431,7 @@ layui.define(['jquery', 'element', 'layer', 'tabPage', 'menu', 'theme'], functio
 					layer.open({
 						type: 2,
 						title: escapeHtml(data.menuTitle),
-						content: data.menuUrl,
+						content: appendScope(data.menuUrl, param.site && param.site.scope),
 						area: ['80%', '80%'],
 						maxmin: true,
 					});
