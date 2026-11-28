@@ -133,14 +133,16 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 	// 由“配色方案 + 主题模式”合成内部方案对象，供 applyScheme 使用
 	function buildEffectiveScheme(color, mode) {
 		var c = normalizeColor(color);
+		var dark = !!(mode && mode.mode === 'dark');
 		return {
 			id: mode ? mode.id : c.id,
 			label: mode ? mode.label : c.label,
 			mode: mode ? mode.mode : 'light',
 			side: c.side,
-			header: c.header,
-			headerText: c.headerText,
-			tab: c.tab,
+			// 深色模式固定顶栏与标签栏为黑色（不随配色方案变化），顶栏文字用白色
+			header: dark ? '#000000' : c.header,
+			headerText: dark ? '#ffffff' : c.headerText,
+			tab: dark ? '#000000' : c.tab,
 			logo: c.logo,
 			selected: c.selected,
 		};

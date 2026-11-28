@@ -330,3 +330,23 @@ html.dark {
 .dark .layui-laypage .layui-laypage-curr .layui-laypage-em {
   background-color: var(--lay-color-primary);
 }
+/* 分页跳页按钮 / 输入框 / 每页条数下拉在暗色下的适配 */
+.dark .layui-laypage button,
+.dark .layui-laypage input,
+.dark .layui-laypage select,
+.dark .layui-laypage .layui-laypage-btn {
+  background-color: var(--lay-color-bg-2);
+  border-color: var(--lay-color-border-2);
+  color: var(--lay-color-text-2);
+}
+
+.dark .layui-laypage .layui-laypage-skip {
+  color: var(--lay-color-text-3);
+}
+
+.dark .layui-laypage input:focus,
+.dark .layui-laypage select:focus,
+.dark .layui-laypage button:hover,
+.dark .layui-laypage .layui-laypage-btn:hover {
+  border-color: var(--lay-color-primary) !important;
+}

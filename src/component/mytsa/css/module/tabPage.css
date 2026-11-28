@@ -160,7 +160,7 @@
 	padding: 0;
 	border: 1px solid var(--scheme-border-muted);
 	border-radius: var(--global-border-radius, 4px);
-	background-color: color-mix(in srgb, var(--scheme-header) 85%, transparent);
+	background-color: var(--scheme-header);
 }
 
 .mytsa-tab-tool-dropdown .layui-menu {
@@ -170,7 +170,7 @@
 
 .mytsa-tab-tool-dropdown .layui-menu-body-title,
 .mytsa-tab-tool-dropdown .layui-menu-body-title a {
-	color: var(--scheme-dropdown-text, #ffffff);
+	color: var(--scheme-header-text, #333333);
 }
 
 .mytsa-tab-tool-dropdown .layui-menu li:hover,
@@ -182,7 +182,7 @@
 .mytsa-tab-tool-dropdown .layui-menu li:hover .layui-menu-body-title,
 .mytsa-tab-tool-dropdown .layui-menu-item-checked .layui-menu-body-title,
 .mytsa-tab-tool-dropdown .layui-menu-item-checked2 .layui-menu-body-title {
-	color: var(--scheme-dropdown-text, #ffffff);
+	color: var(--scheme-selected-text, #ffffff);
 }
 
 .mytsa-tab-page-loading {

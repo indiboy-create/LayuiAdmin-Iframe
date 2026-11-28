@@ -30,7 +30,7 @@ body,
 }
 
 .mytsa-admin .layui-layout-right .layui-nav-item.user > .layui-nav-child {
-	background-color: color-mix(in srgb, var(--scheme-header) 85%, transparent);
+	background-color: var(--scheme-header);
 }
 
 .mytsa-admin .layui-layout-right .layui-nav-item.user > .layui-nav-child dd.layui-this {
@@ -38,13 +38,13 @@ body,
 }
 
 .mytsa-admin .layui-layout-right .layui-nav-item.user > .layui-nav-child dd > a {
-	color: var(--scheme-dropdown-text, #ffffff);
+	color: var(--scheme-header-text, #333333);
 }
 
 .mytsa-admin .layui-layout-right .layui-nav-item.user > .layui-nav-child dd > a:hover,
 .mytsa-admin .layui-layout-right .layui-nav-item.user > .layui-nav-child dd.layui-this > a {
 	background-color: var(--global-selected-color);
-	color: var(--scheme-dropdown-text, #ffffff);
+	color: var(--scheme-selected-text, #ffffff);
 }
 
 .mytsa-admin .layui-layout-right .layui-nav-item.user > .layui-nav-child hr {
@@ -149,6 +149,17 @@ body,
 	color: var(--scheme-side-text) !important;
 }
 
+/* 左侧菜单 hover：透明背景 + 文字变为主题色（官方垂直导航悬停表现） */
+.mytsa-admin .layui-side .layui-nav-tree .layui-nav-item a:hover {
+	background-color: transparent;
+	color: var(--global-selected-color) !important;
+}
+
+.mytsa-admin .layui-side .layui-nav-tree .layui-nav-item.layui-this > a:hover,
+.mytsa-admin .layui-side .layui-nav-tree .layui-nav-child dd.layui-this > a:hover {
+	color: var(--scheme-selected-text, #ffffff) !important;
+}
+
 .mytsa-admin .layui-header .layui-nav .layui-nav-item > a {
 	color: var(--scheme-header-text) !important;
 	font-size: 15px;
@@ -234,7 +245,7 @@ body,
 .mytsa-admin .layui-header .layui-nav-item.user .user-group {
 	font-size: 10px;
 	line-height: 12px;
-	color: var(--scheme-text-muted);
+	color: color-mix(in srgb, var(--scheme-header-text) 85%, transparent);
 }
 
 .mytsa-admin .layui-body {

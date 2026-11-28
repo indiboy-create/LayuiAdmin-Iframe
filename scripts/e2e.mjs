@@ -424,15 +424,15 @@ try {
 		'标签页激活圆点仍存在右侧外边距'
 	);
 	ok(
-		'标签工具栏下拉菜单配色与顶部下拉一致',
+		'标签工具栏下拉菜单配色与顶部下拉一致（背景不透明）',
 		/mytsa-tab-tool-dropdown/.test(tabPageModule.text) &&
-			/\.mytsa-tab-tool-dropdown\{[^}]*background-color:color-mix\(in srgb,var\(--scheme-header\) 85%,transparent\)/.test(
+			/\.mytsa-tab-tool-dropdown\{[^}]*background-color:var\(--scheme-header\)/.test(
 				mytsaBundle.text
 			) &&
 			/\.mytsa-tab-tool-dropdown \.layui-menu\{[^}]*background-color:transparent/.test(
 				mytsaBundle.text
 			) &&
-			/\.mytsa-tab-tool-dropdown \.layui-menu-body-title[^{]*\{[^}]*color:var\(--scheme-dropdown-text,#fff\)/.test(
+			/\.mytsa-tab-tool-dropdown \.layui-menu-body-title[^{]*\{[^}]*color:var\(--scheme-header-text/.test(
 				mytsaBundle.text
 			) &&
 			/\.mytsa-tab-tool-dropdown \.layui-menu li:hover[^{]*\{[^}]*background-color:var\(--global-selected-color\)!important/.test(
@@ -503,22 +503,22 @@ try {
 		'headerText 配置、写入或样式消费缺失'
 	);
 	ok(
-		'用户下拉菜单背景取顶栏色加透明度、无内边距且文字使用语义 token',
+		'用户下拉菜单背景取顶栏色（不透明）、无内边距且文字使用语义 token',
 		/\.layui-layout-right \.layui-nav-child\{[^}]*padding:0/.test(adminBundle.text) &&
-			/\.layui-nav-item\.user>\.layui-nav-child\{[^}]*background-color:color-mix\(in srgb,var\(--scheme-header\) 85%,transparent\)/.test(
+			/\.layui-nav-item\.user>\.layui-nav-child\{[^}]*background-color:var\(--scheme-header\)/.test(
 				adminBundle.text
 			) &&
 			!/\.layui-nav-item\.user>\.layui-nav-child\{[^}]*--scheme-tab/.test(adminBundle.text) &&
 			/\.layui-nav-item\.user>\.layui-nav-child hr\{border-bottom-color:var\(--scheme-hover-fill\)\}/.test(
 				adminBundle.text
 			) &&
-			/\.layui-nav-item\.user>\.layui-nav-child dd>a\{color:var\(--scheme-dropdown-text,#fff\)\}/.test(
+			/\.layui-nav-item\.user>\.layui-nav-child dd>a\{color:var\(--scheme-header-text/.test(
 				adminBundle.text
 			) &&
 			/\.layui-nav-item\.user>\.layui-nav-child dd>a:hover[^{]*\{[^}]*background-color:var\(--global-selected-color\)/.test(
 				adminBundle.text
 			) &&
-			/\.layui-nav-item\.user>\.layui-nav-child dd\.layui-this>a[^{]*\{[^}]*color:var\(--scheme-dropdown-text,#fff\)/.test(
+			/\.layui-nav-item\.user>\.layui-nav-child dd\.layui-this>a[^{]*\{[^}]*color:var\(--scheme-selected-text/.test(
 				adminBundle.text
 			),
 		'用户下拉菜单背景或文字语义 token 缺失'
@@ -533,7 +533,7 @@ try {
 			/\.layui-nav-item\.user \.user-avatar\{[^}]*width:28px/.test(adminBundle.text) &&
 			/\.layui-nav-item\.user \.user-avatar\{[^}]*height:28px/.test(adminBundle.text) &&
 			/\.layui-nav-item\.user \.user-name\{font-size:12px/.test(adminBundle.text) &&
-			/\.layui-nav-item\.user \.user-group\{font-size:10px[^}]*color:var\(--scheme-text-muted\)/.test(
+			/\.layui-nav-item\.user \.user-group\{font-size:10px[^}]*color:color-mix\(in srgb,var\(--scheme-header-text\) 85%,transparent\)/.test(
 				adminBundle.text
 			),
 		'用户入口块、头像或文字尺寸未缩小'

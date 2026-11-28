@@ -78,13 +78,12 @@
 		<script src="../component/iframe/iframe.js"></script>
 		<script>
 			layui.use(['table', 'watermark'], function () {
-				var watermark = layui.watermark;
 				var table = layui.table;
 
 				// 渲染
 				table.render({
 					elem: '#ID-table-demo-setRowChecked',
-					url: '/static/json/2/table/user.json', // 此处为静态模拟数据，实际使用时需换成真实接口
+					url: '/api/user.json', // 此处为静态模拟数据，实际使用时需换成真实接口
 					page: true,
 					cols: [
 						[
@@ -128,21 +127,6 @@
 							layer.alert(JSON.stringify(data)); // 显示 - 仅用于演示
 							break;
 					}
-				});
-
-				watermark.render({
-					text: '13888888888',
-					fontSize: 11,
-					fontFamily: "'Microsoft YaHei', 'PingFang SC', sans-serif",
-					color: '#cccccc',
-					opacity: 0.2,
-					tileWidth: 42,
-					tileHeight: 27,
-					offsetX: 6,
-					offsetY: 19,
-					rotate: -45,
-					zIndex: 10,
-					target: '.watermark',
 				});
 			});
 		</script>
