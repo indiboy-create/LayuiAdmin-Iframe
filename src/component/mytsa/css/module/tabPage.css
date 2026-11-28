@@ -158,9 +158,9 @@
 .layui-dropdown.mytsa-tab-tool-dropdown {
 	width: 120px;
 	padding: 0;
-	border: 1px solid var(--scheme-border-muted);
+	border: 1px solid var(--scheme-side-border);
 	border-radius: var(--global-border-radius, 4px);
-	background-color: var(--scheme-header);
+	background-color: var(--scheme-side);
 }
 
 .mytsa-tab-tool-dropdown .layui-menu {
@@ -170,7 +170,7 @@
 
 .mytsa-tab-tool-dropdown .layui-menu-body-title,
 .mytsa-tab-tool-dropdown .layui-menu-body-title a {
-	color: var(--scheme-header-text, #333333);
+	color: var(--scheme-side-text);
 }
 
 .mytsa-tab-tool-dropdown .layui-menu li:hover,

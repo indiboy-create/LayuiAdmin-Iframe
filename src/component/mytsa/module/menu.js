@@ -451,7 +451,7 @@ layui.define(['jquery', 'element', 'sanitize'], function (exports) {
 			var navChildDl = navItem + ' .layui-nav-child>dl';
 			var navChildDd = navItem + ' .layui-nav-child>dd';
 
-			$(navItem + ',' + navChildDd).mouseenter(function () {
+			$(navItem + ',' + navChildDd).on('mouseenter.mytsaNavHover', function () {
 				var _this = $(this);
 				_this.siblings().find('.layui-nav-child').removeClass('layui-nav-hover').css({
 					left: 0,
@@ -474,7 +474,7 @@ layui.define(['jquery', 'element', 'sanitize'], function (exports) {
 				});
 			});
 
-			$(navItem + ',' + navChildDl).mouseleave(function () {
+			$(navItem + ',' + navChildDl).on('mouseleave.mytsaNavHover', function () {
 				var _this = $(this);
 				_this
 					.closest('.layui-nav-item')
@@ -486,8 +486,8 @@ layui.define(['jquery', 'element', 'sanitize'], function (exports) {
 					});
 			});
 		} else {
-			$('#' + option.elem + ' .layui-nav-item').off('mouseenter mouseleave');
-			$('#' + option.elem + ' dd').off('mouseenter mouseleave');
+			$('#' + option.elem + ' .layui-nav-item').off('.mytsaNavHover');
+			$('#' + option.elem + ' dd').off('.mytsaNavHover');
 		}
 	}
 

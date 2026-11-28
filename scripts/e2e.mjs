@@ -184,6 +184,25 @@ try {
 		watermark.status === 200 && /render\s*:/.test(watermark.text),
 		`HTTP ${watermark.status}`
 	);
+	const watermarkParams = [
+		'text',
+		'fontSize',
+		'fontFamily',
+		'color',
+		'opacity',
+		'tileWidth',
+		'tileHeight',
+		'offsetX',
+		'offsetY',
+		'rotate',
+		'zIndex',
+		'target',
+	];
+	ok(
+		'watermark 模块提供完整默认参数',
+		watermarkParams.every((key) => new RegExp(`\\b${key}\\s*:`).test(watermark.text)),
+		'水印默认参数缺失'
+	);
 	const printCss = await request(base, '/component/mytsa/css/mytsa.css');
 	ok(
 		'mytsa.css 含打印样式',
@@ -327,25 +346,9 @@ try {
 			!/(?:theme\/admin|component\/login|theme\/login)\//.test(response.text)
 		);
 		ok(`${page} 引入 iframe 水印组件入口`, /component\/iframe\/iframe\.js/.test(response.text));
-		const watermarkParams = [
-			'text',
-			'fontSize',
-			'fontFamily',
-			'color',
-			'opacity',
-			'tileWidth',
-			'tileHeight',
-			'offsetX',
-			'offsetY',
-			'rotate',
-			'zIndex',
-			'target',
-		];
 		ok(
-			`${page} 通过 layui.use 回调配置完整水印参数`,
-			/layui\.use\(\[[^\]]*['"]watermark['"]/.test(response.text) &&
-				/watermark\.render\(\{/.test(response.text) &&
-				watermarkParams.every((key) => new RegExp(`\\b${key}\\s*:`).test(response.text))
+			`${page} 由统一水印默认配置渲染且不内联重复配置`,
+			!/watermark\.render\(\{/.test(response.text)
 		);
 		pageSources.push({ page, html: response.text });
 	}
@@ -424,21 +427,21 @@ try {
 		'标签页激活圆点仍存在右侧外边距'
 	);
 	ok(
-		'标签工具栏下拉菜单配色与顶部下拉一致（背景不透明）',
+		'标签工具栏下拉菜单参考左侧菜单配色（背景与文字同侧栏）',
 		/mytsa-tab-tool-dropdown/.test(tabPageModule.text) &&
-			/\.mytsa-tab-tool-dropdown\{[^}]*background-color:var\(--scheme-header\)/.test(
+			/\.mytsa-tab-tool-dropdown\{[^}]*background-color:var\(--scheme-side\)/.test(
 				mytsaBundle.text
 			) &&
 			/\.mytsa-tab-tool-dropdown \.layui-menu\{[^}]*background-color:transparent/.test(
 				mytsaBundle.text
 			) &&
-			/\.mytsa-tab-tool-dropdown \.layui-menu-body-title[^{]*\{[^}]*color:var\(--scheme-header-text/.test(
+			/\.mytsa-tab-tool-dropdown \.layui-menu-body-title[^{]*\{[^}]*color:var\(--scheme-side-text\)/.test(
 				mytsaBundle.text
 			) &&
 			/\.mytsa-tab-tool-dropdown \.layui-menu li:hover[^{]*\{[^}]*background-color:var\(--global-selected-color\)!important/.test(
 				mytsaBundle.text
 			),
-		'标签工具栏下拉菜单配色未与顶部下拉一致'
+		'标签工具栏下拉菜单未参考左侧菜单配色'
 	);
 	const adminBundle = await request(base, '/theme/admin/css/admin.bundle.css');
 	const themeModule = await request(base, '/component/mytsa/module/theme.js');
@@ -503,16 +506,12 @@ try {
 		'headerText 配置、写入或样式消费缺失'
 	);
 	ok(
-		'用户下拉菜单背景取顶栏色（不透明）、无内边距且文字使用语义 token',
+		'用户下拉菜单参考左侧菜单配色（背景与文字同侧栏）、无内边距且悬停用主题色高亮',
 		/\.layui-layout-right \.layui-nav-child\{[^}]*padding:0/.test(adminBundle.text) &&
-			/\.layui-nav-item\.user>\.layui-nav-child\{[^}]*background-color:var\(--scheme-header\)/.test(
+			/\.layui-nav-item\.user>\.layui-nav-child\{[^}]*background-color:var\(--scheme-side\)/.test(
 				adminBundle.text
 			) &&
-			!/\.layui-nav-item\.user>\.layui-nav-child\{[^}]*--scheme-tab/.test(adminBundle.text) &&
-			/\.layui-nav-item\.user>\.layui-nav-child hr\{border-bottom-color:var\(--scheme-hover-fill\)\}/.test(
-				adminBundle.text
-			) &&
-			/\.layui-nav-item\.user>\.layui-nav-child dd>a\{color:var\(--scheme-header-text/.test(
+			/\.layui-nav-item\.user>\.layui-nav-child dd>a\{color:var\(--scheme-side-text\)/.test(
 				adminBundle.text
 			) &&
 			/\.layui-nav-item\.user>\.layui-nav-child dd>a:hover[^{]*\{[^}]*background-color:var\(--global-selected-color\)/.test(
@@ -521,7 +520,28 @@ try {
 			/\.layui-nav-item\.user>\.layui-nav-child dd\.layui-this>a[^{]*\{[^}]*color:var\(--scheme-selected-text/.test(
 				adminBundle.text
 			),
-		'用户下拉菜单背景或文字语义 token 缺失'
+		'用户下拉菜单未参考左侧菜单配色或悬停高亮缺失'
+	);
+	ok(
+		'右侧主题面板参考左侧菜单配色（背景与文字同侧栏）',
+		/\.layui-layer\.layer-anim-right\{[^}]*background-color:var\(--scheme-side\)/.test(
+			adminBundle.text
+		) &&
+			/\.layui-layer\.layer-anim-right \.layui-layer-content\{[^}]*color:var\(--scheme-side-text\)/.test(
+				adminBundle.text
+			) &&
+			/\.scheme-custom li\{[^}]*color:var\(--scheme-side-text\)/.test(adminBundle.text),
+		'右侧主题面板未参考左侧菜单配色'
+	);
+	ok(
+		'自定义配色选择器边框随侧栏配色自适应',
+		/\.set-custom-theme \.layui-colorpicker\{[^}]*border-color:var\(--scheme-side-border\)/.test(
+			adminBundle.text
+		) &&
+			/\.set-custom-theme \.layui-colorpicker:hover\{[^}]*border-color:var\(--scheme-side-text\)/.test(
+				adminBundle.text
+			),
+		'颜色选择器仍使用固定白色边框'
 	);
 	ok(
 		'用户入口块、头像与文字尺寸已缩小且垂直居中',
@@ -588,6 +608,13 @@ try {
 			/\{\/\}/.test(iframeEntry.text) &&
 			/module\/watermark/.test(iframeEntry.text),
 		'iframe.js 仍在设置全局 base 或模块路径不完整'
+	);
+	ok(
+		'iframe.js 默认不绘制水印，仅在存在 .watermark 时执行',
+		iframeEntry.status === 200 &&
+			/querySelector\(["']\.watermark["']\)/.test(iframeEntry.text) &&
+			/watermark\.render\(\)/.test(iframeEntry.text),
+		'水印未按 .watermark 容器存在性条件执行'
 	);
 	ok(
 		'主题模式按 mode 拆分且 iframe 按作用域同步',

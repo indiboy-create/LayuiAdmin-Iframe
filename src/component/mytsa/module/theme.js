@@ -139,10 +139,10 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 			label: mode ? mode.label : c.label,
 			mode: mode ? mode.mode : 'light',
 			side: c.side,
-			// 深色模式固定顶栏与标签栏为黑色（不随配色方案变化），顶栏文字用白色
+			// 深色模式固定顶栏为纯黑、标签栏为略浅的黑（均不随配色方案变化），顶栏文字用白色
 			header: dark ? '#000000' : c.header,
 			headerText: dark ? '#ffffff' : c.headerText,
-			tab: dark ? '#000000' : c.tab,
+			tab: dark ? '#1a1a1a' : c.tab,
 			logo: c.logo,
 			selected: c.selected,
 		};
@@ -689,7 +689,7 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 		$.each(modes, function (i, mode) {
 			var dark = mode.mode === 'dark';
 			var side = '#23292E';
-			var header = dark ? '#2F363C' : '#FAFAFA';
+			var header = dark ? '#1C2226' : '#FAFAFA';
 			var tab = dark ? '#23292E' : '#F7F7F7';
 			var logo = '#23292E';
 			items +=
@@ -700,9 +700,17 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 				'" title="' +
 				mode.label +
 				'">' +
-				'<div class="scheme-preview">' +
+				'<div class="scheme-preview ' +
+				(dark ? 'is-dark' : 'is-light') +
+				'">' +
 				'<span class="scheme-preview-header" style="background: ' +
 				header +
+				';"></span>' +
+				'<span class="scheme-preview-logo" style="background: ' +
+				logo +
+				';"></span>' +
+				'<span class="scheme-preview-side" style="background: ' +
+				side +
 				';"></span>' +
 				'<span class="scheme-preview-tab" style="background: ' +
 				tab +
@@ -710,12 +718,10 @@ layui.define(['jquery', 'form', 'layer', 'colorpicker'], function (exports) {
 				'<span class="scheme-preview-selected" style="background: ' +
 				accent +
 				';"></span>' +
-				'<span class="scheme-preview-side" style="background: ' +
-				side +
-				';"></span>' +
-				'<span class="scheme-preview-logo" style="background: ' +
-				logo +
-				';"></span>' +
+				'<span class="scheme-preview-card"></span>' +
+				'<em class="scheme-preview-label">' +
+				(dark ? 'Dark' : 'Light') +
+				'</em>' +
 				'</div>' +
 				'</li>';
 		});

@@ -20,6 +20,11 @@ layui.define(['jquery'], function (exports) {
 
 	function drawWatermark(options) {
 		var settings = $.extend({}, DEFAULTS, options);
+		// 默认不绘制：文档中没有 .watermark 容器时直接返回，不做任何 canvas 计算
+		var $containers = $(settings.target || DEFAULTS.target);
+		if (!$containers.length) {
+			return;
+		}
 		var ratio = window.devicePixelRatio || 1;
 		var rad = (settings.rotate * Math.PI) / 180;
 		var cos = Math.cos(rad);
@@ -81,10 +86,6 @@ layui.define(['jquery'], function (exports) {
 
 		// 水印只作用于 .watermark 容器（可同时存在多个），逐个铺一层覆盖层；
 		// 直接画在业务容器上会被卡片白色底遮住，因此用独立覆盖层
-		var $containers = $(settings.target || DEFAULTS.target);
-		if (!$containers.length) {
-			return;
-		}
 
 		$containers.each(function () {
 			var $container = $(this);

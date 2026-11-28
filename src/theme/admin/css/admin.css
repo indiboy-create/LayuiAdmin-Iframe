@@ -21,7 +21,7 @@ body,
 }
 
 .mytsa-admin .layui-layout-right .layui-nav-child {
-	border: 1px solid var(--scheme-border-muted);
+	border: 1px solid var(--scheme-side-border);
 	border-radius: var(--global-border-radius, 4px);
 	width: auto;
 	padding: 0;
@@ -30,7 +30,7 @@ body,
 }
 
 .mytsa-admin .layui-layout-right .layui-nav-item.user > .layui-nav-child {
-	background-color: var(--scheme-header);
+	background-color: var(--scheme-side);
 }
 
 .mytsa-admin .layui-layout-right .layui-nav-item.user > .layui-nav-child dd.layui-this {
@@ -38,7 +38,7 @@ body,
 }
 
 .mytsa-admin .layui-layout-right .layui-nav-item.user > .layui-nav-child dd > a {
-	color: var(--scheme-header-text, #333333);
+	color: var(--scheme-side-text);
 }
 
 .mytsa-admin .layui-layout-right .layui-nav-item.user > .layui-nav-child dd > a:hover,
@@ -48,7 +48,7 @@ body,
 }
 
 .mytsa-admin .layui-layout-right .layui-nav-item.user > .layui-nav-child hr {
-	border-bottom-color: var(--scheme-hover-fill);
+	border-bottom-color: var(--scheme-side-border);
 }
 
 .mytsa-admin .layui-header {
@@ -459,6 +459,39 @@ body,
 	animation: am-horizontal-roll_show 0.5s ease-out;
 }
 
+/** 右侧主题面板参考左侧菜单配色 */
+.layui-layer.layer-anim-right {
+	background-color: var(--scheme-side);
+}
+
+.layui-layer.layer-anim-right .layui-layer-content {
+	background-color: transparent;
+	color: var(--scheme-side-text);
+}
+
+.layui-layer.layer-anim-right .mytsaone-color .color-title,
+.layui-layer.layer-anim-right .scheme-custom li {
+	color: var(--scheme-side-text);
+}
+
+.layui-layer.layer-anim-right .scheme-custom .set-default-theme .reset-theme,
+.layui-layer.layer-anim-right .scheme-custom .set-default-theme .reset-theme:hover {
+	border-color: var(--scheme-side-border);
+	color: var(--scheme-side-text) !important;
+}
+
+.layui-layer.layer-anim-right .scheme-custom li .set-custom-theme .layui-colorpicker {
+	border-color: var(--scheme-side-border);
+}
+
+.layui-layer.layer-anim-right .scheme-custom li .set-custom-theme .layui-colorpicker:hover {
+	border-color: var(--scheme-side-text);
+}
+
+.layui-layer.layer-anim-right .scheme-custom li .set-custom-theme .layui-colorpicker-trigger-span {
+	border-color: var(--scheme-side-border);
+}
+
 /** 主题面板 */
 /** 配色方案 */
 .scheme-content {
@@ -514,49 +547,108 @@ body,
 	box-sizing: border-box;
 }
 
+.scheme-content li[data-select-mode] {
+	height: 64px;
+	padding: 0;
+	background-color: transparent;
+	border: 1px solid var(--scheme-side-border);
+	border-radius: 4px;
+}
+
+.scheme-content li[data-select-mode]:after {
+	border-radius: 4px;
+}
+
 .scheme-preview {
 	position: relative;
+	display: block;
 	width: 100%;
 	height: 100%;
 	overflow: hidden;
+	border-radius: 3px;
 }
 
 .scheme-preview-header {
-	display: block;
-	width: 100%;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 10px;
+}
+
+.scheme-preview-logo {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 22px;
 	height: 10px;
 }
 
 .scheme-preview-side {
 	position: absolute;
+	top: 10px;
 	left: 0;
-	top: 0;
-	width: 20px;
-	height: 100%;
-}
-
-.scheme-preview-logo {
-	position: absolute;
-	left: 0;
-	top: 0;
-	width: 20px;
-	height: 10px;
+	bottom: 0;
+	width: 22px;
 }
 
 .scheme-preview-tab {
 	position: absolute;
-	left: 20px;
 	top: 10px;
-	width: calc(100% - 20px);
-	height: 4px;
+	left: 22px;
+	right: 0;
+	height: 9px;
 }
 
 .scheme-preview-selected {
 	position: absolute;
-	left: 20px;
-	top: 14px;
-	width: calc(100% - 20px);
+	top: 13px;
+	left: 27px;
+	width: 26px;
 	height: 4px;
+	border-radius: 2px;
+}
+
+.scheme-preview-card {
+	position: absolute;
+	top: 19px;
+	left: 22px;
+	right: 0;
+	bottom: 0;
+	background-color: #ffffff;
+}
+
+.scheme-preview.is-dark .scheme-preview-card {
+	background-color: #14181b;
+}
+
+.scheme-preview-card:before {
+	content: '';
+	position: absolute;
+	top: 9px;
+	left: 8px;
+	right: 14px;
+	height: 4px;
+	border-radius: 2px;
+	background-color: rgba(0, 0, 0, 0.07);
+}
+
+.scheme-preview.is-dark .scheme-preview-card:before {
+	background-color: rgba(255, 255, 255, 0.1);
+}
+
+.scheme-preview-label {
+	position: absolute;
+	top: 0;
+	right: 5px;
+	font-size: 8px;
+	font-style: normal;
+	line-height: 10px;
+	color: #7a828a;
+}
+
+.scheme-preview.is-dark .scheme-preview-label {
+	color: #9aa0a6;
 }
 
 .palette-content ul {

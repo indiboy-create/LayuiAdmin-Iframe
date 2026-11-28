@@ -91,6 +91,9 @@
 			watermark: '{/}' + rootPath + 'module/watermark',
 		})
 		.use(['watermark'], function () {
-			layui.watermark.render();
+			// 默认不执行：只有页面中存在 .watermark 容器时才绘制
+			if (document.querySelector('.watermark')) {
+				layui.watermark.render();
+			}
 		});
 })();
